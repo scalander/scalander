@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1
 
 # Install pip requirements
 COPY requirements.txt .
-RUN apt install build_essential
+RUN apt update && apt install -y build-essential
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
