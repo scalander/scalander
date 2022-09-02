@@ -13,4 +13,6 @@ COPY --from=build /usr/src/app/package.json .
 COPY --from=build /usr/src/app/package-lock.json .
 RUN npm ci
 EXPOSE 8080
+RUN chown node /app
+USER node
 CMD ["node", "/app"]
