@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  backend:
+    build: backend
+  frontend:
+    build: frontend
+    ports:
+      - 8080:8080
+    volumes:
+      - ./frontend:/projectroot
+    depends_on:
+      - backend
+    entrypoint: /bin/sh
+    environment:
+      - NODE_ENV=development
+    command: '-c "cd /projectroot && npm install && npm run dev --host"'
