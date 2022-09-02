@@ -1,12 +1,16 @@
-FROM node:lts-alpine AS build
-ENV NODE_ENV=production
+FROM node:latest AS build
 WORKDIR /usr/src/app
 COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
-ENV PORT 8080
-RUN npm install --production --silent && mv node_modules ../
+RUN npm ci
 COPY . .
 RUN npm run build
+FROM node:latest
+WORKDIR /app
+ENV PORT 8080
+ENV NODE_ENV=production
+COPY --from=build /usr/src/app/build .
+COPY --from=build /usr/src/app/package.json .
+COPY --from=build /usr/src/app/package-lock.json .
+RUN npm ci
 EXPOSE 8080
-RUN chown -R node /usr/src/app
-USER node
-CMD ["node", "build"]
+CMD ["node", "/app"]
