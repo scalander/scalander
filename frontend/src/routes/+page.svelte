@@ -7,6 +7,6 @@
 
 {#each testaroo as test (test)}
   <!-- Only do odd numbers. -->
-  <div style="cursor:pointer" on:click="{()=>testaroo= [...testaroo, test+1]}">test! {test} {result}</div>
+  <div class="p-2" style="cursor:pointer" on:click="{()=>testaroo= [...testaroo, test+1]}">test! {test} {result}</div>
 {/each}
 <input placeholder="hewo" bind:value="{result}">
