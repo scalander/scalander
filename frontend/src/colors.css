@@ -1,0 +1,34 @@
+/* Who doesn't like colors? */
+/* Variables for unified themeing */
+
+* {
+  /* the theme colors */
+  --black: #37393a;
+  --blue: #00a6fb;
+  --green: #8dffcd;
+  --orange: #fa824c;
+  --red: #ee4266;
+}
+
+* {
+  /* foreground */
+  --primary: var(--black);
+  --primary-contrast: var(--background);
+
+  /* accent */
+  --accent: var(--red);
+  --accent-contrast: var(--background);
+
+  /* background */
+  --background: #fafafa;
+  --background-contrast: #e8e8e8;
+}
+
+/* basic default overrides */
+* {
+  color: var(--primary);
+  border-color: var(--background-contrast);
+  background-color: var(--background);
+}
+
+

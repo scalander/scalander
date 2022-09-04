@@ -3,7 +3,11 @@
   let num = 0;
 </script>
 
-<Button on:click="{()=>num += 1}"/>
+<div class="m-4">
+  <Button on:click="{()=>num += 1}" color="var(--blue)">Groot!</Button>
+  <Button on:click="{()=>num += 1}" primary>Groot!</Button>
+  <Button on:click="{()=>num += 1}" color="var(--green)" contrastColor="var(--black)" primary>Groot!</Button>
+</div>
 {num}
 
 
