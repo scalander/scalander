@@ -1,6 +1,6 @@
 <script>
   // spring!
-  import { spring } from "svelte/motion";
+  import { tweened } from "svelte/motion";
 
   // Prop to declare whether or not the button
   // is the active or passive style 
@@ -9,6 +9,10 @@
   // Color props. By default they are the main accent
   export let color = "var(--accent)";
   export let contrastColor = "var(--accent-contrast)";
+
+  // The visiblity of button
+  // onHover, we use an animation to drop the opacity a ltitle
+  const opacity = tweened(1, {duration: 200});
 
   // Primary color mappings
   $: border=color;
@@ -20,7 +24,10 @@
      class="button"
      style:border-color="{border}"
      style:color="{color_}"
-     style:background-color="{backgroundColor}">
+     style:background-color="{backgroundColor}"
+     style:opacity="{$opacity}"
+     on:mouseenter="{(_)=>opacity.set(0.9)}"
+     on:mouseleave="{(_)=>opacity.set(1)}">
   <slot />
 </div>
 
