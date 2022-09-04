@@ -1,6 +1,6 @@
 <script>
-  import DateTimePicker from "$lib/components/DateTimePicker.svelte";
+  import MonthlyCalendarBase from "$lib/components/MonthlyCalendarBase.svelte";
 </script>
 
-<DateTimePicker />
+<MonthlyCalendarBase />
 
