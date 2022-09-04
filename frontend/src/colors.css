@@ -15,6 +15,10 @@
   --primary: var(--black);
   --primary-contrast: var(--background);
 
+  /* foreground (lighter) */
+  --secondary: #5e5d5d;
+  --secondary-contrast: var(--background);
+
   /* accent */
   --accent: var(--red);
   --accent-contrast: var(--background);
