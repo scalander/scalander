@@ -5,7 +5,7 @@ from operator import truediv
 
 #FUNCTIONS
 def commitmentCheck(commitment, meeting): #if meeting and commitment intersect, return True
-    return ((meeting.start>commitment.start and meeting.start<commitment.end) or (meeting.end>commitment.start and meeting.end<commitment.end))
+    return (meeting.start>commitment.start and meeting.start<commitment.end) or (meeting.end>commitment.start and meeting.end<commitment.end)
 
 def checkUserCommits(meeting, user): #check all the user's commitments with a meeting, return True if meeting time works
     for c in user.commitments:
