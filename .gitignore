@@ -12,3 +12,4 @@ __pycache__
 __pycache__/*
 backend/scheduling/results.json
 backend/scheduling/testdata.json
+db.sqlite3
