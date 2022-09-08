@@ -2,6 +2,11 @@
 from curses import can_change_color
 from distutils.log import error
 from fcntl import F_SEAL_SEAL
+<<<<<<< HEAD
+=======
+from imp import init_builtin
+from tabnanny import check
+>>>>>>> f549312 (classes added)
 import time
 from operator import truediv
 from typing import List
@@ -20,14 +25,12 @@ class Meeting:
     def __init__(self, name, start, end, subscribedUsers, lockInDate):
         self.name, self.start, self.end, self.subscribedUsers, self.lockInDate = name, start, end, subscribedUsers, lockInDate
 
-class UserMeetingSubscription:
-    def __init__(self, parent, user, meeting, isCritical, weight):
-        if parent is Meeting:
-            self.user = user
-        elif parent is User:
-            self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
-        else:
-            error("Please specific parent class")
+class MeetingAttendee:
+    def __init__(self, user, isCritical, weight):
+        self.user, self.isCritical, self.weight = user, isCritical, weight
+class UserAttendence:
+    def __init__(self, meeting, isCritical, weight):
+        self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
 
 
 # FUNCTIONS
@@ -46,5 +49,20 @@ def check_user_subs(meeting, user):  # check all the user's meeting subscription
             return False
     return True
 
-def checkBoth(meeting, user): #check both subs and commits, return True if it still works
-    return (checkUserCommits(meeting, user) and checkUserSubs(meeting, user))
+def check_both(meeting, user):  # check both subs and commits, return True if it still works
+    return check_user_commits(meeting, user) and check_user_subs(meeting, user)
+
+def checkMultipleUsers(meeting, users):
+    can, cannot = [], []
+    for u in range(len(users)):
+        if check_both(meeting, users[u]):
+            can.append(u)
+        else:
+            cannot.append(u)
+    return [can, cannot]
+
+def checkAllTimes(times, users):
+    return list(map(lambda t: checkMultipleUsers(t, users), times))
+
+def returnTopTimes(times, users):
+    arr = checkAllTimes(times, users)
