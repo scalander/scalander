@@ -1,4 +1,5 @@
 #for getting the freebusy status from the user
+#TODO: figure out how to test this
 from calendar_api.calendar_api import google_calendar_api
 import json
 g = google_calendar_api()
