@@ -1,0 +1,21 @@
+import api_app.models as models
+from backend.api_app.models import UserMeetingSubscription
+
+class User:
+    def __init__(self, name, commitments, meetingSubscriptions):
+        self.name, self.commitments, self.meetingSubscriptions = name, commitments, meetingSubscriptions
+
+class Commitment:
+    def __init__(self, start, end, isAbsolute):
+        self.start, self.end, self.isAbsolute = start, end, isAbsolute
+
+class Meeting:
+    def __init__(self, name, start, end, subscribedUsers, lockInDate):
+        self.name, self.start, self.end, self.subscribedUsers, self.lockInDate = name, start, end, subscribedUsers, lockInDate
+
+class MeetingAttendee:
+    def __init__(self, user, isCritical, weight):
+        self.user, self.isCritical, self.weight = user, isCritical, weight
+class UserAttendence:
+    def __init__(self, meeting, isCritical, weight):
+        self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
