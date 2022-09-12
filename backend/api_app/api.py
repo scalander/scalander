@@ -25,3 +25,9 @@ def get_meeting_data(id):
     subscriptions = models.UserMeetingSubscription.objects.filter(meeting_id=mtg.id).all()
     users = list(map(lambda x: models.User.objects.filter(id=x.user_id).first(), subscriptions))
     return users
+
+def get_user_availability(id):
+    user = models.User.objects.filter(id=id).first()
+    commitments = models.Commitment.objects.filter(user_id=user.id).all()
+    subscriptions = models.UserMeetingSubscription.objects.filter(user_id=user.id).all()
+    subs_and_meetings = list(map(lambda sub: {"subscription": sub, "meeting": UserMeetingSubscription.objects.filter(id=sub.meeting_id).first()}, subscriptions))
