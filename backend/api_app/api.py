@@ -19,3 +19,9 @@ class MeetingAttendee:
 class UserAttendence:
     def __init__(self, meeting, isCritical, weight):
         self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
+
+def get_meeting_data(id):
+    mtg = models.Meeting.objects.filter(id=id).first()
+    subscriptions = models.UserMeetingSubscription.objects.filter(meeting_id=mtg.id).all()
+    users = list(map(lambda x: models.User.objects.filter(id=x.user_id).first(), subscriptions))
+    return users
