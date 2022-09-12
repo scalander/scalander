@@ -82,3 +82,6 @@ def chunk_times(times, users):
 
 def reduce_chunks(times, users, minUsers):  # minUsers is the minimum amount of users that will be considered as an option
     return list(filter(lambda c: len(c[2]) >= minUsers, chunk_times(times, users)))
+
+def create_times(blocks, users, minUsers):
+    pass
