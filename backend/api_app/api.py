@@ -22,3 +22,9 @@ class MeetingAttendee:
 class UserAttendance:
     def __init__(self, meeting, is_critical, weight):
         self.meeting, self.is_critical, self.weight = meeting, is_critical, weight
+
+def get_user(id):
+    user = models.User.objects.filter(id=id).first()
+    commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user=id).all()))
+    meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user=id).all()))
+    return User(user.name, commitment_ids, meeting_subscription_ids)
