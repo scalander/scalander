@@ -28,3 +28,7 @@ def get_user(id):
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user=id).all()))
     return User(user.name, commitment_ids, meeting_subscription_ids)
+
+def get_commitment(id):
+    commitment = models.Commitment.objects.filter(id=id).first()
+    return Commitment(commitment.start, commitment.end, commitment.is_absolute)
