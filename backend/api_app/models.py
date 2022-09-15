@@ -30,3 +30,4 @@ class UserMeetingSubscription(models.Model):
 class MeetingProposalAttendance(models.Model):
     proposal = models.ForeignKey(MeetingTimeProposal, on_delete=models.DO_NOTHING)
     user_subscription = models.ForeignKey(UserMeetingSubscription, on_delete=models.DO_NOTHING)
+    is_committed = models.BooleanField()
