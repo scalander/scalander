@@ -38,3 +38,9 @@ def get_meeting(id):
     proposal_ids = list(map(lambda prop: prop.id, models.MeetingTimeProposal.objects.filter(id=id).all()))
     subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(meeting=id).all()))
     return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
+
+def get_proposal(id):
+    proposal = models.Meeting.objects.filter(id=id).first()
+    committed_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal=id, is_committed=True).all()))
+    unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal=id, is_committed=False).all()))
+    return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
