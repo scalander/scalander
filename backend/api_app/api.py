@@ -1,33 +1,24 @@
 import api_app.models as models
-from backend.api_app.models import UserMeetingSubscription
 
 class User:
-    def __init__(self, name, commitments, meetingSubscriptions):
-        self.name, self.commitments, self.meetingSubscriptions = name, commitments, meetingSubscriptions
+    def __init__(self, name, commitments, meeting_subscriptions):
+        self.name, self.commitments, self.meeting_subscriptions = name, commitments, meeting_subscriptions
 
 class Commitment:
-    def __init__(self, start, end, isAbsolute):
-        self.start, self.end, self.isAbsolute = start, end, isAbsolute
+    def __init__(self, start, end, is_absolute):
+        self.start, self.end, self.is_absolute = start, end, is_absolute
 
 class Meeting:
-    def __init__(self, name, start, end, subscribedUsers, lockInDate):
-        self.name, self.start, self.end, self.subscribedUsers, self.lockInDate = name, start, end, subscribedUsers, lockInDate
+    def __init__(self, name, start, end, proposals, subscribed_users, lock_in_date):
+        self.name, self.start, self.end, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, proposals, subscribed_users, lock_in_date
+
+class MeetingTimeProposal:
+    def __init__(self, start, end, commited_users, unavailable_users, optimality):
+        self.start, self.end, self.commited_users, self.unavailable_users, self.optimality = start, end, commited_users, unavailable_users, optimality
 
 class MeetingAttendee:
-    def __init__(self, user, isCritical, weight):
-        self.user, self.isCritical, self.weight = user, isCritical, weight
-class UserAttendence:
-    def __init__(self, meeting, isCritical, weight):
-        self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
-
-def get_meeting_data(id):
-    mtg = models.Meeting.objects.filter(id=id).first()
-    subscriptions = models.UserMeetingSubscription.objects.filter(meeting_id=mtg.id).all()
-    users = list(map(lambda x: models.User.objects.filter(id=x.user_id).first(), subscriptions))
-    return users
-
-def get_user_availability(id):
-    user = models.User.objects.filter(id=id).first()
-    commitments = models.Commitment.objects.filter(user_id=user.id).all()
-    subscriptions = models.UserMeetingSubscription.objects.filter(user_id=user.id).all()
-    subs_and_meetings = list(map(lambda sub: {"subscription": sub, "meeting": UserMeetingSubscription.objects.filter(id=sub.meeting_id).first()}, subscriptions))
+    def __init__(self, user, is_critical, weight):
+        self.user, self.is_critical, self.weight = user, is_critical, weight
+class UserAttendance:
+    def __init__(self, meeting, is_critical, weight):
+        self.meeting, self.is_critical, self.weight = meeting, is_critical, weight
