@@ -16,6 +16,7 @@ class Meeting(models.Model):
     lock_in_duration = models.DurationField()
 
 class MeetingTimeProposal(models.Model):
+    meeting = models.ForeignKey(Meeting, on_delete=models.DO_NOTHING)
     start = models.DateField()
     end = models.DateField()
     optimality = models.IntegerField()
