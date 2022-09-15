@@ -99,8 +99,7 @@ def reduce_chunks(times, attendees, minChunks):
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
         # should maybe add a loop count limit to prevent crash abuse
-        ind = 0
-        indvalue = chunkmap[0][1]
+        indvalue, ind = chunkmap[0][1], 0
         for i in range(1, len(chunkmap)):
             if chunkmap[i][1] < indvalue:
                 indvalue = chunkmap[i][1]
