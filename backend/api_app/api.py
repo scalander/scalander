@@ -32,3 +32,9 @@ def get_user(id):
 def get_commitment(id):
     commitment = models.Commitment.objects.filter(id=id).first()
     return Commitment(commitment.start, commitment.end, commitment.is_absolute)
+
+def get_meeting(id):
+    meeting = models.Meeting.objects.filter(id=id).first()
+    proposal_ids = list(map(lambda prop: prop.id, models.MeetingTimeProposal.objects.filter(id=id).all()))
+    subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(meeting=id).all()))
+    return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
