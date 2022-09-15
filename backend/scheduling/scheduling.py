@@ -1,5 +1,6 @@
 # IMPORTS
 
+# I have absolutely no clue why half of these are here
 from curses import can_change_color
 from distutils.log import error
 from fcntl import F_SEAL_SEAL
@@ -35,6 +36,8 @@ class UserAttendence:
 
 
 # FUNCTIONS
+
+# functions here generally call the one above them
 
 def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
     return (meeting.start > commitment.start and meeting.start < commitment.end) or (meeting.end > commitment.start and meeting.end < commitment.end)
@@ -79,8 +82,7 @@ def chunk_times(times, users):
     chunks[-1][1] = times[-1].end
     return chunks  # chunks are structured as such: [start, end, [userIndex, ...], [userIndex, ...]]; first array is those who can make the meeting and second is those who cannot
 
-def reduce_chunks(times, attendees, minUsers):
-    # return list(filter(lambda c: len(c[2]) >= minUsers, chunk_times(times, users)))  # minUsers is the minimum amount of users that will be considered as an option
+def reduce_chunks(times, attendees, minChunks):
     chunks, chunkmap = chunk_times(times, list(map(lambda a: a.user, attendees))), []  # attendees is a list of the MeetingAttendee model, user is a child
     for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
         shouldContinue = False
@@ -95,8 +97,16 @@ def reduce_chunks(times, attendees, minUsers):
             if not attendees[j].isCritical:
                 value += attendees[j].weight
         chunkmap.append([i, value])
-    while len(chunkmap) > 5:  # chunkmap could potentially return less than 5 values, which is fine
-        pass
+    while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
+        # should maybe add a loop count limit to prevent crash abuse
+        ind = 0
+        indvalue = chunkmap[0][1]
+        for i in range(1, len(chunkmap)):
+            if chunkmap[i][1] < indvalue:
+                indvalue = chunkmap[i][1]
+                ind = chunkmap[i][0]
+        chunkmap.pop(ind)
+    return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
-def create_times(blocks, users, minUsers):
+def create_times(blocks, users, minChunks):
     pass
