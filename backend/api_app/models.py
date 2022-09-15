@@ -15,10 +15,17 @@ class Meeting(models.Model):
     end = models.DateTimeField()
     lock_in_duration = models.DurationField()
 
+class MeetingTimeProposal(models.Model):
+    start = models.DateField()
+    end = models.DateField()
+    optimality = models.IntegerField()
+
 class UserMeetingSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     meeting = models.ForeignKey(Meeting, on_delete=models.DO_NOTHING)
     is_critical = models.BooleanField()
     weight = models.IntegerField()
 
-# Create your models here.
+class MeetingProposalAttendance(models.Model):
+    proposal = models.ForeignKey(MeetingTimeProposal, on_delete=models.DO_NOTHING)
+    user_subscription = models.ForeignKey(UserMeetingSubscription, on_delete=models.DO_NOTHING)
