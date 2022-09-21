@@ -21,19 +21,49 @@ function calendarPaddingHelper(month, year, mondayWeeks = false) {
   // for some godaweful reason, again, weeks start at 0
   // so we will check if we have -1 (its a sunday), and
   // if so provide 6 days of padding
-  let beginPadding_ = firstDay.getDay() - weekStartDay;
+  const beginPadding_ = firstDay.getDay() - weekStartDay;
   const beginPadding = beginPadding_ == -1 ? 6 : beginPadding_;
   // given we made a fictional day 7, we may create
   // an entire 7 days of padding. We therefore check that
   // and remove it before declaring the final variable
-  let endPadding_ = weekEndDay-lastDay.getDay();
+  const endPadding_ = weekEndDay-lastDay.getDay();
   const endPadding = endPadding_ == 7 ? 0 : endPadding_;
 
   // calculatte the begin padding days
-  // for (let pad = -1; -pad ; pad-- {
+  const today = new Date();
+  // get early padding dates
+  let beginPaddingDates = [];
+  // search forward and prepend
+  // plus one because TODO we have an off-by-one error
+  for (let pad = -1; -pad < beginPadding+1; pad--) {
+    const newDate = new Date(firstDay.getFullYear(),
+                             firstDay.getMonth(),
+                             firstDay.getDate()+pad);
+    beginPaddingDates = [newDate, ...beginPaddingDates];
+  }
+  // end padding dates
+  let endPaddingDates = [];
+  // search forward and prepend
+  // plus one because TODO we have an off-by-one error
+  for (let pad = 1; pad < endPadding+1; pad++) {
+    const newDate = new Date(lastDay.getFullYear(),
+                             lastDay.getMonth(),
+                             lastDay.getDate()+pad);
+    endPaddingDates = [newDate, ...endPaddingDates];
   }
 
-  // return [beginPadding, endPadding];
+  // Get dates in the middle
+  let middleDates = [firstDay];
+
+  // we don't care about hours, we are just going to compare
+  // the DATE instead of exact date object
+  while (middleDates[middleDates.length-1].getDate() != lastDay.getDate()) {
+    middleDates.push((new Date(year,
+                              middleDates[middleDates.length-1].getMonth(),
+                               middleDates[middleDates.length-1].getDate()+1)));
+  }
+
+  return [beginPaddingDates, middleDates, endPaddingDates];
 }
 
 export { calendarPaddingHelper };

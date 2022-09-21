@@ -12,7 +12,7 @@
   export let mondayweeks = false;
 
   // Get an origin month and year
-  export let month = 3;
+  export let month = 9;
   export let year = 2022;
 
   // Abbrev. names for the days of the week
@@ -26,29 +26,34 @@
   if (!mondayweeks)
     daysOfWeek = [daysOfWeek.pop(0), ...daysOfWeek];
 
-  const [beginPadding, endPadding] = calendarPaddingHelper(month, year, mondayweeks);
-
+  $: [beginPadding, middleDates, endPadding] = calendarPaddingHelper(month, year, mondayweeks);
 
 </script>
+
+{month}/{year}
 
 <div class="calendar m-4">
   {#each daysOfWeek as day}
     <div class="header-item">{day}</div>
   {/each}
-  <DateButton>9</DateButton>
-  <DateButton>10</DateButton>
-  <DateButton color="var(--orange)">11</DateButton>
-  <DateButton>12</DateButton>
-  <DateButton primary>13</DateButton>
-  <DateButton>14</DateButton>
+  {#each beginPadding as day}
+    <DateButton>{day.getDate()}</DateButton>
+  {/each}
+  {#each middleDates as day}
+    <DateButton primary>{day.getDate()}</DateButton>
+  {/each}
+  {#each endPadding as day}
+    <DateButton>{day.getDate()}</DateButton>
+  {/each}
 </div>
 
-{beginPadding}+{firstDay}
-<br />
-{lastDay}+{endPadding}
+<Button on:click="{()=>{month--}}">-</Button>
+<Button on:click="{()=>{month++}}">+</Button>
 
 <br />
-{daysBetween}
+
+
+<br />
 
 
 
