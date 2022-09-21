@@ -57,8 +57,8 @@
     padding: 1px 2px;
 
     /* width equals height */
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
 
     /* centering */
     justify-content: center;

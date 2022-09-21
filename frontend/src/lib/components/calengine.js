@@ -45,7 +45,7 @@ function calendarPaddingHelper(month, year, mondayWeeks = false) {
   let endPaddingDates = [];
   // search forward and prepend
   // plus one because TODO we have an off-by-one error
-  for (let pad = 1; pad < endPadding+1; pad++) {
+  for (let pad = endPadding; pad != 0; pad--) {
     const newDate = new Date(lastDay.getFullYear(),
                              lastDay.getMonth(),
                              lastDay.getDate()+pad);
