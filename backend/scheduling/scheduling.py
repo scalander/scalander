@@ -1,4 +1,4 @@
-# IMPORTS
+### IMPORTS
 
 # I have absolutely no clue why half of these are here
 from curses import can_change_color
@@ -6,13 +6,15 @@ from distutils.log import error
 from fcntl import F_SEAL_SEAL
 from imp import init_builtin
 from tabnanny import check
-import time
+import time  # necessary
+import datetime  # necessary
+# import math # necessary
 from operator import truediv
 from typing import List
 from typing_extensions import Self
 
 
-# CLASSES
+### CLASSES
 
 class User:
     def __init__(self, name, commitments, meetingSubscriptions):
@@ -34,8 +36,12 @@ class UserAttendence:
     def __init__(self, meeting, isCritical, weight):
         self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
 
+class Block:  # only really for me and maybe frontend?
+    def __init__(self, start, end):
+        self.start, self.end = start, end
 
-# FUNCTIONS
+
+### FUNCTIONS
 
 # functions here generally call the one above them
 
@@ -52,7 +58,7 @@ def check_user_subs(meeting, user):  # check all the user's meeting subscription
     for c in user.meetingSubscriptions:
         if commitment_check(c.meeting, meeting):
             return False
-    return True
+    return True  # maybe add lockInDate functionality later?
 
 def check_both(meeting, user):  # check both subs and commits, return True if it still works
     return check_user_commits(meeting, user) and check_user_subs(meeting, user)
@@ -66,7 +72,7 @@ def check_multiple_users(meeting, users):
             cannot.append(u)
     return [can, cannot]
 
-def check_all_times(times, users):
+def check_all_times(times, users):  # times is a list of the meeting object (not rly efficient but whatever)
     return list(map(lambda t: check_multiple_users(t, users), times))
 
 def chunk_times(times, users):
@@ -98,7 +104,7 @@ def reduce_chunks(times, attendees, minChunks):
                 value += attendees[j].weight
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
-        # should maybe add a loop count limit to prevent crash abuse
+        # should maybe add a loop count limit to prevent crash abuse once I figure out errors
         indvalue, ind = chunkmap[0][1], 0
         for i in range(1, len(chunkmap)):
             if chunkmap[i][1] < indvalue:
@@ -107,5 +113,22 @@ def reduce_chunks(times, attendees, minChunks):
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
-def create_times(blocks, users, minChunks):
-    pass
+def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
+    if n < 0:
+        return 1
+    else:
+        return n
+
+def create_times(blocks, meetingLength, meetingName, meetingSubscribedUsers, meetingLockInDate, attendees, minChunks, timeIncrement):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1)
+    # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
+    chunks = []
+    for i in blocks:
+        times = []
+        # meetingLength must be less than blockLen
+        blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24  # I still have to make this work over months and years
+        # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
+        timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
+        for j in range(timeQuantity):  # go through the block and add a time every time increment
+            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), meetingSubscribedUsers, meetingLockInDate))  # change Meeting class later once we standardize the classes
+        chunks += reduce_chunks(times, attendees, minChunks)
+    return chunks
