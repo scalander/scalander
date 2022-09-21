@@ -5,6 +5,7 @@
 
   // dating helper
   // oh wait
+  import { format } from 'date-fns'; 
   import { calendarPaddingHelper } from "./calengine";
 
   // Weeks Start on Sunday, right?
@@ -49,12 +50,19 @@
     year = active.getFullYear(); // add month by 1 to solve 0
   }
 
+  // function to reset dates to home
+  function reset() {
+    month = today.getMonth()+1;
+    year = today.getFullYear();
+  }
+
 </script>
 
 <div class="calendar-container">
-  <div class="calendar-metadata-container">
+  <div class="calendar-metadata-container" on:click="{reset}">
     <div class="year">{year}</div>
-    <div class="month">{month}</div>
+    <!-- TODO localization -->
+    <div class="month">{format(new Date(year, month, 0), "LLLL")}</div>
   </div>
   <div class="calendar-buttons">
     <Button on:click="{decrementMonth}">-</Button>
@@ -70,7 +78,9 @@
                   on:click="{decrementMonth}">{day.getDate()}</DateButton>
     {/each}
     {#each middleDates as day}
-      <DateButton primary color="var(--secondary)">{day.getDate()}</DateButton>
+      <DateButton color="var(--secondary)"
+                  responsive="var(--accent)"
+                  primary>{day.getDate()}</DateButton>
     {/each}
     {#each endPadding as day}
       <DateButton color="var(--background-contrast)"
@@ -82,6 +92,13 @@
 
 
 <style>
+  /* set the width and height for the master object */
+  .calendar-container {
+      /* Set the width and height */
+      width: 300px;
+      height: 300px;
+  }
+
   .calendar {
       /* in case you haven't picked it up by now
        calendars are usually a grid */
@@ -92,9 +109,12 @@
       grid-template-columns: repeat(7, 14%);
       grid-template-rows: 10% repeat(5, 18%);
 
-      /* Set the width */
+      /* Set the width and height */
       width: 300px;
       height: 300px;
+
+      /* set margin */
+      margin: 0;
       }
 
        .header-item {
@@ -112,14 +132,26 @@
 
        .calendar-metadata-container {
            display: inline;
+           cursor: pointer;
+       }
+
+       .calendar-buttons {
+           float: right;
+           padding-right: 10px;
+           cursor: pointer;
        }
 
        .year {
            display: inline;
+           font-weight: 300;
+           color: var(--primary);
        }
 
        .month {
            display: inline;
+           font-size: 30px;
+           font-weight: 600;
+           color: var(--accent);
        }
 
        .calendar-buttons {
