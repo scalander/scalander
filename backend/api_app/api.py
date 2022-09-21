@@ -42,15 +42,43 @@ class UserAttendance:
     def json_object(self):
         return {"meeting": self.meeting, "isCritical": self.is_critical, "weight": self.weight}
 
+def create_user(obj):
+    model = models.User.create(name=obj.name)
+    for commitment in obj.commitments:
+        commitment_model = models.Commitment.objects.filter(id=commitment).first()
+        commitment_model.user = model.id
+        commitment_model.save()
+    for subscription in obj.meeting_subscriptions:
+        subscription_model = models.UserMeetingSubscription.objects.filter(id=subscription).first()
+        subscription_model.user = model.id
+        subscription_model.save()
+    return model.id
+
 def get_user(id):
     user = models.User.objects.filter(id=id).first()
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user=id).all()))
     return User(user.name, commitment_ids, meeting_subscription_ids)
 
+def create_commitment(obj):
+    model = models.Commitment.create(start=obj.start, end=obj.end, is_absolute=obj.is_absolute)
+    return model.id
+
 def get_commitment(id):
     commitment = models.Commitment.objects.filter(id=id).first()
     return Commitment(commitment.start, commitment.end, commitment.is_absolute)
+
+def create_meeting(obj):
+    model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
+    for proposal in model.proposals:
+        proposal_model = models.MeetingTimeProposal.objects.filter(id=proposal).first()
+        proposal_model.meeting = model.id
+        proposal_model.save()
+    for subscription in model.subscribed_users:
+        subscription_model = models.UserMeetingSubscription.objects.fitler(id=subscription).first()
+        subscription_model.meeting = model.id
+        subscription_model.save()
+    return model.id
 
 def get_meeting(id):
     meeting = models.Meeting.objects.filter(id=id).first()
@@ -58,15 +86,38 @@ def get_meeting(id):
     subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(meeting=id).all()))
     return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
 
+def create_proposal(obj):
+    # BUG: if a user is in both `commited` and `unavailable`, they are saved as `unavailable`, not `commited`
+    model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
+    for commited in model.commited_users:
+        commited_model = models.MeetingProposalAttendance.objects.filter(id=commited).first()
+        commited_model.is_commited = true
+        commited_model.proposal = model.id
+        commited_model.save()
+    for unavailable in model.commited_users:
+        unavailable_model = models.MeetingProposalAttendance.objects.filter(id=commited).first()
+        commited_model.is_commited = false
+        unavailable_model.proposal = model.id
+        unavailable_model.save()
+    return model.id
+
 def get_proposal(id):
     proposal = models.Meeting.objects.filter(id=id).first()
     committed_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal=id, is_committed=True).all()))
     unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal=id, is_committed=False).all()))
     return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
 
+def create_attendee(obj):
+    model = models.UserMeetingSubscription.objects.create(user=obj.user, is_critical=obj.is_critical, weight=obj.weight)
+    return model.id
+
 def get_attendee(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
     return MeetingAttendee(subscription.user, subscription.is_critical, subscription.weight)
+
+def create_attendance(obj):
+    model = models.UserMeetingSubscription.objects.create(meeting=obj.meeting, is_critical=obj.is_critical, weight=obj.weight)
+    return model.id
 
 def get_attendance(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
