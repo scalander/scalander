@@ -129,7 +129,7 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
     for i in blocks:
         times = []
         # meetingLength must be less than blockLen
-        blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24  # I still have to make this work over months and years
+        blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
         # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
@@ -137,11 +137,11 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         chunks += reduce_chunks(times, attendees, minChunks)
     return chunks
 
-iBlocks = []
-iMeetingLength = 45
-iMeetingLockInDate = datetime.datetime.now()
-iAttendees = []
-iMinChunks = 5
-iTimeIncrement = 5
+# iBlocks = []
+# iMeetingLength = 45
+# iMeetingLockInDate = datetime.datetime.now()
+# iAttendees = []
+# iMinChunks = 5
+# iTimeIncrement = 5
 
 print(create_times())
