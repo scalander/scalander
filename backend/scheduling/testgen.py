@@ -19,14 +19,21 @@ jsonData = {
 st = datetime.datetime.now() + datetime.timedelta(days=random.randint(0,30), hours=random.randint(0,23), minutes=random.randint(0,59))
 stsave = st
 for i in range(random.randint(1, 15)):
-    start = st
-    st += datetime.timedelta(minutes=random.randint(jsonData["iMeetingLength"], 719))
-    jsonData["iBlocks"].append({"start":start, "end":st})
-    st += datetime.timedelta(minutes=random.randint(jsonData["iMeetingLength"], 719))
+    start = st  # set start of block
+    st += datetime.timedelta(minutes=random.randint(jsonData["iMeetingLength"], 719))  # increment between the start and the end of the block
+    jsonData["iBlocks"].append({"start":start, "end":st})  # set end of block
+    st += datetime.timedelta(minutes=random.randint(jsonData["iMeetingLength"], 719))  # increment between end of block and start of next block
 
-def gen_commits(sta, end):
+def gen_commits(sta, end):  # essentially repeatedly add commitments or free time until it is past the end date
     commitments = []
-    
+    ct = sta
+    while ct < end:
+        if random.choose([True, False]):  # if true add a commitment, if false make it free time
+            temp = ct
+            ct += datetime.timedelta(minutes=random.randint(1, 90))
+            commitments.append({"start":temp, "end":ct})
+        else:
+            ct += datetime.timedelta(minutes=random.randint(1, 90))
     return commitments
 
 for i in range(random.randint(2, 100)):
