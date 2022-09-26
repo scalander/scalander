@@ -10,6 +10,8 @@ cal_ids = [] #for storing the "id" field of all the users calendars
 formatted_ids = [] #for storing the calendar IDs in the format that query() takes
 query_max = today #latest date-time to check for freebusy - default is midnight 1 week from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
 query_min = today + datetime.timedelta(days = 7) #eariliest date-time to check - default is midnight today, see query_max TODO: make this 1 week from today
+commitments = []
+
 
 def format_all(cals = calendar): #takes in a list of the user's calendars - default is all
     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use get_freebusy()
@@ -33,5 +35,17 @@ def get_freebusy(formatted_ids = formatted_ids, query_max = query_max, query_min
         "timeZone": "UTC", # Time zone used in the response. Optional. The default is UTC.
     #structure for query body from: https://google-api-client-libraries.appspot.com/documentation/calendar/v3/python/latest/calendar_v3.freebusy.html
     })
-    return (freebusy["busy"])
-    #TODO: make this return a list of commitments objects - see wiki: https://github.com/scalander/scalander/wiki/Programming-Interfaces#commitment-model
+    # return (freebusy["busy"])
+    send_commitments(freebusy["busy"])
+
+def send_commitments(freebusy): #runs from get_freebusy() - you shouldn't need to run this
+    for commitment in freebusy:
+        start = datetime.datetime.strptime(commitment["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
+        end = datetime.datetime.strptime(commitment["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
+        commitments.append({
+            "start": start,
+            "end": end,
+            "isAbsolute": True #can't really be sure from freebusy so we assume true
+        })
+    return(commitments)
+
