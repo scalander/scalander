@@ -22,11 +22,11 @@ class Meeting:
         return {"name": self.name, "start": self.start, "end": self.end, "proposals": self.proposals, "subscribedUsers": self.subscribed_users, "lockInDate": self.lock_in_date}
 
 class MeetingTimeProposal:
-    def __init__(self, start, end, commited_users, unavailable_users, optimality):
-        self.start, self.end, self.commited_users, self.unavailable_users, self.optimality = start, end, commited_users, unavailable_users, optimality
+    def __init__(self, start, end, committed_users, unavailable_users, optimality):
+        self.start, self.end, self.committed_users, self.unavailable_users, self.optimality = start, end, committed_users, unavailable_users, optimality
     
     def json_object(self):
-        return {"start": self.start, "end": self.end, "commitedUsers": self.commited_users, "unavailableUsers": self.unavailable_users, "optimality": self.optimality}
+        return {"start": self.start, "end": self.end, "committedUsers": self.committed_users, "unavailableUsers": self.unavailable_users, "optimality": self.optimality}
 
 class MeetingAttendee:
     def __init__(self, user, is_critical, weight):
@@ -152,16 +152,16 @@ def update_meeting(id, obj):
         delete_subscription(subscription_id)
 
 def create_proposal(obj):
-    # BUG: if a user is in both `commited` and `unavailable`, they are saved as `unavailable`, not `commited`
+    # BUG: if a user is in both `committed` and `unavailable`, they are saved as `unavailable`, not `committed`
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
-    for commited in model.commited_users:
-        commited_model = models.MeetingProposalAttendance.objects.filter(id=commited).first()
-        commited_model.is_commited = true
-        commited_model.proposal = model.id
-        commited_model.save()
-    for unavailable in model.commited_users:
-        unavailable_model = models.MeetingProposalAttendance.objects.filter(id=commited).first()
-        commited_model.is_commited = false
+    for committed in model.committed_users:
+        committed_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
+        committed_model.is_committed = true
+        committed_model.proposal = model.id
+        committed_model.save()
+    for unavailable in model.committed_users:
+        unavailable_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
+        committed_model.is_committed = false
         unavailable_model.proposal = model.id
         unavailable_model.save()
     return model.id
