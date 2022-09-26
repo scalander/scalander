@@ -60,6 +60,11 @@ def get_user(id):
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user=id).all()))
     return User(user.name, commitment_ids, meeting_subscription_ids)
 
+def update_user(id, obj):
+    user = models.User.objects.filter(id=id).first()
+    user.name = obj.name
+    user.save()
+
 def create_commitment(obj):
     model = models.Commitment.create(start=obj.start, end=obj.end, is_absolute=obj.is_absolute)
     return model.id
@@ -67,6 +72,11 @@ def create_commitment(obj):
 def get_commitment(id):
     commitment = models.Commitment.objects.filter(id=id).first()
     return Commitment(commitment.start, commitment.end, commitment.is_absolute)
+
+def update_commitment(id, obj):
+    commitment = models.Commitment.objects.filter(id=id).first()
+    commitment.start, commitment.end, commitment.is_absolute = obj.start, obj.end, obj.is_absolute
+    commitment.save()
 
 def create_meeting(obj):
     model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
@@ -85,6 +95,11 @@ def get_meeting(id):
     proposal_ids = list(map(lambda prop: prop.id, models.MeetingTimeProposal.objects.filter(id=id).all()))
     subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(meeting=id).all()))
     return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
+
+def update_meeting(id, obj):
+    meeting = models.Meeting.objects.filter(id=id).first()
+    meeting.name, meeting.start, meeting.end, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.lock_in_date
+    meeting.save()
 
 def create_proposal(obj):
     # BUG: if a user is in both `commited` and `unavailable`, they are saved as `unavailable`, not `commited`
@@ -107,6 +122,11 @@ def get_proposal(id):
     unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal=id, is_committed=False).all()))
     return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
 
+def update_proposal(id, obj):
+    proposal = models.Meeting.objects.filter(id=id).first()
+    proposal.start, proposal.end, proposal.optimality = obj.start, obj.end, obj.optimality
+    proposal.save()
+
 def create_attendee(obj):
     model = models.UserMeetingSubscription.objects.create(user=obj.user, is_critical=obj.is_critical, weight=obj.weight)
     return model.id
@@ -115,6 +135,11 @@ def get_attendee(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
     return MeetingAttendee(subscription.user, subscription.is_critical, subscription.weight)
 
+def update_attendee(id, obj):
+    subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
+    subscription.user, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
+    subscription.save()
+
 def create_attendance(obj):
     model = models.UserMeetingSubscription.objects.create(meeting=obj.meeting, is_critical=obj.is_critical, weight=obj.weight)
     return model.id
@@ -122,3 +147,8 @@ def create_attendance(obj):
 def get_attendance(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
     return UserAttendance(subscription.meeting, subscription.is_critical, subscription.weight)
+
+def update_attendance(id, obj):
+    subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
+    subscription.meeting, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
+    subscription.save()
