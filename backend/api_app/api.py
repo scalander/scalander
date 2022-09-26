@@ -65,6 +65,32 @@ def update_user(id, obj):
     user.name = obj.name
     user.save()
 
+    # Update commitments
+    commitment_models = dict(map(lambda com: (com.id, com), models.Commitment.objects.filter(user=id).all()))
+    current_commitments = set(map(lambda com: com.id, commitment_models))
+    to_attach = set(obj.commitments) - current_commitments
+    to_delete = current_commitments - set(obj.commitments)
+    for commitment_id in to_attach:
+        commitment = commitment_models[commitment_id]
+        commitment.user = id
+        commitment.save()
+    for commitment_id in to_delete:
+        commitment = commitment_models[commitment_id]
+        commitment.delete()
+    
+    # Update meeting subscriptions
+    subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user=id).all()))
+    current_subscriptions = set(map(lambda com: com.id, subscription_models))
+    to_attach = set(obj.subscriptions) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.subscriptions)
+    for subscription_id in to_attach:
+        subscription = subscription_models[subscription_id]
+        subscription.user = id
+        subscription.save()
+    for subscription_id in to_delete:
+        # OPTIMIZE: extra db query here, and everywhere else this strategy is used
+        delete_subscription(id)
+
 def create_commitment(obj):
     model = models.Commitment.create(start=obj.start, end=obj.end, is_absolute=obj.is_absolute)
     return model.id
@@ -101,6 +127,30 @@ def update_meeting(id, obj):
     meeting.name, meeting.start, meeting.end, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.lock_in_date
     meeting.save()
 
+    # Update time proposals
+    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposals.objects.filter(user=id).all()))
+    current_proposals = set(map(lambda com: com.id, proposal_models))
+    to_attach = set(obj.proposals) - current_proposals
+    to_delete = current_proposals - set(obj.proposals)
+    for proposal_id in to_attach:
+        proposal = proposal_models[proposal_id]
+        proposal.user = id
+        proposal.save()
+    for proposal_id in to_delete:
+        delete_proposal(proposal_id)
+
+    # Update user subscription
+    subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user=id).all()))
+    current_subscriptions = set(map(lambda com: com.id, subscription_models))
+    to_attach = set(obj.subscriptions) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.subscriptions)
+    for subscription_id in to_attach:
+        subscription = subscription_models[subscription_id]
+        subscription.user = id
+        subscription.save()
+    for subscription_id in to_delete:
+        delete_subscription(subscription_id)
+
 def create_proposal(obj):
     # BUG: if a user is in both `commited` and `unavailable`, they are saved as `unavailable`, not `commited`
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
@@ -126,6 +176,32 @@ def update_proposal(id, obj):
     proposal = models.Meeting.objects.filter(id=id).first()
     proposal.start, proposal.end, proposal.optimality = obj.start, obj.end, obj.optimality
     proposal.save()
+
+    # Update committed users
+    committed_user_models = dict(map(lambda com: (com.id, com), models.MeetingProposalAttendance.objects.filter(user=id, is_committed=True).all()))
+    current_committed_users = set(map(lambda com: com.id, committed_user_models))
+    to_attach = set(obj.committed_users) - current_committed_users
+    to_delete = current_committed_users - set(obj.committed_users)
+    for committed_user_id in to_attach:
+        committed_user = committed_user_models[committed_user_id]
+        committed_user.user = id
+        committed_user.save()
+    for committed_user_id in to_delete:
+        committed_user = committed_user_models[committed_user_id]
+        committed_user.delete()
+    
+    # Updated unavailable users
+    unavailable_user_models = dict(map(lambda com: (com.id, com), models.MeetingProposalAttendance.objects.filter(user=id, is_committed=False).all()))
+    current_unavailable_users = set(map(lambda com: com.id, unavailable_user_models))
+    to_attach = set(obj.unavailable_users) - current_unavailable_users
+    to_delete = current_unavailable_users - set(obj.unavailable_users)
+    for unavailable_user_id in to_attach:
+        unavailable_user = unavailable_user_models[unavailable_user_id]
+        unavailable_user.user = id
+        unavailable_user.save()
+    for unavailable_user_id in to_delete:
+        unavailable_user = unavailable_user_models[unavailable_user_id]
+        unavailable_user.delete()
 
 def create_attendee(obj):
     model = models.UserMeetingSubscription.objects.create(user=obj.user, is_critical=obj.is_critical, weight=obj.weight)
