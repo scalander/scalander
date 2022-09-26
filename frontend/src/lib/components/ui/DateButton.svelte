@@ -5,6 +5,7 @@
   // Prop to declare whether or not the button
   // is the active or passive style 
   export let primary = false;
+  export let inverse = false;
 
   // Color props. By default they are the main accent
   export let color = "var(--primary)";
@@ -16,8 +17,12 @@
 
   // Primary color mappings
   $: border=color;
-  $: backgroundColor = primary?color:"inherit";
-  $: color_ = primary?contrastColor:color; 
+  $: backgroundColorTmp = primary?color:"inherit";
+  $: colorTmp = primary?contrastColor:color; 
+
+  // If inverse, invert the colors
+  $: backgroundColor = inverse?colorTmp:backgroundColorTmp;
+  $: color_ = inverse?backgroundColorTmp:colorTmp;
 </script>
 
 <div on:click

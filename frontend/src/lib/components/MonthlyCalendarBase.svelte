@@ -5,7 +5,7 @@
 
   // dating helper
   // oh wait
-  import { format } from 'date-fns'; 
+  import { format, isSameDay } from 'date-fns'; 
   import { calendarPaddingHelper } from "./calengine";
 
   // Weeks Start on Sunday, right?
@@ -78,9 +78,10 @@
                   on:click="{decrementMonth}">{day.getDate()}</DateButton>
     {/each}
     {#each middleDates as day}
-      <DateButton color="var(--secondary)"
-                  responsive="var(--accent)"
-                  primary>{day.getDate()}</DateButton>
+      <DateButton color="var(--tertiary)"
+                  contrastColor="var(--tertiary-contrast)"
+                  primary
+                  inverse="{isSameDay(day, new Date())}">{day.getDate()}</DateButton>
     {/each}
     {#each endPadding as day}
       <DateButton color="var(--background-contrast)"
@@ -143,7 +144,7 @@
 
        .year {
            display: inline;
-           font-weight: 300;
+           font-weight: 600;
            color: var(--primary);
        }
 

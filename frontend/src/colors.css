@@ -23,6 +23,10 @@
   --accent: var(--red);
   --accent-contrast: var(--background);
 
+  /* tertiary (even lighter accent) */
+  --tertiary: #fae3e8;
+  --tertiary-contrast: var(--red);
+
   /* background */
   --background: #fafafa;
   --background-contrast: #e8e8e8;
