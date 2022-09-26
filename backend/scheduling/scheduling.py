@@ -1,20 +1,24 @@
 ### IMPORTS
 
 # I have absolutely no clue why half of these are here
-from curses import can_change_color
-from distutils.log import error
-from fcntl import F_SEAL_SEAL
-from imp import init_builtin
-from tabnanny import check
+# from curses import can_change_color
+# from distutils.log import error
+# from fcntl import F_SEAL_SEAL
+# from imp import init_builtin
+# from tabnanny import check
 import time  # necessary
 import datetime  # necessary
+import json  # necessary
+import os  # necessary
 # import math # necessary
-from operator import truediv
-from typing import List
-from typing_extensions import Self
+# from operator import truediv
+# from typing import List
+# from typing_extensions import Self
 
 
 ### CLASSES
+
+# Theodore will most likely modify these later
 
 class User:
     def __init__(self, name, commitments, meetingSubscriptions):
@@ -43,7 +47,7 @@ class Block:  # only really for me and maybe frontend?
 
 ### FUNCTIONS
 
-# functions here generally call the one above them
+# functions here generally call the one(s) directly above them
 
 def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
     return (meeting.start > commitment.start and meeting.start < commitment.end) or (meeting.end > commitment.start and meeting.end < commitment.end)
@@ -119,7 +123,7 @@ def if_neg(n):  # return 1 if the number is negative (basically if it crosses mo
     else:
         return n
 
-def create_times(blocks, meetingLength, meetingName, meetingSubscribedUsers, meetingLockInDate, attendees, minChunks, timeIncrement):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1)
+def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=""):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
     # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
     chunks = []
     for i in blocks:
@@ -129,6 +133,15 @@ def create_times(blocks, meetingLength, meetingName, meetingSubscribedUsers, mee
         # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
-            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), meetingSubscribedUsers, meetingLockInDate))  # change Meeting class later once we standardize the classes
+            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
         chunks += reduce_chunks(times, attendees, minChunks)
     return chunks
+
+iBlocks = []
+iMeetingLength = 45
+iMeetingLockInDate = datetime.datetime.now()
+iAttendees = []
+iMinChunks = 5
+iTimeIncrement = 5
+
+print(create_times())
