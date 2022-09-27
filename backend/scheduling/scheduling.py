@@ -141,21 +141,15 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
+### TEST LOADING AND RUNNING
 
 
-# iBlocks = []
-# iMeetingLength = 45
-# iMeetingLockInDate = datetime.datetime.now()
-# iAttendees = []
-# iMinChunks = 5
-# iTimeIncrement = 5
-
-with open("backend/scheduling/testdata.json", "r") as read_file:
+with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
     jsonData = json.load(read_file)
 
+# print basic information about the test
 print(jsonData["seed"])
 print(jsonData["basetime"])
-
 
 # essentially read the json and turn it into classes and datetime objects accordingly
 results = reduce_chunks(
@@ -192,12 +186,12 @@ results = reduce_chunks(
     timeIncrement = jsonData["iTimeIncrement"]
 )
 
-
-
+#  processes the results into a json serializable object
 results = list(map(lambda r: {"start":r[0].isoformat(timespec="minutes"), "end":r[1].isoformat(timespec="minutes"), "can":r[2], "cannot":r[3]}, results))
 
+#  prints the results and length
 print(results)
 print(len(results))
 
-with open("backend/scheduling/results.json", "w") as write_file:
+with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
     json.dump(results, write_file, indent=4)
