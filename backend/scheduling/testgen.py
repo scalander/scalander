@@ -6,19 +6,21 @@ import random
 from webbrowser import MacOSX
 
 seed = 1234567890
+basetime = datetime.datetime.now()
 
 random.seed(seed)
 
 jsonData = {
     "seed": seed,
+    "basetime": basetime,
     "iBlocks": [],
     "iMeetingLength": random.randint(10, 90),
-    "iMeetingLockInDate": datetime.datetime.now().isoformat(timespec="minutes"),
+    "iMeetingLockInDate": basetime.isoformat(timespec="minutes"),
     "iAttendees": [],
     "iMinChunks": random.randint(3, 10),
     "iTimeIncrement": random.randint(1, 10)
 }
-st = datetime.datetime.now() + datetime.timedelta(days=random.randint(0,30), hours=random.randint(0,23), minutes=random.randint(0,59))
+st = basetime + datetime.timedelta(days=random.randint(0,30), hours=random.randint(0,23), minutes=random.randint(0,59))
 stsave = st
 for i in range(random.randint(1, 15)):
     start = st  # set start of block
@@ -38,7 +40,7 @@ def gen_commits(sta, end):  # essentially repeatedly add commitments or free tim
             ct += datetime.timedelta(minutes=random.randint(1, 90))
     return commitments
 
-for i in range(random.randint(2, 100)):
+for i in range(random.randint(2, 50)):
     crit = random.choice([True, False])
     weight = random.random() * 10
     user = {"name": f"{random.choice(['John', 'Sara', 'Abigail', 'Charlie', 'Joe', 'Frank', 'José', 'Robert', 'Elizabeth', 'Elijah', 'Theodore'])} {random.choice(['Johnson', 'Andersson', 'Smith', 'Doe', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'])}"}
