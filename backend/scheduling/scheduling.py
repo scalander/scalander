@@ -194,4 +194,4 @@ print(results)
 print(len(results))
 
 with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
-    json.dump(results, write_file, indent=4)
+    json.dump({"seed":jsonData["seed"], "basetime":jsonData["basetime"], "results":results}, write_file, indent=4)
