@@ -12,7 +12,7 @@ random.seed(seed)
 
 jsonData = {
     "seed": seed,
-    "basetime": basetime,
+    "basetime": basetime.isoformat(),
     "iBlocks": [],
     "iMeetingLength": random.randint(10, 90),
     "iMeetingLockInDate": basetime.isoformat(timespec="minutes"),
