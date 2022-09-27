@@ -41,7 +41,8 @@ def gen_commits(sta, end):  # essentially repeatedly add commitments or free tim
     return commitments
 
 for i in range(random.randint(2, 50)):
-    crit = random.choice([True, False])
+    # crit = random.choice([True, False])  # too many criticals for any time to work
+    crit = False
     weight = random.random() * 10
     user = {"name": f"{random.choice(['John', 'Sara', 'Abigail', 'Charlie', 'Joe', 'Frank', 'José', 'Robert', 'Elizabeth', 'Elijah', 'Theodore'])} {random.choice(['Johnson', 'Andersson', 'Smith', 'Doe', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'])}"}
     user["commitments"] = list(map(lambda c: {"start":c["start"].isoformat(timespec="minutes"), "end":c["end"].isoformat(timespec="minutes"), "isAbsolute":random.choice([True, False])}, gen_commits(stsave, st)))

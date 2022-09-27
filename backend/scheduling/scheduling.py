@@ -115,7 +115,7 @@ def reduce_chunks(times, attendees, minChunks):
         for i in range(1, len(chunkmap)):
             if chunkmap[i][1] < indvalue:
                 indvalue = chunkmap[i][1]
-                ind = chunkmap[i][0]
+                ind = i
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
