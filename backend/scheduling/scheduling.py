@@ -94,8 +94,30 @@ def chunk_times(times, users):
     chunks[-1][1] = times[-1].end
     return chunks  # chunks are structured as such: [start, end, [userIndex, ...], [userIndex, ...]]; first array is those who can make the meeting and second is those who cannot
 
-def reduce_chunks(times, attendees, minChunks):
-    chunks, chunkmap = chunk_times(times, list(map(lambda a: a.user, attendees))), []  # attendees is a list of the MeetingAttendee model, user is a child
+# reduce_chunks used to be above create times but it caused chunks to not be reduced correctly
+
+def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
+    if n < 0:
+        return 1
+    else:
+        return n
+
+def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
+    # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
+    chunks = []
+    for i in blocks:
+        times = []
+        # meetingLength must be less than blockLen
+        blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
+        # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
+        timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
+        for j in range(timeQuantity):  # go through the block and add a time every time increment
+            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
+        chunks += chunk_times(times, list(map(lambda a: a.user, attendees)))
+    return chunks
+
+def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
+    chunks, chunkmap = create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName), []  # attendees is a list of the MeetingAttendee model, user is a child
     for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
         shouldContinue = False
         for j in chunks[i][3]:
@@ -119,25 +141,7 @@ def reduce_chunks(times, attendees, minChunks):
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
-def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
-    if n < 0:
-        return 1
-    else:
-        return n
 
-def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
-    # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
-    chunks = []
-    for i in blocks:
-        times = []
-        # meetingLength must be less than blockLen
-        blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
-        # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
-        timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
-        for j in range(timeQuantity):  # go through the block and add a time every time increment
-            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
-        chunks += reduce_chunks(times, attendees, minChunks)
-    return chunks
 
 # iBlocks = []
 # iMeetingLength = 45
@@ -154,7 +158,7 @@ print(jsonData["basetime"])
 
 
 # essentially read the json and turn it into classes and datetime objects accordingly
-print(create_times(
+results = reduce_chunks(
     blocks = list(map(lambda a: Block(
         datetime.datetime.fromisoformat(a["start"]), 
         datetime.datetime.fromisoformat(a["end"])
@@ -186,4 +190,14 @@ print(create_times(
         ), jsonData["iAttendees"])),
     minChunks = jsonData["iMinChunks"],
     timeIncrement = jsonData["iTimeIncrement"]
-))
+)
+
+
+
+results = list(map(lambda r: {"start":r[0].isoformat(timespec="minutes"), "end":r[1].isoformat(timespec="minutes"), "can":r[2], "cannot":r[3]}, results))
+
+print(results)
+print(len(results))
+
+with open("backend/scheduling/results.json", "w") as write_file:
+    json.dump(results, write_file, indent=4)
