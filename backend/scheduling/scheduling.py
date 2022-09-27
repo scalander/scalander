@@ -6,9 +6,11 @@
 # from fcntl import F_SEAL_SEAL
 # from imp import init_builtin
 # from tabnanny import check
+# from configparser import DuplicateOptionError
 import time  # necessary
 import datetime  # necessary
 import json  # necessary
+import random  # necessary
 import os  # necessary
 # import math # necessary
 # from operator import truediv
@@ -96,14 +98,14 @@ def reduce_chunks(times, attendees, minChunks):
     chunks, chunkmap = chunk_times(times, list(map(lambda a: a.user, attendees))), []  # attendees is a list of the MeetingAttendee model, user is a child
     for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
         shouldContinue = False
-        for j in i[3]:
+        for j in chunks[i][3]:
             if attendees[j].isCritical:
                 shouldContinue = True
                 break
         if shouldContinue:
             continue
         value = 0
-        for j in i[2]:
+        for j in chunks[i][2]:
             if not attendees[j].isCritical:
                 value += attendees[j].weight
         chunkmap.append([i, value])
@@ -123,7 +125,7 @@ def if_neg(n):  # return 1 if the number is negative (basically if it crosses mo
     else:
         return n
 
-def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=""):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
+def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
     # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
     chunks = []
     for i in blocks:
@@ -144,4 +146,44 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
 # iMinChunks = 5
 # iTimeIncrement = 5
 
-print(create_times())
+with open("backend/scheduling/testdata.json", "r") as read_file:
+    jsonData = json.load(read_file)
+
+print(jsonData["seed"])
+print(jsonData["basetime"])
+
+
+# essentially read the json and turn it into classes and datetime objects accordingly
+print(create_times(
+    blocks = list(map(lambda a: Block(
+        datetime.datetime.fromisoformat(a["start"]), 
+        datetime.datetime.fromisoformat(a["end"])
+        ), jsonData["iBlocks"])),
+    meetingLength = jsonData["iMeetingLength"],
+    meetingLockInDate = jsonData["iMeetingLockInDate"],
+    attendees = list(map(lambda a: MeetingAttendee(
+            User(
+                a["user"]["name"], 
+                list(map(lambda b: Commitment(
+                    datetime.datetime.fromisoformat(b["start"]), 
+                    datetime.datetime.fromisoformat(b["end"]), 
+                    b["isAbsolute"]
+                ), a["user"]["commitments"])),
+                list(map(lambda b: UserAttendence(
+                    Meeting(
+                        b["meeting"]["name"], 
+                        datetime.datetime.fromisoformat(b["meeting"]["start"]), 
+                        datetime.datetime.fromisoformat(b["meeting"]["end"]),
+                        b["meeting"]["subscribedUsers"],
+                        datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
+                    ),
+                    b["isCritical"],
+                    b["weight"]
+                ), a["user"]["meetingSubscriptions"]))
+            ), 
+            a["isCritical"], 
+            a["weight"]
+        ), jsonData["iAttendees"])),
+    minChunks = jsonData["iMinChunks"],
+    timeIncrement = jsonData["iTimeIncrement"]
+))

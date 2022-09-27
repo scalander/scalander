@@ -3,7 +3,7 @@ import os
 import datetime
 import time
 import random
-from webbrowser import MacOSX
+# from webbrowser import MacOSX
 
 seed = 1234567890
 basetime = datetime.datetime.now()
