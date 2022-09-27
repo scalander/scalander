@@ -22,7 +22,7 @@ jsonData = {
     "iMinChunks": random.randint(3, 10),
     "iTimeIncrement": random.randint(1, 10)
 }
-st = basetime + datetime.timedelta(months=random.randint(0,11), days=random.randint(0,30), hours=random.randint(0,23), minutes=random.randint(0,59))
+st = basetime + datetime.timedelta(days=random.randint(0,365), hours=random.randint(0,23), minutes=random.randint(0,59))
 stsave = st
 for i in range(random.randint(1, 15)):
     start = st  # set start of block
