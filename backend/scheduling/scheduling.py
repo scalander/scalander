@@ -24,7 +24,7 @@ import os
 
 class User:
     def __init__(self, name, commitments, meetingSubscriptions, id):
-        self.name, self.commitments, self.meetingSubscriptions, self.id = name, commitments, meetingSubscriptions, id
+        self.name, self.commitments, self.meetingSubscriptions, self.id = name, commitments, meetingSubscriptions, id  # id is apparently a 5 number string for now (I generate it in tests as 10000-99999)
 
 class Commitment:
     def __init__(self, start, end, isAbsolute):
@@ -141,6 +141,15 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
+def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
+    return list(map(lambda r: {
+    "start": r[0], 
+    "end": r[1], 
+    "can": list(map(lambda x: attendees[x].user.id, r[2])), 
+    "cannot": list(map(lambda x: attendees[x].user.id, r[3]))
+    }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" ")))
+
+
 ### TEST LOADING AND RUNNING
 
 
@@ -188,7 +197,12 @@ results = reduce_chunks(
 )
 
 #  processes the results into a json serializable object
-results = list(map(lambda r: {"start":r[0].isoformat(timespec="minutes"), "end":r[1].isoformat(timespec="minutes"), "can":list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), "cannot":list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))}, results))
+results = list(map(lambda r: {
+    "start": r[0].isoformat(timespec="minutes"), 
+    "end": r[1].isoformat(timespec="minutes"), 
+    "can": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), 
+    "cannot": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))
+    }, results))
 
 #  prints the results and length
 #  print(results)
