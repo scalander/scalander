@@ -204,7 +204,7 @@ results = list(map(lambda r: {
     "cannot": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))
     }, results))
 
-#  prints the results and length
+#  prints the results and length of the results
 #  print(results)
 print(len(results))
 
