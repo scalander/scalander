@@ -1,11 +1,11 @@
 import api_app.models as models
 
 class User:
-    def __init__(self, name, commitments, meeting_subscriptions):
-        self.name, self.commitments, self.meeting_subscriptions = name, commitments, meeting_subscriptions
+    def __init__(self, name, emails, commitments, meeting_subscriptions):
+        self.name, self.emails, self.commitments, self.meeting_subscriptions = name, emails, commitments, meeting_subscriptions
     
     def json_object(self):
-        return {"name": self.name, "commitments": self.commitments, "meetingSubscriptions": self.meeting_subscriptions}
+        return {"name": self.name, "emails": self.emails, "commitments": self.commitments, "meetingSubscriptions": self.meeting_subscriptions}
 
 class Commitment:
     def __init__(self, start, end, is_absolute):
@@ -43,7 +43,7 @@ class UserAttendance:
         return {"meeting": self.meeting, "isCritical": self.is_critical, "weight": self.weight}
 
 def create_user(obj):
-    model = models.User.create(name=obj.name)
+    model = models.User.create(name=obj.name, email=obj.email)
     for commitment in obj.commitments:
         commitment_model = models.Commitment.objects.filter(id=commitment).first()
         commitment_model.user = model.id
@@ -58,11 +58,12 @@ def get_user(id):
     user = models.User.objects.filter(id=id).first()
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user=id).all()))
-    return User(user.name, commitment_ids, meeting_subscription_ids)
+    return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
 
 def update_user(id, obj):
     user = models.User.objects.filter(id=id).first()
     user.name = obj.name
+    user.email = obj.email
     user.save()
 
     # Update commitments
