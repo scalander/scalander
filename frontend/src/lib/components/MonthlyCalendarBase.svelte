@@ -3,14 +3,23 @@
   import Button from "./ui/Button.svelte";
   import DateButton from "./ui/DateButton.svelte";
 
+  // event dispatching
+  import { createEventDispatcher } from 'svelte';
+
   // dating helper
   // oh wait
   import { format, isSameDay } from 'date-fns'; 
   import { calendarPaddingHelper } from "./calengine";
 
+  // dispatcher
+  const dispatch = createEventDispatcher();
+
   // Weeks Start on Sunday, right?
   // right, North America? booo
   export let mondayweeks = false;
+
+  // set current selection
+  let selection = null;
 
   // get today
   const today = new Date();
@@ -50,6 +59,19 @@
     year = active.getFullYear(); // add month by 1 to solve 0
   }
 
+  // function to send ping
+  function select(date) {
+    // if the date is not selected, select it
+    if (selection != date) {
+      selection = date;
+      dispatch('select', {date});
+    // otherwise, deselect it
+    } else {
+      selection = null;
+      dispatch('select', {date: null});
+    }
+  }
+
   // function to reset dates to home
   function reset() {
     month = today.getMonth()+1;
@@ -65,8 +87,10 @@
     <div class="month">{format(new Date(year, month, 0), "LLLL")}</div>
   </div>
   <div class="calendar-buttons">
-    <Button on:click="{decrementMonth}">-</Button>
-    <Button on:click="{incrementMonth}">+</Button>
+    <span class="calendar-button left-button" on:click="{decrementMonth}">
+      <i class="fa-solid fa-caret-left" /></span>
+    <span class="calendar-button right-button" on:click="{incrementMonth}">
+      <i class="fa-solid fa-caret-right" /></span>
   </div>
 
   <div class="calendar m-4">
@@ -78,16 +102,25 @@
                   on:click="{decrementMonth}">{day.getDate()}</DateButton>
     {/each}
     {#each middleDates as day}
-      <DateButton color="var(--tertiary)"
-                  contrastColor="var(--tertiary-contrast)"
-                  primary
-                  inverse="{isSameDay(day, new Date())}">{day.getDate()}</DateButton>
+    <!-- we put an inverse operation here, because we could -->
+    <!-- like to invert the color when its today -->
+      <div>
+        <DateButton
+          on:click="{()=>{select(day)}}"
+          color="var(--tertiary)"
+          contrastColor="var(--tertiary-contrast)"
+          primary
+          inverse="{isSameDay(day, new Date())}">{day.getDate()}</DateButton>
+        {#if day == selection}
+            <i class="highlighted-dot fa-solid fa-circle" />
+        {/if}
+      </div>
     {/each}
     {#each endPadding as day}
-      <DateButton color="var(--background-contrast)"
-                   on:click="{incrementMonth}">{day.getDate()}</DateButton>
+        <DateButton color="var(--background-contrast)"
+                    on:click="{incrementMonth}">{day.getDate()}</DateButton>
     {/each}
-  </div>
+    </div>
 </div>
 
 
@@ -129,35 +162,48 @@
            align-items: center;
            /* slightly shift to the left for Jack's asthetic preferences */
            transform: translateX(-4px);
-       }
+  }
 
-       .calendar-metadata-container {
-           display: inline;
-           cursor: pointer;
-       }
+  .calendar-metadata-container {
+      display: inline;
+      cursor: pointer;
+  }
 
-       .calendar-buttons {
-           float: right;
-           padding-right: 10px;
-           cursor: pointer;
-       }
+  .calendar-buttons {
+      float: right;
+      padding-right: 10px;
+      cursor: pointer;
+  }
 
-       .year {
-           display: inline;
-           font-weight: 600;
-           color: var(--primary);
-       }
+  .year {
+      display: inline;
+      font-weight: 600;
+      color: var(--primary);
+  }
 
-       .month {
-           display: inline;
-           font-size: 30px;
-           font-weight: 600;
-           color: var(--accent);
-       }
+  .month {
+      display: inline;
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--accent);
+  }
 
-       .calendar-buttons {
-           display: inline;
-       }
+  .calendar-buttons {
+      display: inline;
+      transform: translateY(10px);
+  }
 
-       
+  .highlighted-dot {
+      font-size: 6px !important;
+      transform: translateY(-9px) translateX(5px);
+      background: transparent;
+  }
+
+  i {
+      padding: 10px;
+      font-size: 20px;
+      color: var(--accent);
+  }
+
+  
 </style>
