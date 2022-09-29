@@ -1,8 +1,6 @@
 import json
 from django.views import View
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
-import api_app.models as models
 import api_app.api as api
 
 class User(View):
