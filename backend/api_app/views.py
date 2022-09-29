@@ -127,4 +127,4 @@ class Attendance(View):
 
     def delete(self, request, id):
         api.delete_attendance(id)
-        return HttpResponse(status=204
+        return HttpResponse(status=204)
