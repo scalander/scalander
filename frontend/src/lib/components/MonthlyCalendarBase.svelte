@@ -195,7 +195,7 @@
 
   .highlighted-dot {
       font-size: 6px !important;
-      transform: translateY(-10px) translateX(6px);
+      transform: translateY(-10px) translateX(5.5px);
       background: transparent;
   }
 
