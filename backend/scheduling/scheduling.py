@@ -23,8 +23,8 @@ import os
 # Theodore will most likely modify these later
 
 class User:
-    def __init__(self, name, commitments, meetingSubscriptions):
-        self.name, self.commitments, self.meetingSubscriptions = name, commitments, meetingSubscriptions
+    def __init__(self, name, commitments, meetingSubscriptions, id):
+        self.name, self.commitments, self.meetingSubscriptions, self.id = name, commitments, meetingSubscriptions, id
 
 class Commitment:
     def __init__(self, start, end, isAbsolute):
@@ -177,7 +177,8 @@ results = reduce_chunks(
                     ),
                     b["isCritical"],
                     b["weight"]
-                ), a["user"]["meetingSubscriptions"]))
+                ), a["user"]["meetingSubscriptions"])),
+                a["user"]["id"]
             ), 
             a["isCritical"], 
             a["weight"]
@@ -187,10 +188,10 @@ results = reduce_chunks(
 )
 
 #  processes the results into a json serializable object
-results = list(map(lambda r: {"start":r[0].isoformat(timespec="minutes"), "end":r[1].isoformat(timespec="minutes"), "can":r[2], "cannot":r[3]}, results))
+results = list(map(lambda r: {"start":r[0].isoformat(timespec="minutes"), "end":r[1].isoformat(timespec="minutes"), "can":list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), "cannot":list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))}, results))
 
 #  prints the results and length
-print(results)
+#  print(results)
 print(len(results))
 
 with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file

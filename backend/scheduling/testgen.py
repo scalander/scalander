@@ -1,8 +1,8 @@
-import json
+import json  # necessary
 import os
-import datetime
+import datetime  # necessary
 import time
-import random
+import random  # necessary
 # from webbrowser import MacOSX
 
 
@@ -49,6 +49,7 @@ for i in range(random.randint(2, 50)):
     user = {"name": f"{random.choice(['John', 'Sara', 'Abigail', 'Charlie', 'Joe', 'Frank', 'Jorge', 'Robert', 'Elizabeth', 'Elijah', 'Theodore'])} {random.choice(['Johnson', 'Andersson', 'Smith', 'Doe', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'])}"}
     user["commitments"] = list(map(lambda c: {"start":c["start"].isoformat(timespec="minutes"), "end":c["end"].isoformat(timespec="minutes"), "isAbsolute":random.choice([True, False])}, gen_commits(stsave, st)))
     user["meetingSubscriptions"] = list(map(lambda m: {"meeting":{"name":" ", "start":m["start"].isoformat(timespec="minutes"), "end":m["end"].isoformat(timespec="minutes"), "subscribedUsers":[], "lockInDate":stsave.isoformat(timespec="minutes")}, "isCritical":random.choice([True, False]), "weight":random.random()*10}, gen_commits(stsave, st)))
+    user["id"] = str(random.randint(10000,99999))
     jsonData["iAttendees"].append({"user":user, "isCritical":crit, "weight":weight})
 
 
