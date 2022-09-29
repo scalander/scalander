@@ -1,3 +1,3 @@
-for i in range(100):
+for i in range(20):
     exec(open("backend/scheduling/testgen.py").read())
     exec(open("backend/scheduling/scheduling.py").read())
