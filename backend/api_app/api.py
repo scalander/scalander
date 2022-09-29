@@ -186,12 +186,12 @@ def create_proposal(obj):
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
     for committed in model.committed_users:
         committed_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
-        committed_model.is_committed = true
+        committed_model.is_committed = True
         committed_model.proposal = model.id
         committed_model.save()
     for unavailable in model.committed_users:
         unavailable_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
-        committed_model.is_committed = false
+        committed_model.is_committed = False
         unavailable_model.proposal = model.id
         unavailable_model.save()
     return model.id
