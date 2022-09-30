@@ -143,10 +143,10 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
 
 def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
     return list(map(lambda r: {
-    "start": r[0], 
-    "end": r[1], 
-    "can": list(map(lambda x: attendees[x].user.id, r[2])), 
-    "cannot": list(map(lambda x: attendees[x].user.id, r[3]))
+        "start": r[0], 
+        "end": r[1], 
+        "can": list(map(lambda x: attendees[x].user.id, r[2])), 
+        "cannot": list(map(lambda x: attendees[x].user.id, r[3]))
     }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" ")))
 
 
