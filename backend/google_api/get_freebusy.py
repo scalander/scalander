@@ -10,7 +10,14 @@
 from calendar_api.calendar_api import google_calendar_api
 import json
 import datetime
-today = datetime.today.strftime("%Y-%m-%d")
+from datetime import date
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+from googleapiclient.discovery import build
+from django.shortcuts import redirect
+
+
+today = date.today().strftime("%Y-%m-%d")
 g = google_calendar_api()
 calendar = g.list() #gets the list of calendars that the user is subscribed to as a dictionary
 cal_ids = [] #for storing the "id" field of all the users calendars
@@ -19,7 +26,7 @@ query_max = today #latest date-time to check for freebusy - default is midnight 
 query_min = today + datetime.timedelta(days = 7) #eariliest date-time to check - default is midnight today, see query_max TODO: make this 1 week from today
 commitments = []
 
-
+#sending/handling the query data
 def format_all(cals = calendar): #takes in a list of the user's calendars - default is all
     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
     for cal in cals.items: #appends all calendar IDs to cal_id
@@ -32,8 +39,8 @@ def format_all(cals = calendar): #takes in a list of the user's calendars - defa
     return(formatted_ids)
 
 
-def send_query(formatted_ids = formatted_ids, query_max = query_max, query_min = query_min):
-    freebusy = g.query(body = {
+def make_query(formatted_ids = formatted_ids, query_max = query_max, query_min = query_min):
+    query_body = {
         "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
         "groupExpansionMax": 100, # Maximal number of calendar identifiers to be provided for a single group. Optional. An error is returned for a group with more members than this value. Maximum value is 100.
         "timeMax": query_max, # The end of the interval for the query formatted as per RFC3339. default is 1 week from today
@@ -41,8 +48,8 @@ def send_query(formatted_ids = formatted_ids, query_max = query_max, query_min =
         "timeMin": query_min, # The start of the interval for the query formatted as per RFC3339. default is today
         "timeZone": "UTC", # Time zone used in the response. Optional. The default is UTC.
     #structure for query body from: https://google-api-client-libraries.appspot.com/documentation/calendar/v3/python/latest/calendar_v3.freebusy.html
-    })
-    return (freebusy["busy"])
+    }
+    return (query_body)
 
 def send_commitments(freebusy): #runs from send_query() - you shouldn't need to run this
     for commitment in freebusy:
@@ -56,11 +63,17 @@ def send_commitments(freebusy): #runs from send_query() - you shouldn't need to 
     return(commitments)
 
 
+#google api things
+service = build("calendar", "v3")
+collection = service.freebusy()
+request = collection.query(body=make_query(formatted_ids, query_max, query_min))
+service.close()
+
+#final product - RUN THIS
 def get_freebusy( query_min = query_min, query_max = query_max, cals = calendar): 
     #does all the things - 
     #takes datetime object Y-m-d for query min and max (defualt is today and 1 week from today) and calendar ids for cals (optional - default is all)
     ids = format_all(cals)
-    query = send_query(ids, query_max, query_min)
+    query = request
     commitments = send_commitments(query["busy"])
     return (commitments)
-
