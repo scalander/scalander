@@ -5,6 +5,8 @@
   // Prop to declare whether or not the button
   // is the active or passive style 
   export let primary = false;
+  // whether to use block style
+  export let block = false;
 
   // Color props. By default they are the main accent
   export let color = "var(--accent)";
@@ -26,6 +28,7 @@
      style:color="{color_}"
      style:background-color="{backgroundColor}"
      style:opacity="{$opacity}"
+     style:display="{block?'block':'inline-block'}"
      on:mouseenter="{(_)=>opacity.set(0.9)}"
      on:mouseleave="{(_)=>opacity.set(1)}">
   <slot />
@@ -44,9 +47,8 @@
     -ms-user-select: none;
     user-select: none;
     outline:0;
-
-    /* Inline display */
-    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
   }
 
   /* styling actually relating to button goes here */

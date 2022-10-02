@@ -39,38 +39,45 @@
 <style>
 
   div {
-    /* disable blue highlight when tapped multiple times*/
-    /* Remember again that this is component scoped */
-    cursor: pointer;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    outline:0;
+      /* disable blue highlight when tapped multiple times*/
+      /* Remember again that this is component scoped */
+      cursor: pointer;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      outline:0;
 
-    /* Inline (flex, for centering) display */
-    display: inline-flex;
+      /* Inline (flex, for centering) display */
+      display: inline-flex;
   }
 
   /* styling actually relating to button goes here */
   .button {
-    /* borders! */
-    border-radius: 100%;
-    border-width: 1px; 
-    padding: 1px 2px;
+      /* borders! */
+      border-radius: 100%;
+      border-width: 1px; 
+      padding: 1px 2px;
 
-    /* width equals height */
-    width: 36px;
-    height: 36px;
+      /* width equals height */
+      width: 36px;
+      height: 36px;
 
-    /* centering */
-    justify-content: center;
-    align-items: center;
+      /* centering */
+      justify-content: center;
+      align-items: center;
 
-    /* texts! */
-    font-weight: 500;
+      /* texts! */
+      font-weight: 500;
+
+      /* transition! */
+      transition: transform 0.3s;
+  }
+
+  .button:hover {
+      transform: scale(1.1);
   }
 </style>
 

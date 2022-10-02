@@ -1,6 +1,7 @@
 <script>
-  import MonthlyCalendarBase from "$lib/components/MonthlyCalendarBase.svelte";
+  import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
 </script>
 
-<MonthlyCalendarBase />
+<DateTimeRangePicker />
+
 
