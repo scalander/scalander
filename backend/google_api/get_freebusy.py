@@ -1,4 +1,5 @@
 #for getting the freebusy status from the user
+#TODO: remove testing print statements, figure out how to call this
 #############
 # USAGE:
 # run get_freebusy() and pass in the following:
@@ -7,30 +8,18 @@
 # ids is a list of calendar ids (strings) that will specify which calendars to query (optional - defualt is all)
 #############
 #TODO: figure out how to test this
-from calendar_api.calendar_api import google_calendar_api
-import json
 import os
 from dotenv import load_dotenv
 import datetime
 from datetime import date
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
-from django.shortcuts import redirect
-
-#google api things
-load_dotenv()
-service = build("calendar", "v3", developerKey=os.getenv("GOOGLE_API_KEY"))
-freebusy_collection = service.freebusy()
-calendar_collection = service.calendarList()
-calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
+    
 
 today = date.today()
-g = google_calendar_api()
 cal_ids = [{"id": "s603jfdbhtfn4fd50bkm7vqg3c@group.calendar.google.com"}, {"id": "30jid79sjfm4ofnih7n030mm0k@group.calendar.google.com"}] #for storing the user's calendar ids - hardcoded to test will be user input
 formatted_ids = [] #for storing the calendar IDs in the format that query() takes
-query_min = today.strftime("%Y-%m-%d") + "T00:00:00z"  #latest date-time to check for freebusy - default is midnight 1 week from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
-query_max = (today + datetime.timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:00:00z" #eariliest date-time to check - default is midnight today, see query_max
+query_min = today.strftime("%Y-%m-%d") + "T00:00:00-08:00"  #latest date-time to check for freebusy - default is midnight 1 week from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
+query_max = (today + datetime.timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:00:00-08:00" #eariliest date-time to check - default is midnight today, see query_max
 commitments = []
 
 #sending/handling the query data
@@ -60,15 +49,24 @@ def make_query(formatted_ids = cal_ids, query_max = query_max, query_min = query
     return (query_body)
 
 def send_commitments(freebusy):
+    #gets the busy time blocks from the api response - takes in the api response
+    to_check = []
     print("FREEBUSY", freebusy)
     queried_cals = freebusy["calendars"]
-    for cal in queried_cals:
-        for commitment in cal["busy"]:
-            # start = datetime.datetime.strptime(commitment["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
-            # end = datetime.datetime.strptime(commitment["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
-            start = commitment["start"]
-            end = commitment["end"]
+    to_check = list(queried_cals.keys())
+    print("CHECK", to_check)
             
+        # start = datetime.datetime.strptime(commitment["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
+        # end = datetime.datetime.strptime(commitment["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
+    for commitment in to_check:
+        response_cal = queried_cals[commitment]
+        busy_list = response_cal["busy"]
+        print("BUSY", busy_list)
+        for event in busy_list:
+            print("EVENT", event)
+            start = datetime.datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
+            end = datetime.datetime.strptime(event["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
+            print ("TYPES", type(start), type(end))
             commitments.append({
                 "start": start,
                 "end": end,
@@ -76,21 +74,30 @@ def send_commitments(freebusy):
             })
     return(commitments)
 
-#more google api things
-request_body = make_query(cal_ids, query_max, query_min)
-request = freebusy_collection.query(body = request_body)
-print("BODY: ",request_body, "REQUEST: ", request)
-response = request.execute()
-service.close()
+
+def send_request(body): #google api things
+    load_dotenv()
+    service = build("calendar", "v3", developerKey=os.getenv("GOOGLE_API_KEY"))
+    freebusy_collection = service.freebusy()
+    calendar_collection = service.calendarList()
+    calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
+    request_body = body
+    request = freebusy_collection.query(body = request_body)
+    print("BODY: ",request_body, "REQUEST: ", request)
+    response = request.execute()
+    print("RESPONSE", response)
+    service.close()
+    return(response)
 
 #final product - RUN THIS
-def get_freebusy( query_min = query_min, query_max = query_max, cals = calendar): 
+def get_freebusy( query_min = query_min, query_max = query_max): 
     #does all the things - 
     #takes datetime object Y-m-d for query min and max (defualt is today and 1 week from today) and calendar ids for cals (optional - default is all)
     # ids = format_all(cals)
-    query = response
+    body = make_query(cal_ids, query_max, query_min)
+    query = send_request(body)
     print("QUERY", query)
     commitments = send_commitments(query)
     return (commitments)
 
-print("RESULT: ", get_freebusy(query_min,query_max))
+print("RESULT: ", get_freebusy("2022-10-4T00:00:00-08:00","2022-10-6T00:00:00-08:00"))
