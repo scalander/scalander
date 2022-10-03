@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/proposal/<str:id>/', views.Proposal.as_view()),
     path('api/attendee/<str:id>/', views.Attendance.as_view()),
     path('api/attendance/<str:id>/', views.Attendance.as_view()),
+    path('api/schedule/<str:id>/', views.Schedule.as_view()),
 ]
