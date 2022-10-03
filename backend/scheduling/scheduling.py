@@ -1,21 +1,10 @@
 ### IMPORTS
 
-# I have absolutely no clue why half of these are here
-# from curses import can_change_color
-# from distutils.log import error
-# from fcntl import F_SEAL_SEAL
-# from imp import init_builtin
-# from tabnanny import check
-# from configparser import DuplicateOptionError
 import time
 import datetime  # necessary
 import json  # necessary
 import random
 import os
-# import math
-# from operator import truediv
-# from typing import List
-# from typing_extensions import Self
 
 
 ### CLASSES
@@ -52,7 +41,7 @@ class Block:  # only really for me and maybe frontend?
 # functions here generally call the one(s) directly above them
 
 def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
-    return (meeting.start > commitment.start and meeting.start < commitment.end) or (meeting.end > commitment.start and meeting.end < commitment.end)
+    return (meeting.start > commitment.start and meeting.start < commitment.end) or (meeting.end > commitment.start and meeting.end < commitment.end) or (commitment.start > meeting.start and commitment.end < meeting.end)
 
 def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
     for c in user.commitments:
@@ -152,7 +141,10 @@ def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChun
 
 ### TEST LOADING AND RUNNING
 
+print(commitment_check(Commitment(datetime.datetime(2022, 9, 4, 9, 30), datetime.datetime(2022, 9, 4, 9, 45), True), Meeting(" ", datetime.datetime(2022, 9, 4, 9, 15), datetime.datetime(2022, 9, 4, 10, 0), [], datetime.datetime.now())))
 
+
+exit()
 with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
     jsonData = json.load(read_file)
 
