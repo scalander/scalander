@@ -1,9 +1,10 @@
-import time
-import datetime  # necessary
+import datetime
 import json
-import random
-import os
 import api_app.api as api
+
+class Block:
+    def __init__(self, start, end):
+        self.start, self.end = start, end
 
 # functions here generally call the one(s) directly above them
 
