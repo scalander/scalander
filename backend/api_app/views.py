@@ -2,6 +2,7 @@ import json
 from django.views import View
 from django.http import JsonResponse, HttpResponse
 import api_app.api as api
+from scheduling.scheduling import schedule, Block
 
 class User(View):
     def post(self, request):
@@ -128,3 +129,9 @@ class Attendance(View):
     def delete(self, request, id):
         api.delete_attendance(id)
         return HttpResponse(status=204)
+
+class Schedule(View):
+    def get(self, request, id):
+        meeting = api.get_meeting(id)
+        attendees = list(map(lambda id: api.get_attendee(id), meeting.subscribed_users))
+        schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, attendees, 5, 5, meeting.name)
