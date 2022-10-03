@@ -1,46 +1,9 @@
-### EXPORTS
-
-__all__ = ["main_scheduling", "reduce_chunks", "User", "Commitment", "Meeting", "MeetingAttendee", "UserAttendence", "Block"]
-
-
-### IMPORTS
-
 import time
 import datetime  # necessary
 import json
 import random
 import os
-
-### CLASSES
-
-# Theodore will most likely modify these later
-
-class User:
-    def __init__(self, name, commitments, meetingSubscriptions, id):
-        self.name, self.commitments, self.meetingSubscriptions, self.id = name, commitments, meetingSubscriptions, id  # id is apparently a 5 number string for now (I generate it in tests as 10000-99999)
-
-class Commitment: 
-    def __init__(self, start, end, isAbsolute):
-        self.start, self.end, self.isAbsolute = start, end, isAbsolute
-
-class Meeting:
-    def __init__(self, name, start, end, subscribedUsers, lockInDate):
-        self.name, self.start, self.end, self.subscribedUsers, self.lockInDate = name, start, end, subscribedUsers, lockInDate
-
-class MeetingAttendee:
-    def __init__(self, user, isCritical, weight):
-        self.user, self.isCritical, self.weight = user, isCritical, weight
-
-class UserAttendence:
-    def __init__(self, meeting, isCritical, weight):
-        self.meeting, self.isCritical, self.weight = meeting, isCritical, weight
-
-class Block:  # only really for me and maybe frontend?
-    def __init__(self, start, end):
-        self.start, self.end = start, end
-
-
-### FUNCTIONS
+import api_app.api as api
 
 # functions here generally call the one(s) directly above them
 
@@ -105,7 +68,7 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
-            times.append(Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
+            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
         chunks += chunk_times(times, list(map(lambda a: a.user, attendees)))
     return chunks
 
