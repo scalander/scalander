@@ -12,13 +12,6 @@
   // currently selected times
   let selected = {
   };
-
-  let tmp1 = new Date(2022, 9, 17);
-  let tmp2 = [[new Date(2022, 9, 17, 9, 3, 22),
-               new Date(2022, 9, 17, 10, 3, 22)]];
-
-  selected[tmp1] = tmp2;
-
   
   // currently selected date
   let currentDate = null;
@@ -82,7 +75,7 @@
         </div>
         <div class="button-container">
             {#if selected[currentDate]}
-              {#each selected[currentDate] as selection}
+              {#each selected[currentDate] as selection, i}
                 <div class="selection">
                   <span class="selection-content">
                     <input class="datebox"
@@ -98,6 +91,7 @@
                                       selection,
                                       [selection[0],
                                       parseByTime(currentDate, e.target.value)])}"/>
+                           
                   </span>
                   <span class="selection-action">
                     <i class="fa-solid fa-xmark selection-cancel"
