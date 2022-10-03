@@ -26,7 +26,7 @@ class User:
     def __init__(self, name, commitments, meetingSubscriptions, id):
         self.name, self.commitments, self.meetingSubscriptions, self.id = name, commitments, meetingSubscriptions, id  # id is apparently a 5 number string for now (I generate it in tests as 10000-99999)
 
-class Commitment:
+class Commitment: 
     def __init__(self, start, end, isAbsolute):
         self.start, self.end, self.isAbsolute = start, end, isAbsolute
 
