@@ -108,68 +108,61 @@ def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChun
 
 ### TEST LOADING AND RUNNING
 
-# def testtt_functionnn(i):
-#     return i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
 
-# print(testtt_functionnn(Block(datetime.datetime(2022, 6, 30, 23, 59), datetime.datetime(2022, 7, 2, 23, 59))))
-# print(commitment_check(Commitment(datetime.datetime(2022, 9, 4, 9, 30), datetime.datetime(2022, 9, 4, 9, 45), True), Meeting(" ", datetime.datetime(2022, 9, 4, 9, 15), datetime.datetime(2022, 9, 4, 10, 0), [], datetime.datetime.now())))
+with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
+    jsonData = json.load(read_file)
 
-# exit()
+# print basic information about the test
+print(jsonData["seed"])
+print(jsonData["basetime"])
 
-# with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
-#     jsonData = json.load(read_file)
+# essentially read the json and turn it into classes and datetime objects accordingly
+results = reduce_chunks(
+    blocks = list(map(lambda a: Block(
+        datetime.datetime.fromisoformat(a["start"]), 
+        datetime.datetime.fromisoformat(a["end"])
+        ), jsonData["iBlocks"])),
+    meetingLength = jsonData["iMeetingLength"],
+    meetingLockInDate = jsonData["iMeetingLockInDate"],
+    attendees = list(map(lambda a: api.MeetingAttendee(
+            api.User(
+                a["user"]["name"], 
+                list(map(lambda b: api.Commitment(
+                    datetime.datetime.fromisoformat(b["start"]), 
+                    datetime.datetime.fromisoformat(b["end"]), 
+                    b["isAbsolute"]
+                ), a["user"]["commitments"])),
+                list(map(lambda b: api.UserAttendence(
+                    api.Meeting(
+                        b["meeting"]["name"], 
+                        datetime.datetime.fromisoformat(b["meeting"]["start"]), 
+                        datetime.datetime.fromisoformat(b["meeting"]["end"]),
+                        b["meeting"]["subscribedUsers"],
+                        datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
+                    ),
+                    b["isCritical"],
+                    b["weight"]
+                ), a["user"]["meetingSubscriptions"])),
+                a["user"]["id"]
+            ), 
+            a["isCritical"], 
+            a["weight"]
+        ), jsonData["iAttendees"])),
+    minChunks = jsonData["iMinChunks"],
+    timeIncrement = jsonData["iTimeIncrement"]
+)
 
-# # print basic information about the test
-# print(jsonData["seed"])
-# print(jsonData["basetime"])
+#  processes the results into a json serializable object
+results = list(map(lambda r: {
+    "start": r[0].isoformat(timespec="minutes"), 
+    "end": r[1].isoformat(timespec="minutes"), 
+    "can": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), 
+    "cannot": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))
+    }, results))
 
-# # essentially read the json and turn it into classes and datetime objects accordingly
-# results = reduce_chunks(
-#     blocks = list(map(lambda a: Block(
-#         datetime.datetime.fromisoformat(a["start"]), 
-#         datetime.datetime.fromisoformat(a["end"])
-#         ), jsonData["iBlocks"])),
-#     meetingLength = jsonData["iMeetingLength"],
-#     meetingLockInDate = jsonData["iMeetingLockInDate"],
-#     attendees = list(map(lambda a: MeetingAttendee(
-#             User(
-#                 a["user"]["name"], 
-#                 list(map(lambda b: Commitment(
-#                     datetime.datetime.fromisoformat(b["start"]), 
-#                     datetime.datetime.fromisoformat(b["end"]), 
-#                     b["isAbsolute"]
-#                 ), a["user"]["commitments"])),
-#                 list(map(lambda b: UserAttendence(
-#                     Meeting(
-#                         b["meeting"]["name"], 
-#                         datetime.datetime.fromisoformat(b["meeting"]["start"]), 
-#                         datetime.datetime.fromisoformat(b["meeting"]["end"]),
-#                         b["meeting"]["subscribedUsers"],
-#                         datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
-#                     ),
-#                     b["isCritical"],
-#                     b["weight"]
-#                 ), a["user"]["meetingSubscriptions"])),
-#                 a["user"]["id"]
-#             ), 
-#             a["isCritical"], 
-#             a["weight"]
-#         ), jsonData["iAttendees"])),
-#     minChunks = jsonData["iMinChunks"],
-#     timeIncrement = jsonData["iTimeIncrement"]
-# )
+#  prints the results and length of the results
+#  print(results)
+print(len(results))
 
-# #  processes the results into a json serializable object
-# results = list(map(lambda r: {
-#     "start": r[0].isoformat(timespec="minutes"), 
-#     "end": r[1].isoformat(timespec="minutes"), 
-#     "can": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), 
-#     "cannot": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))
-#     }, results))
-
-# #  prints the results and length of the results
-# #  print(results)
-# print(len(results))
-
-# with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
-#     json.dump({"seed":jsonData["seed"], "basetime":jsonData["basetime"], "results":results}, write_file, indent=4)
+with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
+    json.dump({"seed":jsonData["seed"], "basetime":jsonData["basetime"], "results":results}, write_file, indent=4)
