@@ -98,7 +98,7 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         chunkmap.pop(ind)
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
-def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
+def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
     return list(map(lambda r: {
         "start": r[0], 
         "end": r[1], 
