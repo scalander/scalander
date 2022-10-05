@@ -7,3 +7,6 @@ frontend/package
 **/.env
 **/.env.*
 !.env.example
+client_secret.json
+__pycache__
+__pycache__/*
