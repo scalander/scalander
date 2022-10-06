@@ -20,10 +20,10 @@
   import strings from "$lib/strings.json";
 
   // function to remove a selection
-  function removeSelection(date, selection) {
+  function removeSelection(date, oldSelectionIndex) {
     let currentSelections = selected[date];
     // filter for current selection
-    currentSelections = currentSelections.filter(i=>i!=selection);
+    currentSelections.splice(oldSelectionIndex, 1);
     // set it back
     selected[date] = currentSelections;
   }
@@ -39,12 +39,12 @@
   }
 
   // function to update a selection
-  function updateSelection(date, oldSelection, newSelection) {
+  function updateSelection(date, oldSelectionIndex, newSelection) {
     let currentSelections = selected[date];
     // filter for current selection
-    currentSelections = currentSelections.filter(i=>i!=oldSelection);
-    // append
-    currentSelections.push(newSelection);
+    currentSelections.splice(oldSelectionIndex, 1, newSelection);
+    console.log(oldSelectionIndex, newSelection)
+    console.log(currentSelections);
     // put it back
     selected[date] = currentSelections;
   }
@@ -81,21 +81,21 @@
                     <input class="datebox"
                            value="{format(selection[0], 'hh:mm aa')}"
                            on:change="{(e)=>updateSelection(currentDate,
-                                      selection,
+                                      i,
                                       [parseByTime(currentDate, e.target.value),
                                        selection[1]])}"/>
                     <span class="dash">-</span>
                     <input class="datebox"
                            value="{format(selection[1], 'hh:mm aa')}"
                            on:change="{(e)=>updateSelection(currentDate,
-                                      selection,
+                                      i,
                                       [selection[0],
                                       parseByTime(currentDate, e.target.value)])}"/>
                            
                   </span>
                   <span class="selection-action">
                     <i class="fa-solid fa-xmark selection-cancel"
-                       on:click="{()=>removeSelection(currentDate, selection)}"/>
+                       on:click="{()=>removeSelection(currentDate, i)}"/>
                   </span>
                 </div>
               {/each}
@@ -126,6 +126,7 @@
       display: flex;
       border-radius: 3px;
       border-color: var(--accent);
+      height: 450px;
   }
 
   .selecter {
