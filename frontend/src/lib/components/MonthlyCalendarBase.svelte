@@ -18,6 +18,9 @@
   // right, North America? booo
   export let mondayweeks = false;
 
+  // Get what to mark (sometimes as selected dates, etc.;
+  export let mark = [];
+
   // set current selection
   let selection = null;
 
@@ -78,6 +81,17 @@
     year = today.getFullYear();
   }
 
+  // contains
+  Array.prototype.contains = Array.prototype.contains || function(obj)
+  {
+    var i, l = this.length;
+    for (i = 0; i < l; i++)
+    {
+      if (this[i] == obj) return true;
+    }
+    return false;
+  };
+
 </script>
 
 <div class="calendar-container">
@@ -112,7 +126,9 @@
           primary
           inverse="{isSameDay(day, new Date())}">{day.getDate()}</DateButton>
         {#if day == selection}
-            <i class="highlighted-dot fa-solid fa-circle" />
+            <i class="highlighted-dot fa-solid fa-circle dot-accent" />
+        {:else if mark.contains(day) }  
+            <i class="highlighted-dot fa-solid fa-circle dot-tertiary" />
         {/if}
       </div>
     {/each}
@@ -198,6 +214,15 @@
       transform: translateY(-10px) translateX(5.5px);
       background: transparent;
   }
+
+  .dot-accent {
+      color: var(--accent);
+  }
+
+  .dot-tertiary {
+      color: var(--tertiary);
+  }
+
 
   i {
       padding: 10px;

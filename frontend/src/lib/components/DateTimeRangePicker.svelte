@@ -24,8 +24,15 @@
     let currentSelections = selected[date];
     // filter for current selection
     currentSelections.splice(oldSelectionIndex, 1);
-    // set it back
-    selected[date] = currentSelections;
+    // if there is no length, we get rid of the key
+    // otherwise, we set the new thing
+    if (currentSelections.length == 0) {
+      delete selected[date];
+      // trigger svelte rerender
+      selected = selected;
+    } else {
+      selected[date] = currentSelections;
+    }
   }
 
   // function to insert a selection
@@ -43,8 +50,6 @@
     let currentSelections = selected[date];
     // filter for current selection
     currentSelections.splice(oldSelectionIndex, 1, newSelection);
-    console.log(oldSelectionIndex, newSelection)
-    console.log(currentSelections);
     // put it back
     selected[date] = currentSelections;
   }
@@ -72,45 +77,47 @@
 </script>
 
 <div class="wrapper">
-  <MonthlyCalendarBase on:select={(e)=>
-    currentDate = e.detail.date} />
+  <MonthlyCalendarBase
+    on:select={(e)=> currentDate = e.detail.date}
+    mark={Object.keys(selected)} />
+
     <div class="selecter">
       {#if currentDate}
         <div class="date-subtitle">
           {strings.DATETIMERANGEPICKER_SELECTING_TIME.replace("$DATE",
-                        format(currentDate, "EEEE, MMMM dd, yyyy"))}
+          format(currentDate, "EEEE, MMMM dd, yyyy"))}
         </div>
         <div class="button-container">
-            {#if selected[currentDate]}
-              {#each selected[currentDate] as selection, i}
-                <div class="selection">
-                  <span class="selection-content">
-                    <input class="datebox"
-                           value="{format(selection[0], 'hh:mm aa')}"
-                           on:change="{(e)=>updateSelection(currentDate,
-                                      i,
-                                      [parseByTime(currentDate, e.target.value),
-                                       selection[1]])}"/>
-                    <span class="dash">-</span>
-                    <input class="datebox"
-                           value="{format(selection[1], 'hh:mm aa')}"
-                           on:change="{(e)=>updateSelection(currentDate,
-                                      i,
-                                      [selection[0],
-                                      parseByTime(currentDate, e.target.value)])}"/>
-                           
-                  </span>
-                  <span class="selection-action">
-                    <i class="fa-solid fa-xmark selection-cancel"
-                       on:click="{()=>removeSelection(currentDate, i)}"/>
-                  </span>
-                </div>
-              {/each}
-            {/if}
-            <Button block on:click="{()=>insertSelection(currentDate, [currentDate, currentDate])}">
-              <i class="icon fa-solid fa-plus" />
-              {strings.DATETIMERANGEPICKER_ADD_TIME}
-            </Button>
+          {#if selected[currentDate]}
+            {#each selected[currentDate] as selection, i}
+              <div class="selection">
+                <span class="selection-content">
+                  <input class="datebox"
+                         value="{format(selection[0], 'hh:mm aa')}"
+                         on:change="{(e)=>updateSelection(currentDate,
+                                    i,
+                                    [parseByTime(currentDate, e.target.value),
+                                    selection[1]])}"/>
+                  <span class="dash">-</span>
+                  <input class="datebox"
+                         value="{format(selection[1], 'hh:mm aa')}"
+                         on:change="{(e)=>updateSelection(currentDate,
+                                    i,
+                                    [selection[0],
+                                    parseByTime(currentDate, e.target.value)])}"/>
+                  
+                </span>
+                <span class="selection-action">
+                  <i class="fa-solid fa-xmark selection-cancel"
+                     on:click="{()=>removeSelection(currentDate, i)}"/>
+                </span>
+              </div>
+            {/each}
+          {/if}
+          <Button block on:click="{()=>insertSelection(currentDate, [currentDate, currentDate])}">
+            <i class="icon fa-solid fa-plus" />
+            {strings.DATETIMERANGEPICKER_ADD_TIME}
+          </Button>
         </div>
       {:else}
         <div class="date-subtitle">
