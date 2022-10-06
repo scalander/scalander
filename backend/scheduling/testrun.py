@@ -3,7 +3,7 @@ import datetime  # necessary
 import json  # necessary
 import random
 import os
-from backend.scheduling.scheduling import *
+from scheduling import *
 
 
 with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
