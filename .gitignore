@@ -10,3 +10,5 @@ frontend/package
 client_secret.json
 __pycache__
 __pycache__/*
+backend/scheduling/results.json
+backend/scheduling/testdata.json
