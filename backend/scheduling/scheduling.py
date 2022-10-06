@@ -67,7 +67,7 @@ def check_multiple_users(meeting, users):
             cannot.append(u)
     return [can, cannot]
 
-def check_all_times(times, users):  # times is a list of the meeting object (not rly efficient but whatever)
+def check_all_times(times, users):  # times is a list of the meeting object (not rly storage efficient but whatever)
     return list(map(lambda t: check_multiple_users(t, users), times))
 
 def chunk_times(times, users):
@@ -141,10 +141,14 @@ def main_scheduling(blocks, meetingLength, meetingLockInDate, attendees, minChun
 
 ### TEST LOADING AND RUNNING
 
-print(commitment_check(Commitment(datetime.datetime(2022, 9, 4, 9, 30), datetime.datetime(2022, 9, 4, 9, 45), True), Meeting(" ", datetime.datetime(2022, 9, 4, 9, 15), datetime.datetime(2022, 9, 4, 10, 0), [], datetime.datetime.now())))
+# def testtt_functionnn(i):
+#     return i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
 
+# print(testtt_functionnn(Block(datetime.datetime(2022, 6, 30, 23, 59), datetime.datetime(2022, 7, 2, 23, 59))))
+# print(commitment_check(Commitment(datetime.datetime(2022, 9, 4, 9, 30), datetime.datetime(2022, 9, 4, 9, 45), True), Meeting(" ", datetime.datetime(2022, 9, 4, 9, 15), datetime.datetime(2022, 9, 4, 10, 0), [], datetime.datetime.now())))
 
-exit()
+# exit()
+
 with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
     jsonData = json.load(read_file)
 
