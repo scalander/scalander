@@ -51,8 +51,15 @@
 
   // function to parse and update time
   function parseByTime(refDate, timeStr) {
+    // TODO HACKY!!!
+    // we add an "m" after stripping and if the last
+    // character is `a` or p, because some
+    // people like to write "5p" for "5pm", and
+    // chrono doesn't parse that
+    let timeStrClean = timeStr.trim()+(['a', 'p'].includes(timeStr[timeStr.length-1]) ?
+                                       'm': '');
     // run chrono
-    let date = chrono.parseDate(timeStr);
+    let date = chrono.parseDate(timeStrClean);
     // if the date doesn't parse, return to ref date
     if (!date) date=refDate;
     // set date
