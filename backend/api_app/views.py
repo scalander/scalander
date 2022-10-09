@@ -3,6 +3,7 @@ from django.views import View
 from django.http import JsonResponse, HttpResponse
 import api_app.api as api
 from scheduling.scheduling import schedule, Block
+from google_api.get_freebusy import get_freebusy
 
 class User(View):
     def post(self, request):
@@ -135,3 +136,8 @@ class Schedule(View):
         meeting = api.get_meeting(id)
         attendees = list(map(lambda id: api.get_attendee(id), meeting.subscribed_users))
         schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, attendees, 5, 5, meeting.name)
+
+class FreeBusy(View):
+    def get(self, request, id):
+        obj = get_freebusy()
+        return JsonResponse(obj)
