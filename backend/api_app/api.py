@@ -43,7 +43,7 @@ class UserAttendance:
         return {"meeting": self.meeting, "isCritical": self.is_critical, "weight": self.weight}
 
 def create_user(obj):
-    model = models.User.create(name=obj.name, email=obj.email)
+    model = models.User.objects.create(name=obj.name, email=obj.emails)
     for commitment in obj.commitments:
         commitment_model = models.Commitment.objects.filter(id=commitment).first()
         commitment_model.user = model.id
@@ -106,7 +106,7 @@ def delete_user(id):
     user_model.delete()
 
 def create_commitment(obj):
-    model = models.Commitment.create(start=obj.start, end=obj.end, is_absolute=obj.is_absolute)
+    model = models.Commitment.objects.create(start=obj.start, end=obj.end, is_absolute=obj.is_absolute)
     return model.id
 
 def get_commitment(id):
