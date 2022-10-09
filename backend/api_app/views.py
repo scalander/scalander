@@ -7,7 +7,7 @@ from scheduling.scheduling import schedule, Block
 class User(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.User(**data)
+        obj = api.User(name=data["name"], emails=data["emails"], commitments=data["commitments"], meeting_subscriptions=data["meetingSubscriptions"])
         model_id = api.create_user(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -17,7 +17,7 @@ class User(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.User(**data)
+        obj = api.User(name=data["name"], emails=data["emails"], commitments=data["commitments"], meeting_subscriptions=data["meetingSubscriptions"])
         api.update_user(id, obj)
         return HttpResponse(status=204)
 
@@ -28,7 +28,7 @@ class User(View):
 class Commitment(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Commitment(**data)
+        obj = api.Commitment(start=data["start"], end=data["end"], is_absolute=data["isAbsolute"])
         model_id = api.create_commitment(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -49,7 +49,7 @@ class Commitment(View):
 class Meeting(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(**data)
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         model_id = api.create_meeting(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -59,7 +59,7 @@ class Meeting(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(**data)
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         api.update_meeting(id, obj)
         return HttpResponse(status=204)
 
@@ -70,7 +70,7 @@ class Meeting(View):
 class Proposal(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.MeetingTimeProposal(**data)
+        obj = api.MeetingTimeProposal(start=data["start"], end=data["end"], committed_users=data["committedUsers"], unavailable_users=data["unavailableUsers"], optimality=data["optimality"])
         model_id = api.create_proposal(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -80,7 +80,7 @@ class Proposal(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.MeetingTimeProposal(**data)
+        obj = api.MeetingTimeProposal(start=data["start"], end=data["end"], committed_users=data["committedUsers"], unavailable_users=data["unavailableUsers"], optimality=data["optimality"])
         api.update_proposal(id, obj)
         return HttpResponse(status=204)
 
@@ -91,7 +91,7 @@ class Proposal(View):
 class Attendee(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.MeetingAttendee(**data)
+        obj = api.MeetingAttendee(user=data["user"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendee(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -101,7 +101,7 @@ class Attendee(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.MeetingAttendee(**data)
+        obj = api.MeetingAttendee(user=data["user"], is_critical=data["isCritical"], weight=data["weight"])
         api.update_attendee(id, obj)
         return HttpResponse(status=204)
 
@@ -112,7 +112,7 @@ class Attendee(View):
 class Attendance(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.UserAttendance(**data)
+        obj = api.UserAttendance(meeting=data["meeting"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendance(obj)
         return HttpResponse(status=201, headers={"Location": model_id})
 
@@ -122,7 +122,7 @@ class Attendance(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.UserAttendance(**data)
+        obj = api.UserAttendance(meeting=data["meeting"], is_critical=data["isCritical"], weight=data["weight"])
         api.update_attendance(id, obj)
         return HttpResponse(status=204)
 
