@@ -15,15 +15,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+# TODO: remove CSRF exemptions
+from django.views.decorators.csrf import csrf_exempt
 import api_app.views as views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/user/<str:id>/', views.User.as_view()),
-    path('api/commitment/<str:id>/', views.Commitment.as_view()),
-    path('api/meeting/<str:id>/', views.Meeting.as_view()),
-    path('api/proposal/<str:id>/', views.Proposal.as_view()),
-    path('api/attendee/<str:id>/', views.Attendance.as_view()),
-    path('api/attendance/<str:id>/', views.Attendance.as_view()),
-    path('api/schedule/<str:id>/', views.Schedule.as_view()),
+    path('api/user/<str:id>', csrf_exempt(views.User.as_view())),
+    path('api/user', csrf_exempt(views.User.as_view(http_method_names=['post']))),
+    path('api/commitment/<str:id>', csrf_exempt(views.Commitment.as_view())),
+    path('api/commitment', csrf_exempt(views.Commitment.as_view(http_method_names=['post']))),
+    path('api/meeting/<str:id>', csrf_exempt(views.Meeting.as_view())),
+    path('api/meeting', csrf_exempt(views.Meeting.as_view(http_method_names=['post']))),
+    path('api/proposal/<str:id>', csrf_exempt(views.Proposal.as_view())),
+    path('api/proposal', csrf_exempt(views.Proposal.as_view(http_method_names=['post']))),
+    path('api/attendee/<str:id>', csrf_exempt(views.Attendee.as_view())),
+    path('api/attendee', csrf_exempt(views.Attendee.as_view(http_method_names=['post']))),
+    path('api/attendance/<str:id>', csrf_exempt(views.Attendance.as_view())),
+    path('api/attendance', csrf_exempt(views.Attendance.as_view(http_method_names=['post']))),
+    path('api/schedule/<str:id>', csrf_exempt(views.Schedule.as_view())),
 ]
