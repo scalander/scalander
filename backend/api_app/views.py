@@ -13,7 +13,7 @@ class User(View):
 
     def get(self, request, id):
         obj = api.get_user(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -34,7 +34,7 @@ class Commitment(View):
 
     def get(self, request, id):
         obj = api.get_commitment(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -55,7 +55,7 @@ class Meeting(View):
 
     def get(self, request, id):
         obj = api.get_meeting(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -76,7 +76,7 @@ class Proposal(View):
 
     def get(self, request, id):
         obj = api.get_proposal(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -97,7 +97,7 @@ class Attendee(View):
 
     def get(self, request, id):
         obj = api.get_attendee(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -118,7 +118,7 @@ class Attendance(View):
 
     def get(self, request, id):
         obj = api.get_attendance(id)
-        return JsonResponse(obj)
+        return JsonResponse(obj.json_object())
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
