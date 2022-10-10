@@ -6,13 +6,29 @@
 # query_max is a datetime date object in format %Y-%m%d or a datetime.date object (needs to have year, month, and day) - this is the last day to query for freebusy information (default is 7 days from today)
 # NOTE: calendar MUST BE PUBLIC in order to get freebusy this way - will create a workaround eventually (using calendar secret id)
 #############
+from distutils.command.build_scripts import build_scripts
 import os
 # from time import strftime
 from dotenv import load_dotenv
 import datetime
 from datetime import timedelta, date
 from googleapiclient.discovery import build
+from django.shortcuts import redirect
+from django.http import request
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+
     
+flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+    'client_secret.json',
+    scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
+flow.redirect_uri = "https://localhost:8080/"
+auth_uri = flow.authorization_url()
+print("URI",auth_uri)
+auth_request = redirect(flow.redirect_uri)
+auth_response = auth_request.build_absolute_uri()
+flow.fetch_token(authorization_response = auth_response)
+
 tzoffset = "-07:00" #timezone offset - assumimg its PDT for now
 today = date.today()
 cal_ids = [{"id": "s603jfdbhtfn4fd50bkm7vqg3c@group.calendar.google.com"}, {"id": "30jid79sjfm4ofnih7n030mm0k@group.calendar.google.com"}] #for storing the user's calendar ids - hardcoded to test will be user input
@@ -21,17 +37,17 @@ query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-
 query_max = (today + datetime.timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
 commitments = []
 
-#sending/handling the query data
-# def format_all(cals = calendar): #takes in a list of the user's calendars - default is all
-#     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
-#     for cal in cals: #appends all calendar IDs to cal_id
-#         cal_ids.append(cal["id"])
+# handling the calendar.list return data
+def format_all(cals): #takes in a list of the user's calendars - default is all
+    #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
+    for cal in cals: #appends all calendar IDs to cal_id
+        cal_ids.append(cal["id"])
 
-#     for id in cal_ids: #adds calendar IDs to formatted_ids in the format needed in query body
-#         formatted_ids.append({
-#             "id": id
-#         })
-#     return(formatted_ids)
+    for id in cal_ids: #adds calendar IDs to formatted_ids in the format needed in query body
+        formatted_ids.append({
+            "id": id
+        })
+    return(formatted_ids)
 
 
 def make_query(formatted_ids = cal_ids, query_max = query_max, query_min = query_min):
@@ -93,6 +109,8 @@ def send_request(body): #google api things
     freebusy_collection = service.freebusy()
     calendar_collection = service.calendarList()
     calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
+    calendar_response = calendar.execute() #TODO: make it build with oauth key for this
+    calendar_list = format_all(calendar_response)
     request_body = body
     request = freebusy_collection.query(body = request_body)
     # print("BODY: ",request_body, "REQUEST: ", request)
@@ -102,7 +120,7 @@ def send_request(body): #google api things
     return(response)
 
 #final product - RUN THIS
-def get_freebusy(query_min = query_min, query_max = query_max): 
+def get_freebusy(cal_ids = cal_ids, query_min = query_min, query_max = query_max): 
     #does all the things - 
     #takes datetime.date object or string "Y-m-d" for query min and max - takes from midnight to midnight on both dates (defualt is today and 1 week from today)
     # ids = format_all(cals)
@@ -112,4 +130,4 @@ def get_freebusy(query_min = query_min, query_max = query_max):
     commitments = send_commitments(query)
     return (commitments)
 
-# print("RESULT: ", get_freebusy(query_min, query_max))
+print("RESULT: ", get_freebusy(query_min, query_max))
