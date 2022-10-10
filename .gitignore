@@ -7,9 +7,6 @@ frontend/package
 **/.env
 **/.env.*
 !.env.example
-client_secret.json
-__pycache__
-__pycache__/*
 backend/scheduling/results.json
 backend/scheduling/testdata.json
 db.sqlite3
