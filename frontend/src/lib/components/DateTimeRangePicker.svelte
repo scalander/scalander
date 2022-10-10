@@ -3,11 +3,18 @@
   import MonthlyCalendarBase from "./MonthlyCalendarBase.svelte";
   import Button from "./ui/Button.svelte";
 
+  // event dispatching
+  import { createEventDispatcher } from 'svelte';
+
   // crono
   import * as chrono from 'chrono-node';
 
   // date formatting
   import { format } from 'date-fns'
+
+  // dispatcher
+  const dispatch = createEventDispatcher();
+
 
   // currently selected times
   let selected = {
@@ -18,6 +25,17 @@
 
   // strings
   import strings from "$lib/strings.json";
+
+  // function to dispatch change (with results)
+  function dispatchChange() {
+    let results = [];
+    
+    for (let key in selected) {
+      results = results + selected[key];
+    }
+
+    dispatch('change', {selected:results});
+  }
 
   // function to remove a selection
   function removeSelection(date, oldSelectionIndex) {
@@ -33,16 +51,25 @@
     } else {
       selected[date] = currentSelections;
     }
+
+    // dispatch change
+    dispatchChange();
   }
 
   // function to insert a selection
   function insertSelection(date, newSelection) {
+    // check that the date conforms
+    // otherwise, we need to update
+
     // get selections
     let currentSelections = selected[date] ? selected[date] : [];
     // append
     currentSelections.push(newSelection);
     // put it back
     selected[date] = currentSelections;
+
+    // dispatch change
+    dispatchChange();
   }
 
   // function to update a selection
@@ -52,6 +79,9 @@
     currentSelections.splice(oldSelectionIndex, 1, newSelection);
     // put it back
     selected[date] = currentSelections;
+
+    // dispatch change
+    dispatchChange();
   }
 
   // function to parse and update time
