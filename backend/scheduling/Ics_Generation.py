@@ -16,7 +16,7 @@ TRANSP:OPAQUE
 END:VEVENT'''
 
 x = datetime.datetime(2022, 9, 11, 14, 0, 0)
-print(x)
+
 def datetime_to_ics(time):
     time2=[str(time.month),str(time.day),str(time.hour),str(time.minute),str(time.second)]
     for i in range(len(time2)):
@@ -27,6 +27,11 @@ def datetime_to_ics(time):
 #takes in json for meeting and ics file
 def AddMeeting(meeting,ics_name):
     ics = open(ics_name, "r+")
+    ics_lines = ics.readlines()
+    add_line = ics_lines[-2]
+
+
+
 
 
 #AddMeeting(meeting,template)
