@@ -36,7 +36,8 @@
 * {
   color: var(--primary);
   border-color: var(--background-contrast);
-  background-color: var(--background);
+  /* We can't have this. This screws with google API */
+  /* background-color: var(--background); */
 }
 
 
