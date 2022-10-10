@@ -105,7 +105,7 @@ def send_commitments(freebusy):
 
 def send_request(body): #google api things
     load_dotenv()
-    service = build("calendar", "v3", developerKey=os.getenv("GOOGLE_API_KEY"))
+    service = build("calendar", "v3", credentials=flow.credentials)
     freebusy_collection = service.freebusy()
     calendar_collection = service.calendarList()
     calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
