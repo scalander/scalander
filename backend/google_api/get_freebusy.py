@@ -19,15 +19,15 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
     
-flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-    'client_secret.json',
-    scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
-flow.redirect_uri = "https://localhost:8080/"
-auth_uri = flow.authorization_url()
-print("URI",auth_uri)
-auth_request = redirect(flow.redirect_uri)
-auth_response = auth_request.build_absolute_uri()
-flow.fetch_token(authorization_response = auth_response)
+# flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+#     'client_secret.json',
+#     scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
+# flow.redirect_uri = "https://localhost:8080/"
+# auth_uri = flow.authorization_url()
+# print("URI",auth_uri)
+# auth_request = redirect(flow.redirect_uri)
+# auth_response = auth_request.build_absolute_uri()
+# flow.fetch_token(authorization_response = auth_response)
 
 tzoffset = "-07:00" #timezone offset - assumimg its PDT for now
 today = date.today()
@@ -38,9 +38,9 @@ query_max = (today + datetime.timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:0
 commitments = []
 
 # handling the calendar.list return data
-def format_all(cals): #takes in a list of the user's calendars - default is all
+def format_all(cals): #takes in a list of the user's calendars from send_request()
     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
-    for cal in cals: #appends all calendar IDs to cal_id
+    for cal in cals["items"]: #appends all calendar IDs to cal_id
         cal_ids.append(cal["id"])
 
     for id in cal_ids: #adds calendar IDs to formatted_ids in the format needed in query body
@@ -50,7 +50,7 @@ def format_all(cals): #takes in a list of the user's calendars - default is all
     return(formatted_ids)
 
 
-def make_query(formatted_ids = cal_ids, query_max = query_max, query_min = query_min):
+def make_query(query_max = query_max, query_min = query_min):
     # print(type(formatted_ids), type(query_min), type(query_max)) #TODO: remove
     if type(query_min) == datetime.date:
         q_min = query_min.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
@@ -64,7 +64,7 @@ def make_query(formatted_ids = cal_ids, query_max = query_max, query_min = query
         # "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
         # "groupExpansionMax": 50, # Maximal number of calendar identifiers to be provided for a single group. Optional. An error is returned for a group with more members than this value. Maximum value is 100.
         "timeMax": q_max, # The end of the interval for the query formatted as per RFC3339. default is 1 week from today
-        "items": formatted_ids, #IDs of the user's calendars - use format_all() to get these
+        "items": "", #IDs of the user's calendars - will be added in send_request
         "timeMin": q_min, # The start of the interval for the query formatted as per RFC3339. default is today
         # "timeZone": "UTC", # Time zone used in the response. Optional. The default is UTC.
     #structure for query body from: https://google-api-client-libraries.appspot.com/documentation/calendar/v3/python/latest/calendar_v3.freebusy.html
@@ -103,29 +103,38 @@ def send_commitments(freebusy):
     return(commitments)
 
 
-def send_request(body): #google api things
+def send_request(body, code): #google api things
     load_dotenv()
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        'client_secret.json',
+        scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
+    flow.fetch_token(code=code)
     service = build("calendar", "v3", credentials=flow.credentials)
-    freebusy_collection = service.freebusy()
+   
     calendar_collection = service.calendarList()
-    calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
-    calendar_response = calendar.execute() #TODO: make it build with oauth key for this
+    calendar_request = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
+    calendar_response = calendar_request.execute()
     calendar_list = format_all(calendar_response)
-    request_body = body
-    request = freebusy_collection.query(body = request_body)
+    assert calendar_list, "missing calendar.list() response"
+    body["items"] = calendar_list
+    freebusy_request_body = body
+    freebusy_collection = service.freebusy()
+    freebusy_request = freebusy_collection.query(body = freebusy_request_body)
     # print("BODY: ",request_body, "REQUEST: ", request)
-    response = request.execute()
+    response = freebusy_request.execute()
     # print("RESPONSE", response)
     service.close()
     return(response)
 
 #final product - RUN THIS
-def get_freebusy(cal_ids = cal_ids, query_min = query_min, query_max = query_max): 
+def get_freebusy(query_min = query_min, query_max = query_max, auth_code = ""): 
     #does all the things - 
     #takes datetime.date object or string "Y-m-d" for query min and max - takes from midnight to midnight on both dates (defualt is today and 1 week from today)
+    #requires auth code
+    assert auth_code != "", "missing auth code"
     # ids = format_all(cals)
-    body = make_query(cal_ids, query_max, query_min)
-    query = send_request(body)
+    body = make_query(query_max, query_min)
+    query = send_request(body, auth_code)
     # print("QUERY", query)
     commitments = send_commitments(query)
     return (commitments)
