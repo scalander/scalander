@@ -1,3 +1,10 @@
+<svelte:head>
+  <script src="https://accounts.google.com/gsi/client"
+          async
+          defer></script>
+</svelte:head>
+
+
 <script>
   const CLIENT_ID_TODO="966652940331-g1ld879a9gn25rk39dhta87u0trjasp3.apps.googleusercontent.com";
   // the date picker
@@ -32,12 +39,6 @@
 
 
 </script>
-<svelte:head>
-  <script src="https://accounts.google.com/gsi/client"
-          async
-          defer></script>
-</svelte:head>
-
 
 <!-- UID: {$page.params.uid} -->
 
