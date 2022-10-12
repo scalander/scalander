@@ -14,7 +14,13 @@ class UserTestCase(TestCase):
         u = api.User("John Doe", "johndoe@email.com", commitment_ids, sub_ids)
         uid = api.create_user(u)
         fetched_user = api.get_user(uid)
-        self.assertTrue(fetched_user.name == "John Doe")
-        self.assertTrue(fetched_user.email == "johndoe@email.com")
-        self.assertTrue(fetched_user.commitments == commitment_ids)
-        self.assertTrue(fetched_user.meeting_subscriptions == sub_ids)
+        r_sub_ids = fetched_user.meeting_subscriptions
+        r_sub_ids.sort()
+        sub_ids.sort()
+        r_com_ids = fetched_user.commitments
+        r_com_ids.sort()
+        commitment_ids.sort()
+        self.assertEqual(fetched_user.name, "John Doe")
+        self.assertEqual(fetched_user.emails, "johndoe@email.com")
+        self.assertEqual(r_com_ids, commitment_ids)
+        self.assertEqual(r_sub_ids, sub_ids)
