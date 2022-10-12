@@ -124,11 +124,11 @@ def delete_commitment(id):
 
 def create_meeting(obj):
     model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
-    for proposal in model.proposals:
+    for proposal in obj.proposals:
         proposal_model = models.MeetingTimeProposal.objects.filter(id=proposal).first()
         proposal_model.meeting = model.id
         proposal_model.save()
-    for subscription in model.subscribed_users:
+    for subscription in obj.subscribed_users:
         subscription_model = models.UserMeetingSubscription.objects.fitler(id=subscription).first()
         subscription_model.meeting = model.id
         subscription_model.save()
