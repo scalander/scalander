@@ -57,7 +57,7 @@ def create_user(obj):
 def get_user(id):
     user = models.User.objects.filter(id=id).first()
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user_id=id).all()))
-    meeting_subscription_ids = list(map(lambda sub: sub.id, models.Commitment.objects.filter(user_id=id).all()))
+    meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
 
 def update_user(id, obj):
