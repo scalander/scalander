@@ -1,5 +1,5 @@
 <svelte:head>
-    <script src="https://accounts.google.com/gsi/client" />
+    <script src="https://accounts.google.com/gsi/client" on:load={loadGoogle} />
 </svelte:head>
 
 
@@ -46,7 +46,7 @@
     }
 
     // Initialize Google Credential Services
-    onMount(()=>{
+    function loadGoogle() {
         google.accounts.id.initialize({
             client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
             callback: handleCredential,
@@ -54,7 +54,7 @@
             auto_select: true
         });
         ready = true;
-    });
+    };
 
     $: {
         // if ready and right state, render button
