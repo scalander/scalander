@@ -1,0 +1,46 @@
+/* Who doesn't like colors? */
+/* Variables for unified themeing */
+
+* {
+  /* the theme colors */
+  --black: #37393a;
+  --blue: #00a6fb;
+  --green: #8dffcd;
+  --orange: #fa824c;
+  --red: #ee4266;
+}
+
+* {
+  /* foreground */
+  --primary: var(--black);
+  --primary-contrast: var(--background);
+
+  /* foreground (lighter) */
+  --secondary: #5e5d5d;
+  --secondary-contrast: var(--background);
+
+  /* accent */
+  --accent: var(--red);
+  --accent-contrast: var(--background);
+
+  /* tertiary (even lighter accent) */
+  --tertiary: #fae3e8;
+  --tertiary-contrast: var(--red);
+
+  /* background */
+  --background: #fafafa;
+  --background-contrast: #e8e8e8;
+
+  /* strong background */
+  --accented-background: white;
+}
+
+/* basic default overrides */
+* {
+  color: var(--primary);
+  border-color: var(--background-contrast);
+  /* We can't have this. This screws with google API */
+  /* background-color: var(--background); */
+}
+
+

@@ -1,4 +1,4 @@
-.vscode/**
+Gvscode/**
 **/.DS_Store
 frontend/node_modules
 frontend/build
@@ -7,8 +7,13 @@ frontend/package
 **/.env
 **/.env.*
 !.env.example
+!frontend/.env
+**/.log
 backend/scheduling/results.json
 backend/scheduling/testdata.json
 db.sqlite3
 **/__pycache__
 client_secret.json
+*.mjs
+#.*
+\#*#

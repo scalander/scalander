@@ -7,6 +7,7 @@ services:
       - 8082:8082
     volumes:
       - ./backend/db.sqlite3:/app/db.sqlite3
+    entrypoint: /bin/bash -c "python manage.py runserver 0.0.0.0:8082"
   frontend:
     build: frontend
     ports:
