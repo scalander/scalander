@@ -30,6 +30,9 @@
   /* background */
   --background: #fafafa;
   --background-contrast: #e8e8e8;
+
+  /* strong background */
+  --accented-background: white;
 }
 
 /* basic default overrides */
