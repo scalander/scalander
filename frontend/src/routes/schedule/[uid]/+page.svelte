@@ -14,6 +14,7 @@
 
     // strings
     import strings from "$lib/strings.json";
+import { exclude_internal_props } from 'svelte/internal';
 
     // current changes
     let change = []
@@ -32,7 +33,7 @@
     // handle credential input
     function handleCredential(authResult) {
         // TODO pass it to the server
-        console.log(`amazing physics going on with ${authResult.credential}`);
+        console.log(`amazing physics going on with ${authResult.access_token}`);
         // move on
         state=2
     }
@@ -45,29 +46,25 @@
         state=3
     }
 
+    onMount(loadGoogle);
+
+    let client;
+
     // Initialize Google Credential Services
     function loadGoogle() {
-        google.accounts.id.initialize({
-            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-            callback: handleCredential,
-            native_callback: handleCredential,
-            auto_select: true
-        });
-        ready = true;
-    };
-
-    $: {
-        // if ready and right state, render button
-        if (ready && state == 1) {
-            google.accounts.id.renderButton(
-                gbutton,
-                { theme: "outline",
-                  size: "large",
-                  width: 100 } 
-            );
+        try {
+            client = google.accounts.oauth2.initTokenClient({
+                client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+                callback: handleCredential,
+                scope: "https://www.googleapis.com/auth/calendar.readonly "
+            });
+            ready = true;
+        } catch (e) {
+            console.log(e);
+            // TODO WARN
+            // this is usually when the API is not ready yet
         }
-    }
-
+    };
 </script>
 
 
@@ -80,8 +77,12 @@
             <p>{strings.SCHEDULE_DESCRIPTION}</p>
             <div class="schedule-action-container">
                 <div id="schedule-action-buttons">
-                    <span bind:this={gbutton} id="gbutton"></span>
+                    {#if ready}
+                    <Button primary
+                            on:click={()=>client.requestAccessToken()}>
+                        {strings.SCHEDULE_READ_CAL}</Button>
                     or
+                    {/if}
                     <Button primary
                             on:click={()=>state=2}>
                         {strings.SCHEDULE_PICK_MANUALLY}</Button>
