@@ -63,7 +63,7 @@ def get_user(id):
 def update_user(id, obj):
     user = models.User.objects.filter(id=id).first()
     user.name = obj.name
-    user.email = obj.email
+    user.email = obj.emails
     user.save()
 
     # Update commitments
@@ -82,8 +82,8 @@ def update_user(id, obj):
     # Update meeting subscriptions
     subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     current_subscriptions = set(map(lambda com: com.id, subscription_models))
-    to_attach = set(obj.subscriptions) - current_subscriptions
-    to_delete = current_subscriptions - set(obj.subscriptions)
+    to_attach = set(obj.meeting_subscriptions) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.meeting_subscriptions)
     for subscription_id in to_attach:
         subscription = subscription_models[subscription_id]
         subscription.user_id = id
