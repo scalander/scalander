@@ -37,6 +37,14 @@
         state=2
     }
 
+    // submit result
+    function submitResult() {
+        // TODO pass it to hte server
+        console.log(`amazing physics going on with ${change}`);
+        // move on
+        state=3
+    }
+
     // Initialize Google Credential Services
     onMount(()=>{
         google.accounts.id.initialize({
@@ -65,12 +73,12 @@
 
 <div id="page-container">
     <div id="schedule-container"
-         class="schedule-container-{state==1?'small':'large'}">
+         class="schedule-container-{state!=2?'small':'large'}">
         <!-- State 1 is a "what do you want to do" screen -->
         {#if state==1}
             <h1>{strings.SCHEDULE_FIND_TIME}</h1>
             <p>{strings.SCHEDULE_DESCRIPTION}</p>
-            <div id="schedule-action-container">
+            <div class="schedule-action-container">
                 <div id="schedule-action-buttons">
                     <span bind:this={gbutton} id="gbutton"></span>
                     or
@@ -79,7 +87,7 @@
                         {strings.SCHEDULE_PICK_MANUALLY}</Button>
                 </div>
             </div>
-        {:else}
+        {:else if state == 2}
             <div>
                 <div>
                     <span class="action"
@@ -87,9 +95,17 @@
                         <i class="fa-solid fa-chevron-left action" />
                         {strings.GLOBAL_BACK}
                     </span>
-                    <span class="action right"><i class="fa-solid fa-check action"></i> {strings.GLOBAL_DONE}</span>
+                    <span class="action right"
+                          on:click={submitResult}><i class="fa-solid fa-check action"></i> {strings.GLOBAL_DONE}</span>
                 </div>
                 <DateTimeRangePicker on:change="{(e)=> change=e.detail.selected}"/>
+            </div>
+        {:else}
+            <div class="schedule-center-container">
+                <div>
+                    <h1>🎉 {strings.SCHEDULE_CONGRATS}</h1>
+                    <p style="font-weight: 500; padding-top: 10px">{strings.SCHEDULE_CONGRATS_MSG}</p>
+                </div>
             </div>
         {/if}
     </div>
@@ -119,8 +135,16 @@
         height: min(80vh, 450px);
     }
 
-    #schedule-action-container {
+    .schedule-action-container {
         height: calc(min(80vh, 250px) - 150px);
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+
+    .schedule-center-container {
+        width: 100%;
+        height: 100%;
         justify-content: center;
         align-items: center;
         display: flex;

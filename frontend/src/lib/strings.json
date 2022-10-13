@@ -4,6 +4,8 @@
     "DATETIMERANGEPICKER_ADD_TIME": "Add a Time",
     "SCHEDULE_FIND_TIME": "Let's find time.",
     "SCHEDULE_DESCRIPTION": "Someone has invited you to pick a time for a meeting. Let's find time for the meeting together!",
+    "SCHEDULE_CONGRATS": "Excellent! Thank you.",
+    "SCHEDULE_CONGRATS_MSG": "Thank you very much for submitting your availability. We will reach out soon by email with the details of the scheduled event. See you soon!",
     "SCHEDULE_PICK_MANUALLY": "Pick Times Manually",
     "GLOBAL_BACK": "Back",
     "GLOBAL_DONE": "Done"
