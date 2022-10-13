@@ -4,51 +4,78 @@
 # run get_freebusy() and pass in the following:
 # query_min is a datetime date object in format %Y-%m%d or a datetime.date object (needs to have year, month, and day) - this is the first day to query for freebusy information (default is today)
 # query_max is a datetime date object in format %Y-%m%d or a datetime.date object (needs to have year, month, and day) - this is the last day to query for freebusy information (default is 7 days from today)
-# NOTE: calendar MUST BE PUBLIC in order to get freebusy this way - will create a workaround eventually (using calendar secret id)
+# auth_code is a string gotten from the google api when the user consents - required (will spit out an assertion error)
+# 
+# example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.a0Aa4xrXOxt9h5nJCON0Fb3w0ACK3-t0FWfXzwFwF3RzASc-PXn2GN4UkJcuZOzcvJfvrqzOwcOKJzwxJ55mjlHAvYdQZLc6LXJpsCs-KmJXuljw8-XwcCZ3YRM-Jz6jQmBqXs80Wudghg7VHXSzqJhSS5b7KkaCgYKATASARASFQEjDvL9FFkGmCmFA7dRV_bEjGUrcg0163")
 #############
-import os
-# from time import strftime
-from dotenv import load_dotenv
 import datetime
 from datetime import timedelta, date
 from googleapiclient.discovery import build
+from google.oauth2.credentials import Credentials
+
     
+# flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+#     'client_secret.json',
+#     scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
+# flow.redirect_uri = "https://localhost:8080/"
+# auth_uri = flow.authorization_url()
+# print("URI",auth_uri)
+# auth_request = redirect(flow.redirect_uri)
+# auth_response = auth_request.build_absolute_uri()
+# flow.fetch_token(authorization_response = auth_response)
+
 tzoffset = "-07:00" #timezone offset - assumimg its PDT for now
 today = date.today()
 cal_ids = [{"id": "s603jfdbhtfn4fd50bkm7vqg3c@group.calendar.google.com"}, {"id": "30jid79sjfm4ofnih7n030mm0k@group.calendar.google.com"}] #for storing the user's calendar ids - hardcoded to test will be user input
-formatted_ids = [] #for storing the calendar IDs in the format that query() takes
 query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-time to check for freebusy - default is midnight 1 week from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
 query_max = (today + datetime.timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
-commitments = []
 
-#sending/handling the query data
-# def format_all(cals = calendar): #takes in a list of the user's calendars - default is all
-#     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
-#     for cal in cals: #appends all calendar IDs to cal_id
-#         cal_ids.append(cal["id"])
+# handling the calendar.list return data
+def format_all(cals): #takes in a list of the user's calendars from send_request()
+    #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
+    formatted_ids = [] #for storing the calendar IDs in the format that query() takes
+    for cal in cals["items"]: #appends all calendar IDs to cal_id
+        cal_ids.append(cal["id"])
 
-#     for id in cal_ids: #adds calendar IDs to formatted_ids in the format needed in query body
-#         formatted_ids.append({
-#             "id": id
-#         })
-#     return(formatted_ids)
+    for id in cal_ids: #adds calendar IDs to formatted_ids in the format needed in query body
+        formatted_ids.append({
+            "id": id
+        })
+    return(formatted_ids)
 
 
-def make_query(formatted_ids = cal_ids, query_max = query_max, query_min = query_min):
+def make_query(query_min, query_max):
     # print(type(formatted_ids), type(query_min), type(query_max)) #TODO: remove
+    print (query_min, len(query_min))
     if type(query_min) == datetime.date:
         q_min = query_min.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
-    else:
+    elif len(query_min) == 25:
         q_min = query_min
+    elif len(query_min) == 19:
+        q_min = query_min + tzoffset
+    elif len(query_min) == 10:
+        q_min = query_min + "T00:00:00" +tzoffset
+    else:
+        raise Exception ("invalid query_min format")
+
     if type(query_max) == datetime.date:
         q_max = query_max.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
-    else:
+    elif len(query_max) == 25:
         q_max = query_max
+    elif len(query_max) == 19:
+        q_max = query_max
+    elif len(query_max) == 10:
+        q_max = query_max + "T00:00:00" +tzoffset
+    else:
+        raise Exception ("invalid query_max format")
+
+    assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00-07:00") < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00-07:00"), "query interval ends before it starts"
+
     query_body = {
         # "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
         # "groupExpansionMax": 50, # Maximal number of calendar identifiers to be provided for a single group. Optional. An error is returned for a group with more members than this value. Maximum value is 100.
         "timeMax": q_max, # The end of the interval for the query formatted as per RFC3339. default is 1 week from today
-        "items": formatted_ids, #IDs of the user's calendars - use format_all() to get these
+        "items": "", #IDs of the user's calendars - will be added in send_request
         "timeMin": q_min, # The start of the interval for the query formatted as per RFC3339. default is today
         # "timeZone": "UTC", # Time zone used in the response. Optional. The default is UTC.
     #structure for query body from: https://google-api-client-libraries.appspot.com/documentation/calendar/v3/python/latest/calendar_v3.freebusy.html
@@ -76,9 +103,10 @@ def send_commitments(freebusy):
             naive_start = utc_start.replace(tzinfo=None) 
             naive_end = utc_end.replace(tzinfo=None) #makes start and end into naive objects...
             start = naive_start + datetime.timedelta(hours=-7)
-            end = naive_end + datetime.timedelta(hours=-7) #...and manually shifts them to PST (ignores daylight savings)
+            end = naive_end + datetime.timedelta(hours=-7) #...and manually shifts them to PDT (ignores daylight savings)
             #TODO: make timezones work
             # print ("TYPES", type(start), type(end))
+            commitments = []
             commitments.append({
                 "start": start,
                 "end": end,
@@ -87,29 +115,36 @@ def send_commitments(freebusy):
     return(commitments)
 
 
-def send_request(body): #google api things
-    load_dotenv()
-    service = build("calendar", "v3", developerKey=os.getenv("GOOGLE_API_KEY"))
-    freebusy_collection = service.freebusy()
+def send_request(body, code): #google api things
+    service = build("calendar", "v3", credentials=Credentials(code))
     calendar_collection = service.calendarList()
-    calendar = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
-    request_body = body
-    request = freebusy_collection.query(body = request_body)
+    calendar_request = calendar_collection.list() #gets the list of calendars that the user is subscribed to as a dictionary
+    calendar_response = calendar_request.execute()
+    calendar_list = format_all(calendar_response)
+    assert calendar_list, "missing calendar.list() response"
+    body["items"] = calendar_list
+    freebusy_request_body = body
+    freebusy_collection = service.freebusy()
+    freebusy_request = freebusy_collection.query(body = freebusy_request_body)
     # print("BODY: ",request_body, "REQUEST: ", request)
-    response = request.execute()
+    response = freebusy_request.execute()
     # print("RESPONSE", response)
     service.close()
     return(response)
 
 #final product - RUN THIS
-def get_freebusy(query_min = query_min, query_max = query_max): 
+def get_freebusy(query_min = query_min, query_max = query_max, auth_code = ""): 
     #does all the things - 
     #takes datetime.date object or string "Y-m-d" for query min and max - takes from midnight to midnight on both dates (defualt is today and 1 week from today)
+    #requires auth code from google api
+    #example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.a0Aa4xrXOxt9h5nJCON0Fb3w0ACK3-t0FWfXzwFwF3RzASc-PXn2GN4UkJcuZOzcvJfvrqzOwcOKJzwxJ55mjlHAvYdQZLc6LXJpsCs-KmJXuljw8-XwcCZ3YRM-Jz6jQmBqXs80Wudghg7VHXSzqJhSS5b7KkaCgYKATASARASFQEjDvL9FFkGmCmFA7dRV_bEjGUrcg0163")
+    assert auth_code != "", "missing auth code"
     # ids = format_all(cals)
-    body = make_query(cal_ids, query_max, query_min)
-    query = send_request(body)
+    body = make_query(query_min, query_max)
+    query = send_request(body, auth_code)
     # print("QUERY", query)
     commitments = send_commitments(query)
     return (commitments)
 
-# print("RESULT: ", get_freebusy(query_min, query_max))
+#testing:
+# print("RESULT: ", get_freebusy("2022-10-09", "2022-10-10", "ya29.a0Aa4xrXOxt9h5nJCON0Fb3w0ACK3-t0FWfXzwFwF3RzASc-PXn2GN4UkJcuZOzcvJfvrqzOwcOKJzwxJ55mjlHAvYdQZLc6LXJpsCs-KmJXuljw8-XwcCZ3YRM-Jz6jQmBqXs80Wudghg7VHXSzqJhSS5b7KkaCgYKATASARASFQEjDvL9FFkGmCmFA7dRV_bEjGUrcg0163"))
