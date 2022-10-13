@@ -8,13 +8,13 @@
 <script>
   const CLIENT_ID_TODO="966652940331-g1ld879a9gn25rk39dhta87u0trjasp3.apps.googleusercontent.com";
   // the date picker
-  // import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
+  import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
 
   // page info
-  // import { page } from '$app/stores';
+  import { page } from '$app/stores';
 
   // current changes
-  // let change = []
+  let change = []
   import { onMount } from 'svelte';
 
   onMount(()=>{
@@ -76,15 +76,15 @@
   <!-- </div> -->
 
 
-<!-- <DateTimeRangePicker on:change="{(e)=> change=e.detail.selected}"/> -->
+<DateTimeRangePicker on:change="{(e)=> change=e.detail.selected}"/>
 
 <!-- {change} -->
 
 
 
 
-  <style>
-    .L5Fo6c-bF1uUb {
-        display: none;
-    }
-    </style>
+<style>
+  .L5Fo6c-bF1uUb {
+      display: none;
+  }
+</style>

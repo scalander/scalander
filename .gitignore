@@ -8,3 +8,8 @@ frontend/package
 **/.env.*
 !.env.example
 **/.log
+backend/scheduling/results.json
+backend/scheduling/testdata.json
+db.sqlite3
+**/__pycache__
+client_secret.json
