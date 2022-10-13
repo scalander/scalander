@@ -1,7 +1,5 @@
 <svelte:head>
-  <script src="https://accounts.google.com/gsi/client"
-          async
-          defer></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
 </svelte:head>
 
 
@@ -21,14 +19,14 @@
   let button;
 
   onMount(()=>{
-    console.log("test!!");
     google.accounts.id.initialize({
       client_id: '966652940331-g1ld879a9gn25rk39dhta87u0trjasp3.apps.googleusercontent.com',
       callback: ()=>{}
     });
     google.accounts.id.renderButton(
       button,
-      { size: "large" } 
+      { size: "large",
+        width: 100 } 
     );
 
   });
@@ -41,6 +39,8 @@
 
 <span bind:this={button} id="button"/>
 
+<div>test</div>
+
 <DateTimeRangePicker on:change="{(e)=> change=e.detail.selected}"/>
 
 
@@ -48,7 +48,8 @@
 
 
 <style>
-  #button>div {
+  #button * {
       display: inline;
+      width: 0%;
   }
 </style>
