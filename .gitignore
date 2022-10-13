@@ -7,6 +7,7 @@ frontend/package
 **/.env
 **/.env.*
 !.env.example
+!frontend/.env
 **/.log
 backend/scheduling/results.json
 backend/scheduling/testdata.json

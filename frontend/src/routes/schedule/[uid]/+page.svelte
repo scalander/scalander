@@ -4,7 +4,6 @@
 
 
 <script>
-  const CLIENT_ID_TODO="966652940331-g1ld879a9gn25rk39dhta87u0trjasp3.apps.googleusercontent.com";
   // the date picker
   import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
 
@@ -20,7 +19,7 @@
 
   onMount(()=>{
     google.accounts.id.initialize({
-      client_id: '966652940331-g1ld879a9gn25rk39dhta87u0trjasp3.apps.googleusercontent.com',
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: ()=>{}
     });
     google.accounts.id.renderButton(
