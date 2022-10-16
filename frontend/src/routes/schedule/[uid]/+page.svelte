@@ -28,7 +28,7 @@ import { exclude_internal_props } from 'svelte/internal';
     // state 3 is the completion screen
     let state = 1;
     // wheather google is ready
-    let ready = false;
+    let oauth_ready = false;
 
     // the freebusy info we are fetching
     let freebusy_loading = false;
@@ -50,11 +50,11 @@ import { exclude_internal_props } from 'svelte/internal';
         freebusy_loading = true;
 
         // load freebusy
-        let res = (await req).json();
-        console.log(res);
+        let res = await (await req).json();
 
         // move on
-        state=2
+        freebusy_loading = false;
+        state = 2;
     }
 
     // submit result
@@ -77,7 +77,7 @@ import { exclude_internal_props } from 'svelte/internal';
                 callback: handleCredential,
                 scope: "https://www.googleapis.com/auth/calendar.readonly "
             });
-            ready = true;
+            oauth_ready = true;
         } catch (e) {
             console.log("google is not ready yet, will retry.");
             // TODO WARN
@@ -96,15 +96,19 @@ import { exclude_internal_props } from 'svelte/internal';
             <p>{strings.SCHEDULE_DESCRIPTION}</p>
             <div class="schedule-action-container">
                 <div id="schedule-action-buttons">
-                    {#if ready}
-                    <Button primary
-                            on:click={()=>client.requestAccessToken()}>
-                        {strings.SCHEDULE_READ_CAL}</Button>
-                    or
+                    {#if freebusy_loading}
+                        Loading your Calendars...
+                    {:else}
+                        {#if oauth_ready}
+                        <Button primary
+                                on:click={()=>client.requestAccessToken()}>
+                            {strings.SCHEDULE_READ_CAL}</Button>
+                        or
+                        {/if}
+                        <Button primary
+                                on:click={()=>state=2}>
+                            {strings.SCHEDULE_PICK_MANUALLY}</Button>
                     {/if}
-                    <Button primary
-                            on:click={()=>state=2}>
-                        {strings.SCHEDULE_PICK_MANUALLY}</Button>
                 </div>
             </div>
         {:else if state == 2}
