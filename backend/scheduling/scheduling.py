@@ -12,7 +12,7 @@ def commitment_check(commitment, meeting):  # if meeting and commitment intersec
     return (commitment.start < meeting.start < commitment.end) or (commitment.start < meeting.end < commitment.end) or (meeting.start <= commitment.start and commitment.end <= meeting.end)
 
 def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
-    for c in user.commitments:
+    for c in api.get_user(user).commitments:
         if commitment_check(c, meeting):
             return False
     return True  # add isAbsolute functionality to commitments later
