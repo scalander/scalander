@@ -110,6 +110,8 @@ import { exclude_internal_props } from 'svelte/internal';
             </div>
         {/if}
     </div>
+{import.meta.env.VITE_BACKEND_ENDPOINT}
+{import.meta.env.MODE}
 </div>
 
 
