@@ -78,15 +78,18 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
     for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
         shouldContinue = False
         for j in chunks[i][3]:
-            if attendees[j].isCritical:
+            # TODO: optimize by caching
+            attendee = api.get_attendee(attendees[j])
+            if attendee.isCritical:
                 shouldContinue = True
                 break
         if shouldContinue:
             continue
         value = 0
         for j in chunks[i][2]:
-            if not attendees[j].isCritical:
-                value += attendees[j].weight
+            attendee = api.get_attendee(attendees[j])
+            if not attendee.isCritical:
+                value += attendee[j].weight
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
         # should maybe add a loop count limit to prevent crash abuse once I figure out errors
@@ -102,8 +105,8 @@ def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, tim
     return list(map(lambda r: {
         "start": r[0], 
         "end": r[1], 
-        "can": list(map(lambda x: attendees[x].user.id, r[2])), 
-        "cannot": list(map(lambda x: attendees[x].user.id, r[3]))
+        "can": list(map(lambda x: attendees[x], r[2])), 
+        "cannot": list(map(lambda x: attendees[x], r[3]))
     }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName)))
 
 
