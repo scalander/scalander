@@ -146,7 +146,7 @@ def update_meeting(id, obj):
     meeting.save()
 
     # Update time proposals
-    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposals.objects.filter(user_id=id).all()))
+    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting_id=id).all()))
     current_proposals = set(map(lambda com: com.id, proposal_models))
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
