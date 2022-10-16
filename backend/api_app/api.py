@@ -192,13 +192,13 @@ def create_proposal(obj):
     return model.id
 
 def get_proposal(id):
-    proposal = models.Meeting.objects.filter(id=id).first()
+    proposal = models.MeetingTimeProposal.objects.filter(id=id).first()
     committed_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=True).all()))
     unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=False).all()))
     return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
 
 def update_proposal(id, obj):
-    proposal = models.Meeting.objects.filter(id=id).first()
+    proposal = models.MeetingTimeProposal.objects.filter(id=id).first()
     proposal.start, proposal.end, proposal.optimality = obj.start, obj.end, obj.optimality
     proposal.save()
 
