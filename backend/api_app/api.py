@@ -58,12 +58,12 @@ def get_user(id):
     user = models.User.objects.filter(id=id).first()
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user_id=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
-    return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
+    return User(user.name, user.emails, commitment_ids, meeting_subscription_ids)
 
 def update_user(id, obj):
     user = models.User.objects.filter(id=id).first()
     user.name = obj.name
-    user.email = obj.email
+    user.emails = obj.emails
     user.save()
 
     # Update commitments
@@ -72,7 +72,7 @@ def update_user(id, obj):
     to_attach = set(obj.commitments) - current_commitments
     to_delete = current_commitments - set(obj.commitments)
     for commitment_id in to_attach:
-        commitment = commitment_models[commitment_id]
+        commitment = models.Commitment.objects.filter(id=commitment_id).first()
         commitment.user_id = id
         commitment.save()
     for commitment_id in to_delete:
@@ -247,11 +247,11 @@ def create_attendee(obj):
 
 def get_attendee(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    return MeetingAttendee(subscription.user, subscription.is_critical, subscription.weight)
+    return MeetingAttendee(subscription.user_id, subscription.is_critical, subscription.weight)
 
 def update_attendee(id, obj):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    subscription.user, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
+    subscription.user_id, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
     subscription.save()
 
 def delete_attendee(id):
@@ -263,11 +263,11 @@ def create_attendance(obj):
 
 def get_attendance(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    return UserAttendance(subscription.meeting, subscription.is_critical, subscription.weight)
+    return UserAttendance(subscription.meeting_id, subscription.is_critical, subscription.weight)
 
 def update_attendance(id, obj):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    subscription.meeting, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
+    subscription.meeting_id, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
     subscription.save()
 
 def delete_attendance(id):
