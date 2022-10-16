@@ -30,10 +30,28 @@ import { exclude_internal_props } from 'svelte/internal';
     // wheather google is ready
     let ready = false;
 
+    // the freebusy info we are fetching
+    let freebusy_loading = false;
+
+
     // handle credential input
-    function handleCredential(authResult) {
-        // TODO pass it to the server
-        console.log(`amazing physics going on with ${authResult.access_token}`);
+    async function handleCredential(authResult) {
+        console.log(import.meta.env.VITE_BACKEND_ENDPOINT);
+        // create the call URL (passing in our endpoint URL
+        let endpoint = new URL("api/freebusy",
+                               import.meta.env.VITE_BACKEND_ENDPOINT);
+        let req = fetch(endpoint.href, {
+            method: "GET",
+            headers: {"Authorization": `Bearer ${authResult.access_token}`}
+        });
+
+        // let the user know that we are loading
+        freebusy_loading = true;
+
+        // load freebusy
+        let res = (await req).json();
+        console.log(res);
+
         // move on
         state=2
     }
@@ -60,7 +78,7 @@ import { exclude_internal_props } from 'svelte/internal';
             });
             ready = true;
         } catch (e) {
-            console.log(e);
+            console.log("google is not ready yet, will retry.");
             // TODO WARN
             // this is usually when the API is not ready yet
         }
@@ -110,8 +128,6 @@ import { exclude_internal_props } from 'svelte/internal';
             </div>
         {/if}
     </div>
-{import.meta.env.VITE_BACKEND_ENDPOINT}
-{import.meta.env.MODE}
 </div>
 
 

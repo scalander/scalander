@@ -4,3 +4,4 @@ gunicorn==20.1.0
 python-dotenv==0.21.0
 google-api-python-client==2.64.0
 google_auth_oauthlib
+django-cors-headers
