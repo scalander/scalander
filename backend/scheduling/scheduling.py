@@ -8,7 +8,8 @@ class Block:
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
+def commitment_check(commitment_id, meeting):  # if meeting and commitment intersect, return True
+    commitment = api.get_commitment(commitment_id)
     return (commitment.start < meeting.start < commitment.end) or (commitment.start < meeting.end < commitment.end) or (meeting.start <= commitment.start and commitment.end <= meeting.end)
 
 def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
