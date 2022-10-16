@@ -251,7 +251,7 @@ def get_attendee(id):
 
 def update_attendee(id, obj):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    subscription.user, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
+    subscription.user_id, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
     subscription.save()
 
 def delete_attendee(id):
@@ -267,7 +267,7 @@ def get_attendance(id):
 
 def update_attendance(id, obj):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
-    subscription.meeting, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
+    subscription.meeting_id, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
     subscription.save()
 
 def delete_attendance(id):
