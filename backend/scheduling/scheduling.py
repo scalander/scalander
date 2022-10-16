@@ -19,8 +19,8 @@ def check_user_commits(meeting, user):  # check all the user's commitments with 
     return True  # add isAbsolute functionality to commitments later
 
 def check_user_subs(meeting, user):  # check all the user's meeting subscriptions with a meeting, return True if meeting time works
-    for c in user.meetingSubscriptions:
-        if commitment_check(c.meeting, meeting):
+    for c in api.get_user(user).meeting_subscriptions:
+        if commitment_check(api.get_attendance(c).meeting, meeting):
             return False
     return True  # maybe add lockInDate functionality later?
 
@@ -81,7 +81,7 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         for j in chunks[i][3]:
             # TODO: optimize by caching
             attendee = api.get_attendee(attendees[j])
-            if attendee.isCritical:
+            if attendee.is_critical:
                 shouldContinue = True
                 break
         if shouldContinue:
@@ -89,7 +89,7 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         value = 0
         for j in chunks[i][2]:
             attendee = api.get_attendee(attendees[j])
-            if not attendee.isCritical:
+            if not attendee.is_critical:
                 value += attendee[j].weight
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
