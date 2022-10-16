@@ -25,32 +25,46 @@
     //state 2 = confirmation screen (will probably come later)
     let state = 1
     let name
-    let start
+    let start //use DateTimeRangePicker for start end?
     let end
-    let users = []
+    let users //stores emails separated by commas
     let lockIn
-    let meeting
+    let meeting = {}
 
-    function submit(name, start, end, users, lockIn){ //name = string, start = datetime, end = datetime, users = [User], lockIn = datetime
-        pass
+    function submit(name, start, end, users, lockIn){ //name = string, start = string, end = string, users = [User], lockIn = string
+        let meetingInfo = (name,start,end,users,lockIn)
+        console.log(meetingInfo)
     }
 
 </script>
 
 
 <div id="page-container">
-    <div id="meeting-form">
+    {#if state==1}
         <!-- State 1 is the form -->
-        {#if state==1}
+        <div id="meeting-form">
             <h1>{strings.CREATE_A_MEETING}</h1>
             <form class = "meeting-form"> <!-- TODO: make a thing for input fields bc listing all of them here is hella messy -->
-                <label for = "field-label">{strings.MEETING_NAME}</label>
+                <h2>{strings.MEETING_NAME}</h2>
                 <input type = "text" bind:value={name} />
-                <label for = "field-label">{strings.MEETING_START}</label>
-                <input type = "text" bind:value={name} />
+
+                <h2>{strings.MEETING_START}</h2>
+                <input type = "text" bind:value={start} />
+
+                <h2>{strings.MEETING_END}</h2>
+                <input type = "text" bind:value={end} />
+
+                <h2>{strings.MEETING_USERS}</h2>
+                <input type = "text" bind:value={users} />
+                
+                <h2>{strings.MEETING_LOCK_IN}</h2>
+                <input type = "text" bind:value={lockIn} />
             </form>
-        {/if}
-    </div>
+            <Button primary
+                            on:click={()=>submit({name},{start},{end},{users},{lockIn})}>
+                        {strings.SUBMIT}</Button>
+        </div>
+    {/if}
 </div>
 
 
@@ -66,10 +80,8 @@
    
 
     #meeting-form {
-        display: grid;
+        display: flex;
         gap: 100px 200px;
-        grid-template-columns: 30% 70%;
-        grid-template-rows: auto auto auto auto auto;
     }
 
     /* .field-label {
@@ -87,5 +99,11 @@
         font-weight: 700;
         color: var(--accent);
         font-size: 30px;
+    }
+
+    h2 {
+        font-weight: normal;
+        color: var(--primary);
+        font-size: 20px;
     }
 </style>
