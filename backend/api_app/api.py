@@ -151,7 +151,7 @@ def update_meeting(id, obj):
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
-        proposal = proposal_models[proposal_id]
+        proposal = get_proposal(proposal_id)
         proposal.user_id = id
         proposal.save()
     for proposal_id in to_delete:
