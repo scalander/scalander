@@ -82,8 +82,8 @@ def update_user(id, obj):
     # Update meeting subscriptions
     subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     current_subscriptions = set(subscription_models.keys())
-    to_attach = set(obj.subscriptions) - current_subscriptions
-    to_delete = current_subscriptions - set(obj.subscriptions)
+    to_attach = set(obj.meeting_subscriptions) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.meeting_subscriptions)
     for subscription_id in to_attach:
         subscription = subscription_models[subscription_id]
         subscription.user_id = id
@@ -160,8 +160,8 @@ def update_meeting(id, obj):
     # Update user subscription
     subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     current_subscriptions = set(map(lambda com: com.id, subscription_models))
-    to_attach = set(obj.subscriptions) - current_subscriptions
-    to_delete = current_subscriptions - set(obj.subscriptions)
+    to_attach = set(obj.meeting_subscriptions) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.meeting_subscriptions)
     for subscription_id in to_attach:
         subscription = subscription_models[subscription_id]
         subscription.user_id = id
