@@ -66,53 +66,37 @@ function calendarPaddingHelper(month, year, mondayWeeks = false) {
   return [beginPaddingDates, middleDates, endPaddingDates];
 }
 
-// https://stackoverflow.com/questions/39469064/find-holes-gaps-in-array-of-date-ranges
-function getGapsStartRangesArray(start, end, ranges) {
-    let chunks = [],
-        i = 0, len = ranges.length, range;
+function getGapsStartRangesArray(start, end, ranges=[]) {
+    // we will use a greedy search algorithum to inch
+    // forward until we satisfy ranges until end date
+    // ASSUMPTION: ranges is assorted by start time
+    
+    // tally for found chunks
+    let chunks = [];
 
-    let _start = start;
+    // create the "current time"
+    // it start at the start, we will essentially
+    let epoch = start;
 
-    // If there are no ranges cached, create one big chunk for entire range.
-    if (!len) {
-        chunks.push({start: start, end: end});
-    } else {
+    // while we have not finished consuming the entire
+    // range, we keep popping from the front
+    while (ranges.length > 0) {
+        // current meeting (earliest)
+        let current_range = ranges.shift();
 
-        for (; i < len; i++) {
-            range = ranges[i];
-
-            // Cache is complete or start is higher then end, we can stop looping
-            if (range.start >= end || (range.start <= start && range.end >= end)) {
-                _start = end;
-                break;
-            }
-
-            // Range hasn't gotten to start date yet, so continue
-            if (range.end < start)
-                continue;
-
-            // This range is lower then the current _start time, so we can go ahead to its end time
-            if (range.start <= _start) {
-                _start = range.end;
-            }
-            // This range is higher then the current _start time, so we are missing a piece
-            else {
-                console.log('missing piece', new Date(_start), new Date(range.start));
-                chunks.push({
-                    start: _start,
-                    end: range.start
-                });
-                _start = range.end;
-            }
-        }
-
-        // Final piece (if required)
-        if (_start < end) {
+        // if the epoch (current time) is BEFORE
+        // the start, then we have a chunk that
+        // ends at the start
+        if (epoch < current_range.start) {
             chunks.push({
-                start: _start,
-                end: end
+                start: epoch,
+                end: current_range.start
             });
         }
+
+        // we then move epoch forward to the end of
+        // the range in question
+        epoch = current_range.end;
     }
 
     return chunks;
@@ -135,13 +119,16 @@ function freebusyHelper(freebusy, calChoices=[]) {
         // get the ranges for which the user is busy
         let busy_info = v.busy;
         // convert all the dates to unix time (ms)
-        busy_info = Object.fromEntries(Object.entries(freebusy).map(([k,v]) =>
+        busy_info = busy_info.map(i=>({start: new Date(i.start),
+                                       end: new Date(i.end)}));
+
+        Object.fromEntries(Object.entries(freebusy).map(([k,v]) =>
             [k, new Date(v).getTime()])); // cast each entry to Unix time
         // tally
-        global_busy = global_busy+busy_info;
+        global_busy = [...global_busy, ...busy_info];
     }
     // sort by start
-    global_busy.sort(x=>x.start);
+    global_busy.sort((x,y)=>(x.start>y.start));
     
     // create today and 60 days from now
     // TODO perhaps make this not hard-coded? but given the DB
@@ -157,8 +144,8 @@ function freebusyHelper(freebusy, calChoices=[]) {
                                        global_busy);
 
     // serialize gaps and return
-    return gaps.map(i=>[new Date(i.start()),
-                        new Date(i.end())]);
+    return gaps.map(i=>[new Date(i.start),
+                        new Date(i.end)]);
 }
 
 

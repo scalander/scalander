@@ -12,9 +12,12 @@
     import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
     import Button from '$lib/components/ui/Button.svelte';
 
+    // our calendar helper
+    import { freebusyHelper } from "$lib/components/calengine.js";
+
     // strings
     import strings from "$lib/strings.json";
-import { exclude_internal_props } from 'svelte/internal';
+import { exclude_internal_props, validate_component } from 'svelte/internal';
 
     // current changes
     let change = []
@@ -33,11 +36,11 @@ import { exclude_internal_props } from 'svelte/internal';
     // the freebusy info we are fetching
     let freebusy_loading = false;
 
+    // our datepicker component
+    let datepicker_component;
 
     // handle credential input
     async function handleCredential(authResult) {
-        console.log(import.meta.env.VITE_BACKEND_ENDPOINT);
-        console.log(authResult.access_token);
         // create the call URL (passing in our endpoint URL
         let endpoint = new URL("api/freebusy",
                                import.meta.env.VITE_BACKEND_ENDPOINT);
@@ -51,6 +54,10 @@ import { exclude_internal_props } from 'svelte/internal';
 
         // load freebusy
         let res = await (await req).json();
+
+        // calculate gaps and set to calendars
+        change = freebusyHelper(res);
+        datepicker_component.set(change);
 
         // move on
         freebusy_loading = false;
@@ -75,7 +82,7 @@ import { exclude_internal_props } from 'svelte/internal';
             client = google.accounts.oauth2.initTokenClient({
                 client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
                 callback: handleCredential,
-                scope: "https://www.googleapis.com/auth/calendar.readonly "
+                scope: "https://www.googleapis.com/auth/calendar.readonly"
             });
             oauth_ready = true;
         } catch (e) {
@@ -90,8 +97,9 @@ import { exclude_internal_props } from 'svelte/internal';
 <div id="page-container">
     <div id="schedule-container"
          class="schedule-container-{state!=2?'small':'large'}">
-        <!-- State 1 is a "what do you want to do" screen -->
-        {#if state==1}
+        <!-- we use DISPLAY instead of IF here because we want to -->
+        <!-- keep the calendar, etc., mounted -->
+        <div style:display="{state==1?'block':'none'}">
             <h1>{strings.SCHEDULE_FIND_TIME}</h1>
             <p>{strings.SCHEDULE_DESCRIPTION}</p>
             <div class="schedule-action-container">
@@ -111,27 +119,27 @@ import { exclude_internal_props } from 'svelte/internal';
                     {/if}
                 </div>
             </div>
-        {:else if state == 2}
+        </div>
+        <div style:display="{state==2?'block':'none'}">
             <div>
-                <div>
-                    <span class="action"
-                           on:click={()=>state=1}>
-                        <i class="fa-solid fa-chevron-left action" />
-                        {strings.GLOBAL_BACK}
-                    </span>
-                    <span class="action right"
-                          on:click={submitResult}><i class="fa-solid fa-check action"></i> {strings.GLOBAL_DONE}</span>
-                </div>
-                <DateTimeRangePicker on:change="{(e)=> change=e.detail.selected}"/>
+                <span class="action"
+                        on:click={()=>state=1}>
+                    <i class="fa-solid fa-chevron-left action" />
+                    {strings.GLOBAL_BACK}
+                </span>
+                <span class="action right"
+                        on:click={submitResult}><i class="fa-solid fa-check action"></i> {strings.GLOBAL_DONE}</span>
             </div>
-        {:else}
-            <div class="schedule-center-container">
-                <div>
-                    <h1>🎉 {strings.SCHEDULE_CONGRATS}</h1>
-                    <p style="font-weight: 500; padding-top: 10px">{strings.SCHEDULE_CONGRATS_MSG}</p>
-                </div>
+            <DateTimeRangePicker
+                bind:this={datepicker_component}
+                on:change="{(e)=> change=e.detail.selected}"/>
+        </div>
+        <div class="schedule-center-container" style:display="{state==3?'block':'none'}">
+            <div>
+                <h1>🎉 {strings.SCHEDULE_CONGRATS}</h1>
+                <p style="font-weight: 500; padding-top: 10px">{strings.SCHEDULE_CONGRATS_MSG}</p>
             </div>
-        {/if}
+        </div>
     </div>
 </div>
 

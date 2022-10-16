@@ -15,10 +15,58 @@
     // dispatcher
     const dispatch = createEventDispatcher();
 
-
     // currently selected times
     let selected = {
     };
+
+    // function to set selections
+    export function set(initial) {
+        // create a temp stash to prevent state updates
+        let tmpsel = {};
+
+        // we will serialize selected to be the
+        // initial list, responsivly
+        for (const [start,end] of initial) {
+            // get the date of initial availablitiy
+            let date = new Date(start.getFullYear(),
+                                start.getMonth(),
+                                start.getDate());
+
+            // TODO this REALLY shoulden't go here
+            // but we will put it here anyways
+            // if the END date is no longer the
+            // START date (we moved days), we ignore
+            // the date
+            let endDate = new Date(end.getFullYear(),
+                                   end.getMonth(),
+                                   end.getDate());
+
+            // note also that == compares date objects
+            // and so .getTime() actually compares the dates
+            if (date.getTime() != endDate.getTime()) {
+                // skip; this is cross-days
+                continue
+            }
+
+            // try to get the existing list
+            let curr = tmpsel[date];
+            // if doesn't exist, make it
+            if (curr == undefined) {
+                curr = [];
+            } 
+            // append to the list
+            curr.push([start,end]);
+            // set to the state
+            // removing duplicates
+            // TODO this is to fix a race condition
+            // where svelte's async hydrate will update
+            // state BEFORE props are updated
+            tmpsel[date] = curr;
+        }
+
+        // set to the actual list, trigger state update
+        selected = tmpsel;
+    }
     
     // currently selected date
     let currentDate = null;
@@ -31,7 +79,7 @@
         let results = [];
         
         for (let key in selected) {
-            results = results + selected[key];
+            results = [...results, ...(selected[key])];
         }
 
         dispatch('change', {selected:results});
