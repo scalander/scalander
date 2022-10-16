@@ -139,5 +139,8 @@ class Schedule(View):
 
 class FreeBusy(View):
     def get(self, request, id):
-        obj = get_freebusy()
+        auth_header = auth_code=request.headers["Authorization"]
+        if len(auth_header.split(" ")) < 2:
+            return HttpResponse(status=401)
+        obj = get_freebusy(auth_code=auth_header.split(" ")[1])
         return JsonResponse(obj)
