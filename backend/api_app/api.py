@@ -16,7 +16,7 @@ class Commitment:
 
 class Meeting:
     def __init__(self, name, start, end, proposals, subscribed_users, lock_in_date):
-        self.name, self.start, self.end, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, proposals, subscribed_users, lock_in_date
+        self.name, self.start, self.end, self.proposals, self.subscribed_users, self.lock_in_date, self.length = name, start, end, proposals, subscribed_users, lock_in_date, 30
     
     def json_object(self):
         return {"name": self.name, "start": self.start, "end": self.end, "proposals": self.proposals, "subscribedUsers": self.subscribed_users, "lockInDate": self.lock_in_date}
@@ -58,7 +58,7 @@ def get_user(id):
     user = models.User.objects.filter(id=id).first()
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user_id=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
-    return User(user.name, user.emails, commitment_ids, meeting_subscription_ids)
+    return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
 
 def update_user(id, obj):
     user = models.User.objects.filter(id=id).first()
@@ -146,12 +146,12 @@ def update_meeting(id, obj):
     meeting.save()
 
     # Update time proposals
-    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposals.objects.filter(user_id=id).all()))
+    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting_id=id).all()))
     current_proposals = set(map(lambda com: com.id, proposal_models))
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
-        proposal = proposal_models[proposal_id]
+        proposal = models.MeetingTimeProposal.objects.filter(id=proposal_id).first()
         proposal.user_id = id
         proposal.save()
     for proposal_id in to_delete:
@@ -159,9 +159,9 @@ def update_meeting(id, obj):
 
     # Update user subscription
     subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user_id=id).all()))
-    current_subscriptions = set(map(lambda com: com.id, subscription_models))
-    to_attach = set(obj.meeting_subscriptions) - current_subscriptions
-    to_delete = current_subscriptions - set(obj.meeting_subscriptions)
+    current_subscriptions = set(subscription_models.keys())
+    to_attach = set(obj.subscribed_users) - current_subscriptions
+    to_delete = current_subscriptions - set(obj.subscribed_users)
     for subscription_id in to_attach:
         subscription = subscription_models[subscription_id]
         subscription.user_id = id
@@ -185,26 +185,20 @@ def delete_meeting(id):
 def create_proposal(obj):
     # BUG: if a user is in both `committed` and `unavailable`, they are saved as `unavailable`, not `committed`
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
-    for committed in model.committed_users:
-        committed_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
-        committed_model.is_committed = True
-        committed_model.proposal_id = model.id
-        committed_model.save()
-    for unavailable in model.committed_users:
-        unavailable_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
-        committed_model.is_committed = False
-        unavailable_model.proposal_id = model.id
-        unavailable_model.save()
+    for committed in obj.committed_users:
+        committed_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=True)
+    for unavailable in obj.committed_users:
+        unavailable_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=False)
     return model.id
 
 def get_proposal(id):
-    proposal = models.Meeting.objects.filter(id=id).first()
+    proposal = models.MeetingTimeProposal.objects.filter(id=id).first()
     committed_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=True).all()))
     unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=False).all()))
     return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
 
 def update_proposal(id, obj):
-    proposal = models.Meeting.objects.filter(id=id).first()
+    proposal = models.MeetingTimeProposal.objects.filter(id=id).first()
     proposal.start, proposal.end, proposal.optimality = obj.start, obj.end, obj.optimality
     proposal.save()
 

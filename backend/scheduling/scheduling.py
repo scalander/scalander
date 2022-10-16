@@ -8,18 +8,19 @@ class Block:
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
+def commitment_check(commitment_id, meeting):  # if meeting and commitment intersect, return True
+    commitment = api.get_commitment(commitment_id)
     return (commitment.start < meeting.start < commitment.end) or (commitment.start < meeting.end < commitment.end) or (meeting.start <= commitment.start and commitment.end <= meeting.end)
 
 def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
-    for c in user.commitments:
+    for c in api.get_user(user).commitments:
         if commitment_check(c, meeting):
             return False
     return True  # add isAbsolute functionality to commitments later
 
 def check_user_subs(meeting, user):  # check all the user's meeting subscriptions with a meeting, return True if meeting time works
-    for c in user.meetingSubscriptions:
-        if commitment_check(c.meeting, meeting):
+    for c in api.get_user(user).meeting_subscriptions:
+        if commitment_check(api.get_attendance(c).meeting, meeting):
             return False
     return True  # maybe add lockInDate functionality later?
 
@@ -69,8 +70,8 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
-            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
-        chunks += chunk_times(times, list(map(lambda a: a.user, attendees)))
+            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
+        chunks += chunk_times(times, list(map(lambda a: api.get_attendee(a).user, attendees)))
     return chunks
 
 def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
@@ -80,7 +81,7 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         for j in chunks[i][3]:
             # TODO: optimize by caching
             attendee = api.get_attendee(attendees[j])
-            if attendee.isCritical:
+            if attendee.is_critical:
                 shouldContinue = True
                 break
         if shouldContinue:
@@ -88,7 +89,7 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         value = 0
         for j in chunks[i][2]:
             attendee = api.get_attendee(attendees[j])
-            if not attendee.isCritical:
+            if not attendee.is_critical:
                 value += attendee[j].weight
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
