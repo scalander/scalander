@@ -185,12 +185,12 @@ def delete_meeting(id):
 def create_proposal(obj):
     # BUG: if a user is in both `committed` and `unavailable`, they are saved as `unavailable`, not `committed`
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
-    for committed in model.committed_users:
+    for committed in obj.committed_users:
         committed_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
         committed_model.is_committed = True
         committed_model.proposal_id = model.id
         committed_model.save()
-    for unavailable in model.committed_users:
+    for unavailable in obj.committed_users:
         unavailable_model = models.MeetingProposalAttendance.objects.filter(id=committed).first()
         committed_model.is_committed = False
         unavailable_model.proposal_id = model.id
