@@ -129,7 +129,7 @@ def create_meeting(obj):
         proposal_model.meeting_id = model.id
         proposal_model.save()
     for subscription in obj.subscribed_users:
-        subscription_model = models.UserMeetingSubscription.objects.fitler(id=subscription).first()
+        subscription_model = models.UserMeetingSubscription.objects.filter(id=subscription).first()
         subscription_model.meeting_id = model.id
         subscription_model.save()
     return model.id
