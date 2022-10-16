@@ -35,7 +35,7 @@ class User(View):
             # TODO: more accurate optimality calculation
             new_proposals = list(map(lambda result: api.MeetingTimeProposal(result["start"], result["end"], result["can"], result["cannot"], sum(list(map(lambda s: api.get_attendee(s).weight, result["can"])))), results))
             meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
-            api.update_meeting(meeting, sub.meeting)
+            api.update_meeting(sub.meeting, meeting)
 
 class Commitment(View):
     def post(self, request):
