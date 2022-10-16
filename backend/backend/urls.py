@@ -33,5 +33,5 @@ urlpatterns = [
     path('api/attendee', csrf_exempt(views.Attendee.as_view(http_method_names=['post']))),
     path('api/attendance/<str:id>', csrf_exempt(views.Attendance.as_view())),
     path('api/attendance', csrf_exempt(views.Attendance.as_view(http_method_names=['post']))),
-    path('api/freebusy/<str:id>', csrf_exempt(views.FreeBusy.as_view(http_method_names=['get']))),
+    path('api/freebusy/', csrf_exempt(views.FreeBusy.as_view(http_method_names=['get']))),
 ]

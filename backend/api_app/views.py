@@ -143,7 +143,7 @@ class Attendance(View):
         return HttpResponse(status=204)
 
 class FreeBusy(View):
-    def get(self, request, id):
+    def get(self, request):
         auth_header = auth_code=request.headers["Authorization"]
         if len(auth_header.split(" ")) < 2:
             return HttpResponse(status=401)

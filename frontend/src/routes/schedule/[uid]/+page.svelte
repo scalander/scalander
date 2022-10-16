@@ -37,6 +37,7 @@ import { exclude_internal_props } from 'svelte/internal';
     // handle credential input
     async function handleCredential(authResult) {
         console.log(import.meta.env.VITE_BACKEND_ENDPOINT);
+        console.log(authResult.access_token);
         // create the call URL (passing in our endpoint URL
         let endpoint = new URL("api/freebusy",
                                import.meta.env.VITE_BACKEND_ENDPOINT);
@@ -175,10 +176,6 @@ import { exclude_internal_props } from 'svelte/internal';
         align-items: center;
         gap: 30px;
         color: var(--accent);
-    }
-
-    #done-button {
-        float: right;
     }
 
     .action {
