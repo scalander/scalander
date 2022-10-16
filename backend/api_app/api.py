@@ -72,7 +72,7 @@ def update_user(id, obj):
     to_attach = set(obj.commitments) - current_commitments
     to_delete = current_commitments - set(obj.commitments)
     for commitment_id in to_attach:
-        commitment = models.Commitment.objects.filter(id=commitment_id)
+        commitment = models.Commitment.objects.filter(id=commitment_id).first()
         commitment.user_id = id
         commitment.save()
     for commitment_id in to_delete:
