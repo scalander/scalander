@@ -68,7 +68,7 @@ def update_user(id, obj):
 
     # Update commitments
     commitment_models = dict(map(lambda com: (com.id, com), models.Commitment.objects.filter(user_id=id).all()))
-    current_commitments = set(map(lambda com: com.id, commitment_models))
+    current_commitments = set(commitment_models.keys())
     to_attach = set(obj.commitments) - current_commitments
     to_delete = current_commitments - set(obj.commitments)
     for commitment_id in to_attach:
