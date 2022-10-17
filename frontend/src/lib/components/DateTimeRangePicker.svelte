@@ -26,7 +26,7 @@
 
         // we will serialize selected to be the
         // initial list, responsivly
-        for (const [start,end] of initial) {
+        for (let [start,end] of initial) {
             // get the date of initial availablitiy
             let date = new Date(start.getFullYear(),
                                 start.getMonth(),
@@ -35,8 +35,8 @@
             // TODO this REALLY shoulden't go here
             // but we will put it here anyways
             // if the END date is no longer the
-            // START date (we moved days), we ignore
-            // the date
+            // START date (we moved days), move the
+            // end date
             let endDate = new Date(end.getFullYear(),
                                    end.getMonth(),
                                    end.getDate());
@@ -44,8 +44,12 @@
             // note also that == compares date objects
             // and so .getTime() actually compares the dates
             if (date.getTime() != endDate.getTime()) {
-                // skip; this is cross-days
-                continue
+                // set the end to be "end-of-day"
+                // which TODO we define at 11PM
+                end = new Date(start.getFullYear(),
+                               start.getMonth(),
+                               start.getDate()+1,
+                               23);
             }
 
             // try to get the existing list
