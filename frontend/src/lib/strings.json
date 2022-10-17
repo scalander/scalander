@@ -14,6 +14,7 @@
     "CREATE_A_MEETING": "Create A Meeting:",
     "MEETING_NAME": "Meeting Name:",
     "MEETING_START": "Meeting Start:",
+    "PICK_TIME": "Pick start/end times",
     "MEETING_END": "Meeting End:",
     "MEETING_USERS": "Invitees: (emails separated by commas)",
     "MEETING_LOCK_IN": "Lock In Date:",
