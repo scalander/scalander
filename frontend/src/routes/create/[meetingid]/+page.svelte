@@ -6,13 +6,16 @@
 <script>
     //chrono
     import * as chrono from 'chrono-node';
+    import { format } from 'date-fns'
+    //do format("yyyy-MM-dd HH:mm:ss")
+    //
 
     // page info and svelte tooling
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
 
     // our own UI components
-    import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
+    // import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
     import Button from '$lib/components/ui/Button.svelte';
 
     // strings
@@ -25,15 +28,39 @@
     //state 2 = confirmation screen (will probably come later)
     let state = 1
     let name
-    let start //use DateTimeRangePicker for start end?
+    let start
     let end
     let users //stores emails separated by commas
     let lockIn
-    let meeting = {}
+    // let times
+    // let meetingInfo
+    let meeting = {"name": "", "start": "", "end": "", "users": "", "lockIn": ""}
 
-    function submit(name, start, end, users, lockIn){ //name = string, start = string, end = string, users = [User], lockIn = string
-        let meetingInfo = (name,start,end,users,lockIn)
-        console.log(meetingInfo)
+    
+    // puts meeting info into one object
+    function meetingAppend(items){
+        // console.log(typeof item)
+        for (let i = 0; i < items.length; i++){
+            let key = Object.keys(items[i])
+            let item = items[i]
+            meeting[key] = item[key]
+        }
+        console.log (meeting)
+    }
+
+    //if not all fiels are filled it breaks silently...
+    function submit(name, start, end, users, lockIn){ //name = string, start = string, end = string, users = string (emails separated by commas), lockIn = string
+        // meetingInfo = [name,times,users,lockIn]
+        // console.log(typeof times)
+        let timeinputs = [start,end,lockIn]
+        let startEnd = times["times"].split(",", 2)
+        let formattedTimes = []
+        for (let i = 0; i<2; i++){
+            let current = startEnd[i]
+        }
+        console.log ("YEAR:" + formattedTimes[0])
+        let meetingStartEnd = [name, {"start": startEnd[0]}, {"end": startEnd[1]}, users, lockIn] //meetingInfo but start and end are separated
+        meetingAppend(meetingStartEnd)
     }
 
 </script>
