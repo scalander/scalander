@@ -1,8 +1,3 @@
-<!-- <svelte:head>
-    <script src="https://accounts.google.com/gsi/client" on:load={loadGoogle} />
-</svelte:head> -->
-
-<!-- base copied from ./schedule/[uid] -->
 <script>
     //chrono
     import * as chrono from 'chrono-node';
@@ -23,75 +18,48 @@
     import { exclude_internal_props } from 'svelte/internal';
     import { parseISO } from 'date-fns';
 
-    //state 0 (doen't exist yet) = begin meeting creation screen
-    //state 1 = form
-    //state 2 = confirmation screen (will probably come later)
-    let state = 1
-    let name
-    let start
-    let end
-    let users //stores emails separated by commas
-    let lockIn
-    // let times
-    // let meetingInfo
-    let meeting = {"name": "", "start": "", "end": "", "users": "", "lockIn": ""}
+    let name;
+    let start;
+    let end;
+    let users; //stores emails separated by commas
+    let lockIn;
+    let meeting = {"name": "", "start": "", "end": "", "users": "", "lockIn": ""};
 
     
     // puts meeting info into one object
     function meetingAppend(items){
         // console.log(typeof item)
         for (let i = 0; i < items.length; i++){
-            let key = Object.keys(items[i])
-            let item = items[i]
-            meeting[key] = item[key]
+            let key = Object.keys(items[i]);
+            let item = items[i];
+            meeting[key] = item[key];
         }
-        console.log (meeting)
     }
-
-    //if not all fiels are filled it breaks silently...
-    function submit(name, start, end, users, lockIn){ //name = string, start = string, end = string, users = string (emails separated by commas), lockIn = string
-        // meetingInfo = [name,times,users,lockIn]
-        // console.log(typeof times)
-        let timeinputs = [start,end,lockIn]
-        let startEnd = times["times"].split(",", 2)
-        let formattedTimes = []
-        for (let i = 0; i<2; i++){
-            let current = startEnd[i]
-        }
-        console.log ("YEAR:" + formattedTimes[0])
-        let meetingStartEnd = [name, {"start": startEnd[0]}, {"end": startEnd[1]}, users, lockIn] //meetingInfo but start and end are separated
-        meetingAppend(meetingStartEnd)
-    }
-
 </script>
 
 
 <div id="page-container">
-    {#if state==1}
-        <!-- State 1 is the form -->
-        <div id="meeting-form">
-            <h1>{strings.CREATE_A_MEETING}</h1>
-            <form class = "meeting-form"> <!-- TODO: make a thing for input fields bc listing all of them here is hella messy -->
-                <h2>{strings.MEETING_NAME}</h2>
-                <input type = "text" bind:value={name} />
+    <div id="create-form">
+        <h1>{strings.CREATE_A_MEETING}</h1>
+        <form class = "meeting-form"> <!-- TODO: make a thing for input fields bc listing all of them here is hella messy -->
+            <h2 class="meeting-subhead">{strings.MEETING_NAME}</h2>
+            <input type="text"
+                   placeholder="{strings.MEETING_NAME_PLACEHOLDER}"
+                   bind:value={name} />
 
-                <h2>{strings.MEETING_START}</h2>
-                <input type = "text" bind:value={start} />
+            <h2 class="meeting-subhead">{strings.MEETING_START}</h2>
+            <input type="text" bind:value={start} />
 
-                <h2>{strings.MEETING_END}</h2>
-                <input type = "text" bind:value={end} />
+            <h2 class="meeting-subhead">{strings.MEETING_END}</h2>
+            <input type="text" bind:value={end} />
 
-                <h2>{strings.MEETING_USERS}</h2>
-                <input type = "text" bind:value={users} />
-                
-                <h2>{strings.MEETING_LOCK_IN}</h2>
-                <input type = "text" bind:value={lockIn} />
-            </form>
-            <Button primary
-                            on:click={()=>submit({name},{start},{end},{users},{lockIn})}>
-                        {strings.SUBMIT}</Button>
+            <h2 class="meeting-subhead">{strings.MEETING_LOCK_IN}</h2>
+            <input type="text" bind:value={lockIn} />
+        </form>
+        <div id="submit">
+            <Button primary>{strings.MEETING_SUBMIT}</Button>
         </div>
-    {/if}
+    </div>
 </div>
 
 
@@ -104,33 +72,41 @@
         align-items: center;
     }
 
-   
-
-    #meeting-form {
-        display: flex;
-        gap: 100px 200px;
-    }
-
-    /* .field-label {
-        font-weight: normal;
-        color: var(--primary);
-        font-size: 20px;
-    }
-
-    #done-button {
-        float: right;
-    } */
-
-
     h1 {
         font-weight: 700;
         color: var(--accent);
         font-size: 30px;
     }
 
-    h2 {
-        font-weight: normal;
-        color: var(--primary);
-        font-size: 20px;
+    .meeting-subhead {
+        color: var(--secondary);
+        font-size: 13px;
+        font-weight: 600;
     }
+
+    input {
+        margin-bottom: 15px;
+        font-size: 15px;
+        padding: 5px;
+        margin: 5px 0;
+        max-width: 600px;
+        width: min(90vw, 600px);
+        border: 1px solid transparent;
+        border-radius: 5px;
+        transition: border-color 0.2s linear;
+    }
+
+    input:hover {
+        border: 1px solid var(--tertiary);
+    }
+
+    input:focus {
+        border: 1px solid var(--accent);
+        outline: 0;
+    }
+
+    #submit {
+        margin-top: 20px;
+    }
+
 </style>
