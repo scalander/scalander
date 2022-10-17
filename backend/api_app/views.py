@@ -5,6 +5,16 @@ import api_app.api as api
 from scheduling.scheduling import schedule, Block
 from google_api.get_freebusy import get_freebusy
 
+def schedule_meeting(user):
+    for m_id in user.meeting_subscriptions:
+        sub = api.get_attendance(m_id)
+        meeting = api.get_meeting(sub.meeting)
+        results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, meeting.subscribed_users, 5, 5, meeting.name)
+        # TODO: more accurate optimality calculation
+        new_proposals = list(map(lambda result: api.MeetingTimeProposal(result["start"], result["end"], result["can"], result["cannot"], sum(list(map(lambda s: api.get_attendee(s).weight, result["can"])))), results))
+        meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
+        api.update_meeting(sub.meeting, meeting)
+
 class User(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
@@ -20,22 +30,12 @@ class User(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.User(name=data["name"], emails=data["emails"], commitments=data["commitments"], meeting_subscriptions=data["meetingSubscriptions"])
         api.update_user(id, obj)
-        self.schedule_meeting(obj)
+        schedule_meeting(obj)
         return HttpResponse(status=204)
 
     def delete(self, request, id):
         api.delete_user(id)
         return HttpResponse(status=204)
-    
-    def schedule_meeting(self, user):
-        for m_id in user.meeting_subscriptions:
-            sub = api.get_attendance(m_id)
-            meeting = api.get_meeting(sub.meeting)
-            results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, meeting.subscribed_users, 5, 5, meeting.name)
-            # TODO: more accurate optimality calculation
-            new_proposals = list(map(lambda result: api.MeetingTimeProposal(result["start"], result["end"], result["can"], result["cannot"], sum(list(map(lambda s: api.get_attendee(s).weight, result["can"])))), results))
-            meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
-            api.update_meeting(sub.meeting, meeting)
 
 class Commitment(View):
     def post(self, request):
@@ -154,4 +154,6 @@ class ManyCommitments(View):
     def post(self, request, id):
         commitment_list = json.loads(request.body.decode("utf-8"))
         api.create_many_commitments(id, commitment_list)
+        obj = api.get_user(id)
+        schedule_meeting(obj)
         return HttpResponse(status=204)
