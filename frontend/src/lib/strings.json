@@ -9,5 +9,13 @@
     "SCHEDULE_PICK_MANUALLY": "Pick Times Manually",
     "SCHEDULE_READ_CAL": "Read Your Calendar",
     "GLOBAL_BACK": "Back",
-    "GLOBAL_DONE": "Done"
+    "GLOBAL_DONE": "Done",
+
+    "CREATE_A_MEETING": "Create A Meeting:",
+    "MEETING_NAME": "Meeting Name:",
+    "MEETING_START": "Meeting Start:",
+    "MEETING_END": "Meeting End:",
+    "MEETING_USERS": "Invitees: (emails separated by commas)",
+    "MEETING_LOCK_IN": "Lock In Date:",
+    "SUBMIT": "Create Meeting"
 }
