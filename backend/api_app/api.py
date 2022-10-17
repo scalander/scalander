@@ -273,4 +273,4 @@ def delete_subscription(id):
 
 def create_many_commitments(id, commitments):
     for c in commitments:
-        c = models.Commitment.objects.create(start=c["start"], end=c["end"], is_critical=False, user_id=id)
+        c = models.Commitment.objects.create(start=c["start"], end=c["end"], is_absolute=True, user_id=id)
