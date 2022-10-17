@@ -270,3 +270,7 @@ def delete_attendance(id):
 def delete_subscription(id):
     subscription = models.UserMeetingSubscription.objects.filter(id=id).first()
     subscription.delete()
+
+def create_many_commitments(id, commitments):
+    for c in commitments:
+        c = models.Commitment.objects.create(start=c["start"], end=c["end"], is_critical=False, user_id=id)

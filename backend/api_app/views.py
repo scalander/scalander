@@ -149,3 +149,9 @@ class FreeBusy(View):
             return HttpResponse(status=401)
         obj = get_freebusy(auth_code=auth_header.split(" ")[1])
         return JsonResponse(obj)
+
+class ManyCommitments(View):
+    def post(self, request, id):
+        commitment_list = json.loads(request.body.decode("utf-8"))
+        api.create_many_commitments(id, commitment_list)
+        return HttpResponse(status=204)
