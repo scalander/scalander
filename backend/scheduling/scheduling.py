@@ -118,8 +118,8 @@ def test_main():
         jsonData = json.load(read_file)
 
     # print basic information about the test
-    print(jsonData["seed"])
-    print(jsonData["basetime"])
+    # print(jsonData["seed"])
+    # print(jsonData["basetime"])
 
     # essentially read the json and turn it into classes and datetime objects accordingly
     results = reduce_chunks(
