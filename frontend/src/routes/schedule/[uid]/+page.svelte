@@ -66,8 +66,24 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
 
     // submit result
     function submitResult() {
-        // TODO pass it to hte server
-        console.log(`amazing physics going on with ${change}`);
+        // <!-- create the call URL (passing in our endpoint URL -->
+        let endpoint = new URL(`api/many-commitments/${$page.params.uid}`,
+                               import.meta.env.VITE_BACKEND_ENDPOINT);
+
+        // serialize commitments
+        let serialized_commitments = change.map(i => ({
+            start: i[0],
+            end: i[1],
+            isAbsolute: true // TODO for tenative
+        }))
+        
+        let req = fetch(endpoint.href, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(serialized_commitments)
+        });
         // move on
         state=3
     }
