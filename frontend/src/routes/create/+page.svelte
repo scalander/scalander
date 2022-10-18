@@ -26,7 +26,14 @@
     // user + priority
     let users=[["", 1]];
 
+    // to replace button
+    let bottomText=null;
+
     async function submitMeeting() {
+        // set bottom text
+        bottomText = strings.MEETING_LOADING;
+
+
         // TODO this function is too large
         // it....
         // 1. creates a meeting object
@@ -62,7 +69,6 @@
         let user_endpoint = new URL("api/user",
                                      import.meta.env.VITE_BACKEND_ENDPOINT);
         for (let [email,weight] of users) {
-            console.log(weight);
             // generate a meeting subscription ticket
             let sub_req = fetch(meeting_sub_endpoint.href, {
                 method: "POST",
@@ -115,6 +121,7 @@
         });
 
         await meeting_update_req;
+        bottomText = strings.MEETING_DONE;
 
 
     }
@@ -199,8 +206,12 @@
             {/each} 
         </form>
         <div id="submit">
-            <Button primary
-                    on:click={submitMeeting}>{strings.MEETING_SUBMIT}</Button>
+            {#if bottomText}
+                <span id="bottomtext">{bottomText}</span>
+            {:else}
+                <Button primary
+                        on:click={submitMeeting}>{strings.MEETING_SUBMIT}</Button>
+            {/if}
         </div>
     </div>
 </div>
@@ -295,6 +306,12 @@
 
     .icon:hover {
         opacity: 1;
+    }
+
+    #bottomtext {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 600;
     }
 
 </style>
