@@ -63,7 +63,7 @@ class Meeting(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         model_id = api.create_meeting(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_meeting(id)
@@ -84,7 +84,7 @@ class Proposal(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.MeetingTimeProposal(start=data["start"], end=data["end"], committed_users=data["committedUsers"], unavailable_users=data["unavailableUsers"], optimality=data["optimality"])
         model_id = api.create_proposal(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_proposal(id)
@@ -105,7 +105,7 @@ class Attendee(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.MeetingAttendee(user=data["user"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendee(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_attendee(id)
@@ -126,7 +126,7 @@ class Attendance(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.UserAttendance(meeting=data["meeting"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendance(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_attendance(id)
