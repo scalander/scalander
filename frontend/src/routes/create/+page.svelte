@@ -1,7 +1,7 @@
 <script>
     //chrono
     import * as chrono from 'chrono-node';
-    import { format } from 'date-fns'
+    import { format, subDays } from 'date-fns'
     //do format("yyyy-MM-dd HH:mm:ss")
     //
 
@@ -21,9 +21,103 @@
     let name;
     let start;
     let end;
+    let lockin;
     // this needs to be a ARRAY
     // user + priority
     let users=[["", 1]];
+
+    async function submitMeeting() {
+        // TODO this function is too large
+        // it....
+        // 1. creates a meeting object
+        // 2. create user subscription objects for each user
+        // 3. creates the user behind it
+        // create the call URL (passing in our endpoint URL
+        let meeting_endpoint = new URL("api/meeting",
+                               import.meta.env.VITE_BACKEND_ENDPOINT);
+        let meeting_req = fetch(meeting_endpoint.href, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name,
+                start: new Date(start),
+                end: new Date(end),
+                lockInDate: subDays(new Date(start), 1), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
+                proposals: [],
+                subscribedUsers: [],
+            })
+        });
+
+        // get the newly created meeting ID
+        let meeting_id = (await (await meeting_req).json()).id;
+
+        // create a tally of meeting subscription tickes
+        let sub_tickets = [];
+
+        // for each user, we work on their data
+        let meeting_sub_endpoint = new URL("api/attendance",
+                                            import.meta.env.VITE_BACKEND_ENDPOINT);
+        let user_endpoint = new URL("api/user",
+                                     import.meta.env.VITE_BACKEND_ENDPOINT);
+        for (let [email,weight] of users) {
+            console.log(weight);
+            // generate a meeting subscription ticket
+            let sub_req = fetch(meeting_sub_endpoint.href, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    weight: weight,
+                    meeting: meeting_id,
+                    isCritical: false // TODO, but trying to scehdule most for now
+                })
+            });
+            let sub_id = ((await (await sub_req).json()).id);
+            // TODO (make persistent users when auth is done) make
+            // a user and stamp the ticket to the user
+            let user_req = fetch(user_endpoint.href, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: "TODO",
+                    emails:email, // TODO, but trying to scehdule most for now
+                    //// AAAAAA email is plural
+                    commitments: [], // backend will send email for form
+                    meetingSubscriptions: [sub_id] // stamping with our ticket
+                })
+            });
+            // send request and wait for it to finish
+            await user_req;
+        }
+
+        let meeting_new_endpoint = new URL(`api/meeting/${meeting_id}`,
+                               import.meta.env.VITE_BACKEND_ENDPOINT);
+        let meeting_update_req = fetch(meeting_new_endpoint.href, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // TODO we need to supply all the meeting info again
+                // because PUT overwrites
+                name,
+                start: new Date(start),
+                end: new Date(end),
+                lockInDate: subDays(new Date(start), 1), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
+                proposals: sub_tickets,
+                subscribedUsers: [],
+            })
+        });
+
+        await meeting_update_req;
+
+
+    }
 
     </script>
 
@@ -35,7 +129,7 @@
             <h2 class="meeting-subhead">{strings.MEETING_NAME}</h2>
             <input type="text"
                    placeholder="{strings.MEETING_NAME_PLACEHOLDER}"
-                   bind:value={name} />
+                   bind:value={name} required />
 
             <h2 class="meeting-subhead">{strings.MEETING_START}</h2>
             <input type="text"
@@ -47,7 +141,7 @@
                        // format the date and set to string
                        // TODO internationalize the freedom units
                        start = format(parsed, "EEEE, MMMM dd yyyy");
-                   }}/>
+                   }} required/>
 
             <h2 class="meeting-subhead">{strings.MEETING_END}</h2>
             <input type="text"
@@ -59,8 +153,21 @@
                        // format the date and set to string
                        // TODO internationalize the freedom units
                        end = format(parsed, "EEEE, MMMM dd yyyy");
-                   }}/>
+                   }} required/>
+
+            <h2 class="meeting-subhead">{strings.MEETING_LOCKIN}</h2>
+            <input type="text"
+                   placeholder="{strings.MEETING_LOCKIN_PLACEHOLDER}"
+                   bind:value={lockin}
+                   on:change={()=>{
+                       // parse the date
+                       let parsed = chrono.parseDate(lockin, {forwardDate: true});
+                       // format the date and set to string
+                       // TODO internationalize the freedom units
+                       lockin = format(parsed, "EEEE, MMMM dd yyyy");
+                   }} required/>
             <hr />
+
             <h2 class="meeting-subhead"
                 style:margin="10px 0 0 0">{strings.MEETING_INVITEES}</h2>
             <span id="priority-explanation">{strings.MEETING_PRIORITY}</span>
@@ -69,30 +176,31 @@
                     <input type="email"
                            class="userleft"
                            placeholder="{strings.MEETING_EMAIL_PLACEHOLDER}"
-                           bind:value={user[0]}/>
+                           bind:value={user[0]} required/>
                     <input type="email"
                            class="userright"
                            placeholder="1"
-                           bind:value={user[1]}/>
+                           bind:value={user[1]} required/>
                     <div class="usericon">
                         {#if i!=0}
-                        <i class="fa-solid fa-trash icon"
-                           on:click="{()=>{users.splice(i, 1);
-                                           // reset to trigger render
-                                           users=users;}}"></i>
-                        {/if}
-                        {#if i==(users.length-1)}
-                            <i class="fa-solid fa-plus icon"
-                               on:click="{()=>{users.push(["", 1]);
-                                               // reset to trigger render
-                                               users=users;}}"></i>
-                        {/if}
-                    </div>
+                            <a on:click="{()=>{users.splice(i, 1);
+                                          // reset to trigger render
+                                          users=users;}}">
+                                <i class="fa-solid fa-trash icon"></i></a>
+                            {/if}
+                            {#if i==(users.length-1)}
+                                <a on:click="{()=>{users.push(["", 1]);
+                                                   // reset to trigger render
+                                                   users=users;}}">
+                                <i class="fa-solid fa-plus icon"></i></a>
+                            {/if}
+                            </div>
                 </div>
             {/each} 
         </form>
         <div id="submit">
-            <Button primary>{strings.MEETING_SUBMIT}</Button>
+            <Button primary
+                    on:click={submitMeeting}>{strings.MEETING_SUBMIT}</Button>
         </div>
     </div>
 </div>

@@ -10,7 +10,7 @@
     "SCHEDULE_READ_CAL": "Read Your Calendar",
     "GLOBAL_BACK": "Back",
     "GLOBAL_DONE": "Done",
-    "CREATE_A_MEETING": "Create A Meeting:",
+    "CREATE_A_MEETING": "Create a Meeting:",
     "MEETING_NAME": "Meeting Name:",
     "MEETING_START": "Earliest Possible Start Date:",
     "MEETING_END": "Latest Possible Start Date:",
@@ -18,6 +18,8 @@
     "MEETING_NAME_PLACEHOLDER": "James' Cookie Party",
     "MEETING_START_PLACEHOLDER": "next friday",
     "MEETING_END_PLACEHOLDER": "four weeks from now",
+    "MEETING_LOCKIN_PLACEHOLDER": "this friday",
+    "MEETING_LOCKIN": "Confirm Schedule By:",
     "MEETING_EMAIL_PLACEHOLDER": "james@scalander.com",
     "MEETING_INVITEES": "Invitees",
     "MEETING_PRIORITY": "Enter the participants' email. A higher priority score means we will preferentially respect their schedule."
