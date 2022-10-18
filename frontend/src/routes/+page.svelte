@@ -14,7 +14,7 @@
         <br />
         <a href="./create"><Button primary>{strings.HOMEPAGE_BUTTON}</Button></a>
         <a href="/privacy" class="link">Privacy</a>
-        <a href="https://www.gnu.org/licenses/lgpl-3.0.en.html" class="link">Terms</a>
+        <a href="/terms" class="link">Terms</a>
     </div>
 </div>
 
