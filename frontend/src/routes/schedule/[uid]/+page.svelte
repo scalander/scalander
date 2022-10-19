@@ -103,6 +103,7 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
             oauth_ready = true;
         } catch (e) {
             console.log("google is not ready yet, will retry.");
+            console.warn(e);
             // TODO WARN
             // this is usually when the API is not ready yet
         }
