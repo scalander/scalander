@@ -18,14 +18,14 @@ class Meeting(models.Model):
     lock_in_date = models.DateTimeField()
 
 class MeetingTimeProposal(models.Model):
-    meeting = models.ForeignKey(Meeting, null=True, on_delete=models.DO_NOTHING)
+    meeting = models.ForeignKey(Meeting, null=True, on_delete=models.CASCADE)
     start = models.DateTimeField()
     end = models.DateTimeField()
     optimality = models.IntegerField()
 
 class UserMeetingSubscription(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
-    meeting = models.ForeignKey(Meeting, null=True, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    meeting = models.ForeignKey(Meeting, null=True, on_delete=models.CASCADE)
     is_critical = models.BooleanField()
     weight = models.IntegerField()
 
