@@ -72,9 +72,9 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
     chunks, chunkmap = create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName), []  # attendees is a list of the MeetingAttendee model, user is a child
     for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
         shouldContinue = False
-        for j in chunks[i][3]:
+        for ii,j in enumerate(chunks[i][3]):
             # TODO: optimize by caching
-            attendee = api.get_attendee(attendees[j])
+            attendee = api.get_attendee(attendees[ii])
             if attendee.is_critical:
                 shouldContinue = True
                 break
@@ -105,12 +105,13 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
 def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
+    result = reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName)
     return list(map(lambda chunk: {
         "start": chunk[0], 
         "end": chunk[1], 
         "can": chunk[2], 
         "cannot": chunk[3]
-    }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName)))
+    }, result))
 
 
 ### TEST LOADING AND RUNNING
