@@ -21,6 +21,7 @@
     let name;
     let start;
     let end;
+    let length;
     let lockin;
     // this needs to be a ARRAY
     // user + priority
@@ -51,7 +52,8 @@
                 name,
                 start: new Date(start),
                 end: new Date(end),
-                lockInDate: subDays(new Date(start), 1), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
+                length,
+                lockInDate: new Date(lockin), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
                 proposals: [],
                 subscribedUsers: [],
             })
@@ -94,7 +96,7 @@
                     emails:email, // TODO, but trying to scehdule most for now
                     //// AAAAAA email is plural
                     commitments: [], // backend will send email for form
-                    subscribedUsers: [sub_id] // stamping with our ticket
+                    meetingSubscriptions: [sub_id] // stamping with our ticket
                 })
             });
             // send request and wait for it to finish
@@ -115,7 +117,8 @@
                 name,
                 start: new Date(start),
                 end: new Date(end),
-                lockInDate: subDays(new Date(start), 1), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
+                length,
+                lockInDate: new Date(lockin), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
                 proposals: [],
                 subscribedUsers: sub_tickets,
             })
@@ -174,8 +177,14 @@
                        // TODO internationalize the freedom units
                        lockin = format(parsed, "EEEE, MMMM dd yyyy");
                    }} required/>
-            <hr />
 
+            <h2 class="meeting-subhead">{strings.MEETING_LENGTH}</h2>
+            <input type="number"
+                   placeholder="15"
+                   bind:value={length} required/>
+            <br />
+            <br />
+            <hr />
             <h2 class="meeting-subhead"
                 style:margin="10px 0 0 0">{strings.MEETING_INVITEES}</h2>
             <span id="priority-explanation">{strings.MEETING_PRIORITY}</span>

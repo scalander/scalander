@@ -16,7 +16,7 @@ class Commitment:
 
 class Meeting:
     def __init__(self, name, start, end, length, proposals, subscribed_users, lock_in_date):
-        self.name, self.start, self.end, self.length, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, proposals, subscribed_users, lock_in_date
+        self.name, self.start, self.end, self.length, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, length, proposals, subscribed_users, lock_in_date
     
     def json_object(self):
         return {"name": self.name, "start": self.start, "end": self.end, "length": self.length, "proposals": self.proposals, "subscribedUsers": self.subscribed_users, "lockInDate": self.lock_in_date}
