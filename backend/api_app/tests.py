@@ -7,7 +7,7 @@ class UserTestCase(TestCase):
     def test_user_create(self):
         c = api.Commitment(datetime.datetime.now(), datetime.datetime.now(), False)
         commitment_ids = [api.create_commitment(c), api.create_commitment(c), api.create_commitment(c)]
-        m = api.Meeting("Some Meeting", datetime.datetime.now(), datetime.datetime.now(), [], [], datetime.datetime.now())
+        m = api.Meeting("Some Meeting", datetime.datetime.now(), datetime.datetime.now(), 30, [], [], datetime.datetime.now())
         m_id = api.create_meeting(m)
         sub = api.UserAttendance(m_id, True, 0)
         sub_ids = [api.create_attendance(sub)]

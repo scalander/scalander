@@ -61,7 +61,7 @@ class Commitment(View):
 class Meeting(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         model_id = api.create_meeting(obj)
         return JsonResponse({"status": "success", "id": model_id})
 
@@ -71,7 +71,7 @@ class Meeting(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         api.update_meeting(id, obj)
         return HttpResponse(status=204)
 

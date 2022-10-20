@@ -64,7 +64,7 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
             # TODO refactor. this is API abuse but we are creating "meeting" objects
-            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
+            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), 30, [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
         chunks += chunk_times(times, list(map(lambda a: api.get_attendee(a).user, attendees)))
     return chunks
 
@@ -145,6 +145,7 @@ def test_main():
                             b["meeting"]["name"], 
                             datetime.datetime.fromisoformat(b["meeting"]["start"]), 
                             datetime.datetime.fromisoformat(b["meeting"]["end"]),
+                            30,
                             b["meeting"]["subscribedUsers"],
                             datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
                         ),
