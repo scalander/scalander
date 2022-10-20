@@ -8,29 +8,20 @@ class Block:
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment_id, meeting):  # if meeting and commitment intersect, return True
+def commitment_check(commitment_id, time):  # if time and commitment intersect, return True
     commitment = api.get_commitment(commitment_id)
-    return (commitment.start < meeting.start < commitment.end) or (commitment.start < meeting.end < commitment.end) or (meeting.start <= commitment.start and commitment.end <= meeting.end)
+    return (commitment.start <= time.start) and (commitment.end >= time.end)
 
-def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
+def check_user_commits(time, user):  # check all the user's commitments with a meeting, return True if meeting time works
     for c in api.get_user(user).commitments:
-        if commitment_check(c, meeting):
-            return False
-    return True  # add isAbsolute functionality to commitments later
+        if commitment_check(c, time):
+            return True
+    return False  # add isAbsolute functionality to commitments later
 
-def check_user_subs(meeting, user):  # check all the user's meeting subscriptions with a meeting, return True if meeting time works
-    for c in api.get_user(user).meeting_subscriptions:
-        if commitment_check(api.get_attendance(c).meeting, meeting):
-            return False
-    return True  # maybe add lockInDate functionality later?
-
-def check_both(meeting, user):  # check both subs and commits, return True if it still works
-    return check_user_commits(meeting, user) and check_user_subs(meeting, user)
-
-def check_multiple_users(meeting, users):
+def check_multiple_users(time, users):
     can, cannot = [], []
-    for u in range(len(users)):
-        if check_both(meeting, users[u]):
+    for u in users:
+        if check_user_commits(time, u):
             can.append(u)
         else:
             cannot.append(u)
@@ -40,6 +31,8 @@ def check_all_times(times, users):  # times is a list of the meeting object (not
     return list(map(lambda t: check_multiple_users(t, users), times))
 
 def chunk_times(times, users):
+    # TODO note that while times are Meeting() objects, they are hijacked
+    # to have .start and .end to be the start and end PROPOSAL times
     arr = check_all_times(times, users)  # len(times) and len(arr) are equal
     chunks = []
     for i in range(len(arr)):
@@ -70,6 +63,7 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
+            # TODO refactor. this is API abuse but we are creating "meeting" objects
             times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
         chunks += chunk_times(times, list(map(lambda a: api.get_attendee(a).user, attendees)))
     return chunks
@@ -87,10 +81,18 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
         if shouldContinue:
             continue
         value = 0
-        for j in chunks[i][2]:
-            attendee = api.get_attendee(attendees[j])
+        for ii,j in enumerate(chunks[i][2]):
+            # JANK: essentially somewhere we didn't clarify
+            # that "ATTENDEE" is a meeting request ticket.
+            #
+            # therefore, we need to reconsiliate the fact
+            # that CHUNKS is returning Users but we need
+            # UserMeetingSubscription IDs. However, their ORDER
+            # should match. THerefore, we are just getting the
+            # nth order by user.
+            attendee = api.get_attendee(attendees[ii])
             if not attendee.is_critical:
-                value += attendee[j].weight
+                value += attendee.weight
         chunkmap.append([i, value])
     while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
         # should maybe add a loop count limit to prevent crash abuse once I figure out errors
@@ -103,11 +105,11 @@ def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks
     return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
 def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
-    return list(map(lambda r: {
-        "start": r[0], 
-        "end": r[1], 
-        "can": list(map(lambda x: attendees[x], r[2])), 
-        "cannot": list(map(lambda x: attendees[x], r[3]))
+    return list(map(lambda chunk: {
+        "start": chunk[0], 
+        "end": chunk[1], 
+        "can": chunk[2], 
+        "cannot": chunk[3]
     }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName)))
 
 

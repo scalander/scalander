@@ -45,23 +45,23 @@ class UserAttendance:
 def create_user(obj):
     model = models.User.objects.create(name=obj.name, email=obj.emails)
     for commitment in obj.commitments:
-        commitment_model = models.Commitment.objects.get(pk=commitment)
+        commitment_model = models.Commitment.objects.get(id=commitment)
         commitment_model.user_id = model.id
         commitment_model.save()
     for subscription in obj.meeting_subscriptions:
-        subscription_model = models.UserMeetingSubscription.objects.get(pk=subscription)
+        subscription_model = models.UserMeetingSubscription.objects.get(id=subscription)
         subscription_model.user_id = model.id
         subscription_model.save()
     return model.id
 
 def get_user(id):
-    user = models.User.objects.get(pk=id)
+    user = models.User.objects.get(id=id)
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user_id=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
 
 def update_user(id, obj):
-    user = models.User.objects.get(pk=id)
+    user = models.User.objects.get(id=id)
     user.name = obj.name
     user.emails = obj.emails
     user.save()
@@ -110,67 +110,71 @@ def create_commitment(obj):
     return model.id
 
 def get_commitment(id):
-    commitment = models.Commitment.objects.get(pk=id)
+    commitment = models.Commitment.objects.get(id=id)
     return Commitment(commitment.start, commitment.end, commitment.is_absolute)
 
 def update_commitment(id, obj):
-    commitment = models.Commitment.objects.get(pk=id)
+    commitment = models.Commitment.objects.get(id=id)
     commitment.start, commitment.end, commitment.is_absolute = obj.start, obj.end, obj.is_absolute
     commitment.save()
 
 def delete_commitment(id):
-    commitment = models.Commitment.objects.get(pk=id)
+    commitment = models.Commitment.objects.get(id=id)
     commitment.delete()
 
 def create_meeting(obj):
     model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
     for proposal in obj.proposals:
-        proposal_model = models.MeetingTimeProposal.objects.get(pk=proposal)
+        proposal_model = models.MeetingTimeProposal.objects.get(id=proposal)
         proposal_model.meeting_id = model.id
         proposal_model.save()
     for subscription in obj.subscribed_users:
-        subscription_model = models.UserMeetingSubscription.objects.get(pk=subscription)
+        subscription_model = models.UserMeetingSubscription.objects.get(id=subscription)
         subscription_model.meeting_id = model.id
         subscription_model.save()
     return model.id
 
 def get_meeting(id):
-    meeting = models.Meeting.objects.get(pk=id)
-    proposal_ids = list(map(lambda prop: prop.id, models.MeetingTimeProposal.objects.filter(id=id).all()))
+    meeting = models.Meeting.objects.get(id=id)
     subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(meeting_id=id).all()))
+
+    # sort proposal by optimality (higher better, so reverse order)
+    proposals = models.MeetingTimeProposal.objects.filter(meeting=meeting).order_by("-optimality")
+    proposal_ids = list(map(lambda prop: prop.id, proposals))
+    
     return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
 
 def update_meeting(id, obj):
-    meeting = models.Meeting.objects.get(pk=id)
+    meeting = models.Meeting.objects.get(id=id)
     meeting.name, meeting.start, meeting.end, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.lock_in_date
     meeting.save()
 
     # Update time proposals
-    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting_id=id).all()))
+    proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting=id).all()))
     current_proposals = set(map(lambda com: com.id, proposal_models))
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
         proposal = models.MeetingTimeProposal.objects.filter(id=proposal_id).first()
-        proposal.user_id = id
+        proposal.meeting = id
         proposal.save()
     for proposal_id in to_delete:
         delete_proposal(proposal_id)
 
     # Update user subscription
-    subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(user_id=id).all()))
+    subscription_models = dict(map(lambda com: (com.id, com), models.UserMeetingSubscription.objects.filter(meeting=id).all()))
     current_subscriptions = set(subscription_models.keys())
     to_attach = set(obj.subscribed_users) - current_subscriptions
     to_delete = current_subscriptions - set(obj.subscribed_users)
     for subscription_id in to_attach:
-        subscription = subscription_models[subscription_id]
-        subscription.user_id = id
+        subscription = models.UserMeetingSubscription.objects.get(id=subscription_id)
+        subscription.meeting = id
         subscription.save()
     for subscription_id in to_delete:
         delete_subscription(subscription_id)
 
 def delete_meeting(id):
-    meeting = models.Meeting.objects.get(pk=id)
+    meeting = models.Meeting.objects.get(id=id)
     proposal_models = models.MeetingTimeProposal.objects.filter(meeting=id).all()
     for proposal in proposal_models:
         attendance_models = models.MeetingProposalAttendance.objects.filter(proposal_id=proposal.id).all()
@@ -192,13 +196,13 @@ def create_proposal(obj):
     return model.id
 
 def get_proposal(id):
-    proposal = models.MeetingTimeProposal.objects.get(pk=id)
+    proposal = models.MeetingTimeProposal.objects.get(id=id)
     committed_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=True).all()))
     unavailable_subscription_ids = list(map(lambda att: att.user_subscription, models.MeetingProposalAttendance.objects.filter(proposal_id=id, is_committed=False).all()))
     return MeetingTimeProposal(proposal.start, proposal.end, committed_subscription_ids, unavailable_subscription_ids, proposal.optimality)
 
 def update_proposal(id, obj):
-    proposal = models.MeetingTimeProposal.objects.get(pk=id)
+    proposal = models.MeetingTimeProposal.objects.get(id=id)
     proposal.start, proposal.end, proposal.optimality = obj.start, obj.end, obj.optimality
     proposal.save()
 
@@ -229,7 +233,7 @@ def update_proposal(id, obj):
         unavailable_user.delete()
 
 def delete_proposal(id):
-    proposal = models.Meeting.objects.get(pk=id)
+    proposal = models.Meeting.objects.get(id=id)
     attendance_models = models.MeetingProposalAttendance.objects.filter(proposal=id).all()
     for attendance in attendance_models:
         attendance.delete()
@@ -240,11 +244,11 @@ def create_attendee(obj):
     return model.id
 
 def get_attendee(id):
-    subscription = models.UserMeetingSubscription.objects.get(pk=id)
+    subscription = models.UserMeetingSubscription.objects.get(id=id)
     return MeetingAttendee(subscription.user_id, subscription.is_critical, subscription.weight)
 
 def update_attendee(id, obj):
-    subscription = models.UserMeetingSubscription.objects.get(pk=id)
+    subscription = models.UserMeetingSubscription.objects.get(id=id)
     subscription.user_id, subscription.is_critical, subscription.weight = obj.user, obj.is_critical, obj.weight
     subscription.save()
 
@@ -256,11 +260,11 @@ def create_attendance(obj):
     return model.id
 
 def get_attendance(id):
-    subscription = models.UserMeetingSubscription.objects.get(pk=id)
+    subscription = models.UserMeetingSubscription.objects.get(id=id)
     return UserAttendance(subscription.meeting_id, subscription.is_critical, subscription.weight)
 
 def update_attendance(id, obj):
-    subscription = models.UserMeetingSubscription.objects.get(pk=id)
+    subscription = models.UserMeetingSubscription.objects.get(id=id)
     subscription.meeting_id, subscription.is_critical, subscription.weight = obj.meeting, obj.is_critical, obj.weight
     subscription.save()
 
@@ -268,7 +272,7 @@ def delete_attendance(id):
     delete_subscription(id)
 
 def delete_subscription(id):
-    subscription = models.UserMeetingSubscription.objects.get(pk=id)
+    subscription = models.UserMeetingSubscription.objects.get(id=id)
     subscription.delete()
 
 def create_many_commitments(id, commitments):

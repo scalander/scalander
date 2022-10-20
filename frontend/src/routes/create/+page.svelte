@@ -94,11 +94,12 @@
                     emails:email, // TODO, but trying to scehdule most for now
                     //// AAAAAA email is plural
                     commitments: [], // backend will send email for form
-                    meetingSubscriptions: [sub_id] // stamping with our ticket
+                    subscribedUsers: [sub_id] // stamping with our ticket
                 })
             });
             // send request and wait for it to finish
             await user_req;
+            sub_tickets.push(sub_id);
         }
 
         let meeting_new_endpoint = new URL(`api/meeting/${meeting_id}`,
@@ -115,8 +116,8 @@
                 start: new Date(start),
                 end: new Date(end),
                 lockInDate: subDays(new Date(start), 1), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
-                proposals: sub_tickets,
-                subscribedUsers: [],
+                proposals: [],
+                subscribedUsers: sub_tickets,
             })
         });
 

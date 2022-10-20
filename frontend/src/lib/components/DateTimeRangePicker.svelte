@@ -166,7 +166,7 @@
         <div class="selecter">
             {#if currentDate}
                 <div class="date-subtitle">
-                    {strings.DATETIMERANGEPICKER_SELECTING_TIME.replace("$DATE",
+                    {strings.DATETIMERANGEPICKER_SELECTING_TIME.replace("{date}",
                     format(currentDate, "EEEE, MMMM dd, yyyy"))}
                 </div>
                 <div class="button-container">
