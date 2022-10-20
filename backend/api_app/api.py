@@ -156,7 +156,7 @@ def update_meeting(id, obj):
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
         proposal = models.MeetingTimeProposal.objects.filter(id=proposal_id).first()
-        proposal.meeting = id
+        proposal.meeting = meeting
         proposal.save()
     for proposal_id in to_delete:
         delete_proposal(proposal_id)
