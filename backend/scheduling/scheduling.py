@@ -53,11 +53,11 @@ def chunk_times(times, users):
 
 # reduce_chunks used to be above create times but it caused chunks to not be reduced correctly
 
-def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
-    if n < 0:
-        return 1
-    else:
-        return n
+# def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
+#     if n < 0:
+#         return 1
+#     else:
+#         return n
 
 def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
     # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
