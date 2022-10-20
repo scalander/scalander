@@ -123,7 +123,7 @@ def delete_commitment(id):
     commitment.delete()
 
 def create_meeting(obj):
-    model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
+    model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, length=obj.length, lock_in_date=obj.lock_in_date)
     for proposal in obj.proposals:
         proposal_model = models.MeetingTimeProposal.objects.get(id=proposal)
         proposal_model.meeting_id = model.id
@@ -142,11 +142,11 @@ def get_meeting(id):
     proposals = models.MeetingTimeProposal.objects.filter(meeting=meeting).order_by("-optimality")
     proposal_ids = list(map(lambda prop: prop.id, proposals))
     
-    return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
+    return Meeting(meeting.name, meeting.start, meeting.end, meeting.length, proposal_ids, subscription_ids, meeting.lock_in_date)
 
 def update_meeting(id, obj):
     meeting = models.Meeting.objects.get(id=id)
-    meeting.name, meeting.start, meeting.end, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.lock_in_date
+    meeting.name, meeting.start, meeting.end, meeting.length, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.length, obj.lock_in_date
     meeting.save()
 
     # Update time proposals
