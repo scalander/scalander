@@ -1,4 +1,5 @@
-
+#requires oath credentials AND user permissions
+#adds event to calendar of google user activating code (or who is one hte website when code is called)
 from __future__ import print_function
 
 import datetime
