@@ -18,8 +18,8 @@ class Meeting(models.Model):
 
 class MeetingTimeProposal(models.Model):
     meeting = models.ForeignKey(Meeting, null=True, on_delete=models.DO_NOTHING)
-    start = models.DateField()
-    end = models.DateField()
+    start = models.DateTimeField()
+    end = models.DateTimeField()
     optimality = models.IntegerField()
 
 class UserMeetingSubscription(models.Model):
