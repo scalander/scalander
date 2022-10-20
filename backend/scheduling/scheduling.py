@@ -12,7 +12,7 @@ class Block:
 def check_multiple_users(time, users):
     can, cannot = [], []
     for u in users:
-        if api.check_commitment(u, time.start, time.end):
+        if api.check_commitment(api.get_attendee(u).user, time.start, time.end):
             can.append(u)
         else:
             cannot.append(u)
@@ -56,7 +56,7 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         for j in range(timeQuantity):  # go through the block and add a time every time increment
             # TODO refactor. this is API abuse but we are creating "meeting" objects
             times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), 30, [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
-        chunks += chunk_times(times, list(map(lambda a: api.get_attendee(a).user, attendees)))
+        chunks += chunk_times(times, attendees)
     return chunks
 
 def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
