@@ -14,6 +14,7 @@ class Meeting(models.Model):
     name = models.CharField(max_length=256)
     start = models.DateTimeField()
     end = models.DateTimeField()
+    length = models.IntegerField()
     lock_in_date = models.DateTimeField()
 
 class MeetingTimeProposal(models.Model):
