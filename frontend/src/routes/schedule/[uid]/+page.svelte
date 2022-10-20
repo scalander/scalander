@@ -151,7 +151,7 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
                 bind:this={datepicker_component}
                 on:change="{(e)=> change=e.detail.selected}"/>
         </div>
-        <div class="schedule-center-container" style:display="{state==3?'block':'none'}">
+        <div class="schedule-center-container" style:display="{state==3?'flex':'none'}">
             <div>
                 <h1>🎉 {strings.SCHEDULE_CONGRATS}</h1>
                 <p style="font-weight: 500; padding-top: 10px">{strings.SCHEDULE_CONGRATS_MSG}</p>
