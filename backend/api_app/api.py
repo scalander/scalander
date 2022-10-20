@@ -282,3 +282,24 @@ def create_many_commitments(id, commitments):
         c = models.Commitment.objects.create(start=c["start"], end=c["end"],
                                              is_absolute=True,
                                              user_id=id)
+
+def check_commitment(uid, start, end):
+    """Checks if any of a user's commitment includes a time range
+
+    Arguments:
+        uid ([uidType]) - user ID 
+        start (datetime.DateTime) - start of range
+        end (datetime.DateTime) - end of range
+
+    Returns:
+        bool is the user available?
+    """
+
+    # get commitments
+    res = models.Commitment.objects.filter(user_id=uid, # users
+                                           start__lte=start, # start time must fit
+                                           end__gte=end) # end time ALSO must fit!
+
+    # we hope to have some non-empty result, if user is available
+    return len(res)>0
+    

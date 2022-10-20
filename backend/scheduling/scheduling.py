@@ -1,6 +1,7 @@
 import datetime
 import json
 import api_app.api as api
+import time as ttt # because time is a variable name
 
 class Block:
     def __init__(self, start, end):
@@ -8,20 +9,10 @@ class Block:
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment_id, time):  # if time and commitment intersect, return True
-    commitment = api.get_commitment(commitment_id)
-    return (commitment.start <= time.start) and (commitment.end >= time.end)
-
-def check_user_commits(time, user):  # check all the user's commitments with a meeting, return True if meeting time works
-    for c in api.get_user(user).commitments:
-        if commitment_check(c, time):
-            return True
-    return False  # add isAbsolute functionality to commitments later
-
 def check_multiple_users(time, users):
     can, cannot = [], []
     for u in users:
-        if check_user_commits(time, u):
+        if api.check_commitment(u, time.start, time.end):
             can.append(u)
         else:
             cannot.append(u)
@@ -112,6 +103,7 @@ def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, tim
         "can": chunk[2], 
         "cannot": chunk[3]
     }, result))
+
 
 
 ### TEST LOADING AND RUNNING
