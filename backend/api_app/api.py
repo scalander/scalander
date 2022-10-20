@@ -151,7 +151,7 @@ def update_meeting(id, obj):
 
     # Update time proposals
     proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting=id).all()))
-    current_proposals = set(map(lambda com: com.id, proposal_models))
+    current_proposals = set(map(lambda com: com, proposal_models))
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
@@ -233,7 +233,7 @@ def update_proposal(id, obj):
         unavailable_user.delete()
 
 def delete_proposal(id):
-    proposal = models.Meeting.objects.get(id=id)
+    proposal = models.MeetingTimeProposal.objects.get(id=id)
     attendance_models = models.MeetingProposalAttendance.objects.filter(proposal=id).all()
     for attendance in attendance_models:
         attendance.delete()
