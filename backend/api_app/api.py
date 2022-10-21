@@ -60,6 +60,10 @@ def get_user(id):
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
 
+def get_user_by_subscription(id):
+    attendence = models.UserMeetingSubscription.objects.get(id=id)
+    return get_user(attendence.user.id)
+
 def update_user(id, obj):
     user = models.User.objects.get(id=id)
     user.name = obj.name

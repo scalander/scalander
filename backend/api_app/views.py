@@ -93,8 +93,8 @@ class Proposal(View):
         return JsonResponse({
             "start": obj.start,
             "end": obj.end,
-            "commitedUsers": list(map(lambda x:x.id, obj.committed_users)),
-            "unavailableUsers": list(map(lambda x:x.id, obj.unavailable_users))
+            "commitedUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.committed_users)),
+            "unavailableUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.unavailable_users))
         });
     
     def put(self, request, id):
