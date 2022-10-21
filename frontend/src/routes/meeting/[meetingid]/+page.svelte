@@ -87,8 +87,8 @@
             </div>
             <div>
                 <span class="sublabel">{strings.RESULT_UNAVAILABLE} ({meeting.proposals[view_proposal].unavailableUsers.length})</span>
-                {#each meeting.proposals[view_proposal].unavailableUsers as commited}
-                    <span class="email">{commited.emails}</span>
+                {#each meeting.proposals[view_proposal].unavailableUsers as uncommited}
+                    <span class="email">{uncommited.emails}</span>
                     <!-- TODO plural because user email is plural (aaa) -->
                 {/each}
             </div>

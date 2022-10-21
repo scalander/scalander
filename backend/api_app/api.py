@@ -195,7 +195,7 @@ def create_proposal(obj):
     model = models.MeetingTimeProposal.objects.create(start=obj.start, end=obj.end, optimality=obj.optimality)
     for committed in obj.committed_users:
         committed_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=True)
-    for unavailable in obj.committed_users:
+    for unavailable in obj.unavailable_users:
         unavailable_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=False)
     return model.id
 
@@ -287,23 +287,27 @@ def create_many_commitments(id, commitments):
                                              is_absolute=True,
                                              user_id=id)
 
-def check_commitment(uid, start, end):
+def check_commitment(users, start, end):
     """Checks if any of a user's commitment includes a time range
 
     Arguments:
-        uid ([uidType]) - user ID 
-        start (datetime.DateTime) - start of range
-        end (datetime.DateTime) - end of range
+        users: [uidType] - user IDs of who to check
+        start: datetime.DateTime - start of range
+        end: datetime.DateTime - end of range
 
     Returns:
-        bool is the user available?
+        list of uidtype, the IDs of users availaible
     """
 
     # get commitments
-    res = models.Commitment.objects.filter(user_id=uid, # users
+    res = models.Commitment.objects.filter(user_id__in=users, # users
                                            start__lte=start, # start time must fit
                                            end__gte=end) # end time ALSO must fit!
 
+    # get the ID of the users available
+    # use set() for duplicate filtering
+    avail_ids = list(set([i.user_id for i in res]))
+
     # we hope to have some non-empty result, if user is available
-    return len(res)>0
+    return avail_ids
     

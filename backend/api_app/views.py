@@ -9,9 +9,9 @@ def schedule_meeting(user):
     for m_id in user.meeting_subscriptions:
         sub = api.get_attendance(m_id)
         meeting = api.get_meeting(sub.meeting)
-        results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, meeting.subscribed_users, 5, 5, meeting.name)
+        results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.subscribed_users, 15, 5)
         # TODO: more accurate optimality calculation
-        new_proposals = list(map(lambda result: api.MeetingTimeProposal(result["start"], result["end"], result["can"], result["cannot"], sum(list(map(lambda s: api.get_attendee(s).weight, result["can"])))), results))
+        new_proposals = list(map(lambda result: api.MeetingTimeProposal(result.start, result.end, result.can, result.cannot, result.total_weight), results))
         meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
         api.update_meeting(sub.meeting, meeting)
 
