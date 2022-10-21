@@ -13,6 +13,11 @@
 
     let meeting_promise = new Promise(()=>{}); 
 
+    // get number of plans
+    let number_plans = 0;
+    // view the nth number of proposals
+    let view_proposal = 0;
+
     async function meetingLoad() {
         // recyclable variables
         let endpoint, req;
@@ -42,14 +47,12 @@
             proposals.push(proposal_json);
         }
 
-        // again, the best proposal is the one on the top
-        // we also slice it out
-        let best_proposal = proposals.slice(0, 1)[0];
-        // we index by 0 because the sliced result is a list
+        // get proposal number
+        number_plans = proposals.length;
 
         // set proposals
         meeting_info["proposals"] = proposals;
-        return [meeting_info, best_proposal];
+        return meeting_info;
     }
 
     onMount(()=>{
@@ -63,27 +66,32 @@
             Loading...
         <!-- new meeting object doesn't include the best proposal -->
         <!-- as we hope to access it directly -->
-    {:then [meeting, bestProposal]} 
+        {:then meeting} 
         <h1 id="meeting-name">{meeting.name}</h1>
         <span id="meeting-length">{formatDistance(0, meeting.length*60*1000)}</span>
         <br />
-        <span class="date">{format((new Date(bestProposal.start)), "EEEE, MMMM dd yyyy")}</span>
+        <span class="date">{format((new Date(meeting.proposals[view_proposal].start)), "EEEE, MMMM dd yyyy")}</span>
         <div class="time">
-            <span class="start-time">{format((new Date(bestProposal.start)), "hh:mm aa")}</span> — <span class="end-time">{format((new Date(bestProposal.end)), "hh:mm aa")}</span>
+            <span class="start-time">{format((new Date(meeting.proposals[view_proposal].start)), "hh:mm aa")}</span> — <span class="end-time">{format((new Date(meeting.proposals[view_proposal].end)), "hh:mm aa")}</span>
         </div>
-        <span class="sublabel">{strings.RESULT_AVAILABLE}</span>
-        {#each bestProposal.commitedUsers as commited}
-            <span class="email">{commited.emails}</span>
-            <!-- TODO plural because user email is plural (aaa) -->
-        {/each}
-        <span class="sublabel">{strings.RESULT_UNAVAILABLE}</span>
-        {#each bestProposal.unavailableUsers as commited}
-            <span class="email">{commited.emails}</span>
-            <!-- TODO plural because user email is plural (aaa) -->
-        {/each}
+        <div class="availability">
+            <div>
+                <span class="sublabel">{strings.RESULT_AVAILABLE} ({meeting.proposals[view_proposal].commitedUsers.length})</span>
+                {#each meeting.proposals[view_proposal].commitedUsers as commited}
+                    <span class="email">{commited.emails}</span>
+                    <!-- TODO plural because user email is plural (aaa) -->
+                {/each}
+            </div>
+            <div>
+                <span class="sublabel">{strings.RESULT_UNAVAILABLE} ({meeting.proposals[view_proposal].unavailableUsers.length})</span>
+                {#each meeting.proposals[view_proposal].unavailableUsers as commited}
+                    <span class="email">{commited.emails}</span>
+                    <!-- TODO plural because user email is plural (aaa) -->
+                {/each}
+            </div>
+        </div>
 
         {/await}
-    </span>
 </div>
 
 <style>
@@ -123,5 +131,12 @@
 
     .email {
         display: block;
+        font-size: 13px;
+    }
+
+    .availability {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
     }
 </style>
