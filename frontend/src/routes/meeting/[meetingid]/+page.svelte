@@ -11,6 +11,9 @@
     // strings
     import strings from "$lib/strings.json";
 
+    // our own UI components
+    import Button from '$lib/components/ui/Button.svelte';
+
     let meeting_promise = new Promise(()=>{}); 
 
     // get number of plans
@@ -63,7 +66,7 @@
 <div class="centering-container">
     <span class="centered">
         {#await meeting_promise}
-            Loading...
+            <span class="loading">Loading...</span>
         <!-- new meeting object doesn't include the best proposal -->
         <!-- as we hope to access it directly -->
         {:then meeting} 
@@ -91,10 +94,45 @@
             </div>
         </div>
 
+
+        <span class="sublabel">{strings.RESULT_ALTERNATE}</span>
+        <div class="buttonrow">
+        {#each [...Array(number_plans).keys()] as t}
+            <div class={"button "+((t==view_proposal)?"active":"")}
+                 on:click={()=>{view_proposal=t}}>{t+1}</div>
+        {/each}
+        </div>
+
         {/await}
 </div>
 
 <style>
+
+    .button {
+        background-color: var(--tertiary);
+        color: var(--accent);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+        cursor: pointer;
+        transition: opacity 0.2s linear;
+    }
+
+    .active {
+        color: var(--tertiary) !important;
+        background-color: var(--accent) !important;
+    }
+
+    .button:hover {
+        opacity: 0.8;
+    }
+
+    .buttonrow {
+        display: flex;
+        width: 100%;
+    }
+
     .centering-container {
         width: 100vw;
         height: 100vh;
@@ -138,5 +176,10 @@
         display: flex;
         gap: 20px;
         flex-wrap: wrap;
+    }
+
+    .loading {
+        color: var(--accent);
+        font-weight: 600;
     }
 </style>

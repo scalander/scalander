@@ -10,7 +10,6 @@
     import { onMount } from 'svelte';
 
     // our own UI components
-    // import DateTimeRangePicker from "$lib/components/DateTimeRangePicker.svelte"
     import Button from '$lib/components/ui/Button.svelte';
 
     // strings

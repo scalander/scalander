@@ -29,5 +29,6 @@
     "MEETING_LOADING": "Working hard with the scheduling bots...",
     "MEETING_DONE": "Done! Each invitee will get an email with futher instructions.",
     "RESULT_AVAILABLE": "Available Attendees",
-    "RESULT_UNAVAILABLE": "Unavailable Attendees"
+    "RESULT_UNAVAILABLE": "Unavailable Attendees",
+    "RESULT_ALTERNATE": "Alternate Schedules"
 }
