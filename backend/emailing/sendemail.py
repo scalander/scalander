@@ -48,7 +48,7 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         from_email=ENDPOINT,
         to_emails=[user.emails], # email(s) being plural is a misnomer, email is singular
         subject=f'{meeting.name} Availability Confirmation',
-        html_content=f'<p><h1>{meeting.name} is being scheduled, please tell us your availability. <br><br><a href="http://scalander.com/{uid}">Click Here to Input Availability.</a> Thank You!</h1></p>')
+        html_content=f'<p><h1>{meeting.name} is being scheduled, please tell us your availability. <br><br><a href="http://scalander.com/schedule/{uid}">Click Here to Input Availability.</a> Thank You!</h1></p>')
     try:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
