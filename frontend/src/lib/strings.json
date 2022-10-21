@@ -27,5 +27,7 @@
     "MEETING_INVITEES": "Invitees",
     "MEETING_PRIORITY": "Enter the participants' email. A higher priority score means we will preferentially respect their schedule.",
     "MEETING_LOADING": "Working hard with the scheduling bots...",
-    "MEETING_DONE": "Done! Each invitee will get an email with futher instructions."
+    "MEETING_DONE": "Done! Each invitee will get an email with futher instructions.",
+    "RESULT_AVAILABLE": "Available Attendees",
+    "RESULT_UNAVAILABLE": "Unavailable Attendees"
 }
