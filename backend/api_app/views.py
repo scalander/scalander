@@ -88,7 +88,14 @@ class Proposal(View):
 
     def get(self, request, id):
         obj = api.get_proposal(id)
-        return JsonResponse(obj.json_object())
+        # we need to serialize this custom-ly because
+        # it has foreign keys in it
+        return JsonResponse({
+            "start": obj.start,
+            "end": obj.end,
+            "commitedUsers": list(map(lambda x:x.id, obj.committed_users)),
+            "unavailableUsers": list(map(lambda x:x.id, obj.unavailable_users))
+        });
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
