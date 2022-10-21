@@ -95,7 +95,7 @@
         </div>
 
 
-        <span class="sublabel">{strings.RESULT_ALTERNATE}</span>
+        <span class="sublabel">{strings.RESULT_ALTERNATE}</span> <span class="order">{strings.RESULT_ORDERING}</span>
         <div class="buttonrow">
         {#each [...Array(number_plans).keys()] as t}
             <div class={"button "+((t==view_proposal)?"active":"")}
@@ -162,14 +162,14 @@
     .sublabel {
         color: var(--accent);
         font-weight: 700;
-        font-size: 12px;
+        font-size: 13px;
         margin-top: 15px;
         display: inline-block;
     }
 
     .email {
         display: block;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .availability {
@@ -181,5 +181,12 @@
     .loading {
         color: var(--accent);
         font-weight: 600;
+    }
+
+    .order {
+        color: var(--accent);
+        font-size: 10px;
+        float:right;
+        transform: translateY(18px);
     }
 </style>
