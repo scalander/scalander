@@ -28,6 +28,8 @@
     "MEETING_PRIORITY": "Enter the participants' email. A higher priority score means we will preferentially respect their schedule.",
     "MEETING_LOADING": "Working hard with the scheduling bots...",
     "MEETING_DONE": "Done! Each invitee will get an email with futher instructions.",
+    "MEETING_NOT_SCHEDULED": "We have not yet identified a viable time for this meeting. Keep your eyes peeled on this page!",
+    "MEETING_RANGE": "Possible Date Range",
     "RESULT_AVAILABLE": "Available Attendees",
     "RESULT_UNAVAILABLE": "Unavailable Attendees",
     "RESULT_ALTERNATE": "Alternate Schedules",

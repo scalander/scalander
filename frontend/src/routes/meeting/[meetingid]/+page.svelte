@@ -72,6 +72,7 @@
         {:then meeting} 
         <h1 id="meeting-name">{meeting.name}</h1>
         <span id="meeting-length">{formatDistance(0, meeting.length*60*1000)}</span>
+        {#if meeting.proposals.length > 0}
         <br />
         <span class="date">{format((new Date(meeting.proposals[view_proposal].start)), "EEEE, MMMM dd yyyy")}</span>
         <div class="time">
@@ -102,6 +103,14 @@
                  on:click={()=>{view_proposal=t}}>{t+1}</div>
         {/each}
         </div>
+        {:else}
+            <div id="notscheduled">
+            <div id="notscheduled-msg">{strings.MEETING_NOT_SCHEDULED}</div>
+            <span class="sublabel">{strings.MEETING_RANGE}</span> 
+            <p class="bold">{format((new Date(meeting.start)), "EEEE, MMMM dd yyyy")} — {format((new Date(meeting.end)), "EEEE, MMMM dd yyyy")}</p>
+            </div>
+        {/if}
+
 
         {/await}
 </div>
@@ -188,5 +197,17 @@
         font-size: 10px;
         float:right;
         transform: translateY(18px);
+    }
+
+    #notscheduled {
+        max-width: min(500px, 90vw)
+    }
+
+    #notscheduled-msg {
+        font-weight: 300;
+    }
+
+    .bold {
+        font-weight: 600;
     }
 </style>
