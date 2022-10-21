@@ -6,3 +6,4 @@ google-api-python-client==2.64.0
 google_auth_oauthlib
 django-cors-headers
 sendgrid
+django-environ
