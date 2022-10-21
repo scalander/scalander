@@ -19,17 +19,16 @@ from google.oauth2.credentials import Credentials
 #     scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
 # flow.redirect_uri = "https://localhost:8080/"
 # auth_uri = flow.authorization_url()
-# print("URI",auth_uri)
 # auth_request = redirect(flow.redirect_uri)
 # auth_response = auth_request.build_absolute_uri()
 # flow.fetch_token(authorization_response = auth_response)
 
 tzoffset = "-07:00" #timezone offset - assumimg its PDT for now
 today = date.today()
-query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-time to check for freebusy - default is midnight 1 week from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
-query_max = (today + timedelta(days = 7)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
+query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-time to check for freebusy - default is 60 days from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
+query_max = (today + timedelta(days = 60)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
 
-# handling the calendar.list return data
+# handling the calendar.list return datahttp://localhost:8080/schedule/i
 def format_all(cals): #takes in a list of the user's calendars from send_request()
     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
     formatted_ids = [] #for storing the calendar IDs in the format that query() takes
@@ -45,7 +44,6 @@ def format_all(cals): #takes in a list of the user's calendars from send_request
 
 
 def make_query(query_min, query_max):
-    # print(type(formatted_ids), type(query_min), type(query_max)) #TODO: remove
     if type(query_min) == datetime.date:
         q_min = query_min.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
     elif len(query_min) == 25:
@@ -70,7 +68,6 @@ def make_query(query_min, query_max):
 
     assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00-07:00") < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00-07:00"), "query interval ends before it starts"
 
-    # print(query_min,query_max)
     query_body = {
         # "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
         # "groupExpansionMax": 50, # Maximal number of calendar identifiers to be provided for a single group. Optional. An error is returned for a group with more members than this value. Maximum value is 100.
@@ -83,52 +80,34 @@ def make_query(query_min, query_max):
     return (query_body)
 
 def send_commitments(freebusy, calendar_names):
-    #gets the busy time blocks from the api response - takes in the api response
-    to_check = []
-    # print("FREEBUSY", freebusy)
     queried_cals = freebusy["calendars"]
+    #gets the busy time blocks from the api response - takes in the api response
     to_check = list(queried_cals.keys())
-    busy_list = []
-    sorted_commitments = {} #stores the commitments grouped by calendar
     formatted_commitments = {} #stores the commitments from sorted as commitment objects, and then adds calendar names
-    # print("CHECK", to_check)
             
         # start = datetime.datetime.strptime(commitment["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
         # end = datetime.datetime.strptime(commitment["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
-    for cal in to_check: #for each calendar in the response...
+
+    # make the commitments into commitment objects:
+    for calendar in to_check:
         commitments = []
-        response_cal = queried_cals[cal]
-        busy_list.clear()
-        for busy in response_cal["busy"]: #for each commitment in the calendar...
-            busy_list.append(busy)
-        # print("BUSY:", busy_list)
-        sorted_commitments[cal] = busy_list #add a calendarid:[commitments] to sorted_commitments
-        # print ("SORTED:", sorted_commitments)
-        
-        # make the commitments into commitment objects:
-        for calendar in to_check:
-            commitments.clear()
-            cals = queried_cals[calendar]
-            for event in cals["busy"]:
-                # print(event,calendar)
-                utc_start = datetime.datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
-                utc_end = datetime.datetime.strptime(event["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
-                naive_start = utc_start.replace(tzinfo=None) 
-                naive_end = utc_end.replace(tzinfo=None) #makes start and end into naive objects...
-                start = naive_start + datetime.timedelta(hours=-7)
-                end = naive_end + datetime.timedelta(hours=-7) #...and manually shifts them to PDT (ignores daylight savings)
-                #TODO: make timezones work
-                # print ("TYPES", type(start), type(end))
-                commitments.append({
-                    "start": start,
-                    "end": end,
-                    "isAbsolute": True #can't really be sure from freebusy so we assume true
-                })
-            formatted_commitments[calendar] = {}
-            formatted_commitments[calendar]["busy"]= commitments
-            calendar_name = calendar_names[calendar]
-            formatted_commitments[calendar]["calendar_name"]= calendar_name
-    # print(formatted_commitments)
+        cals = queried_cals[calendar]
+        for event in cals["busy"]:
+            utc_start = datetime.datetime.strptime(event["start"], "%Y-%m-%dT%H:%M:%S%z") #start of a commitment turned into a datetime object
+            utc_end = datetime.datetime.strptime(event["end"], "%Y-%m-%dT%H:%M:%S%z") #end of a commitment turned into a datetime object
+            naive_start = utc_start.replace(tzinfo=None) 
+            naive_end = utc_end.replace(tzinfo=None) #makes start and end into naive objects...
+            start = naive_start + datetime.timedelta(hours=-7)
+            end = naive_end + datetime.timedelta(hours=-7) #...and manually shifts them to PDT (ignores daylight savings)
+            #TODO: make timezones work
+            # print ("TYPES", type(start), type(end))
+            commitments.append({
+                "start": start,
+                "end": end
+            })
+        formatted_commitments[calendar] = {}
+        formatted_commitments[calendar]["busy"]= commitments
+        formatted_commitments[calendar]["calendar_name"]= calendar_names[calendar]
     return(formatted_commitments)
 
 
@@ -153,11 +132,8 @@ def send_request(body, code): #google api things
     freebusy_request_body = body
     freebusy_collection = service.freebusy()
     freebusy_request = freebusy_collection.query(body = freebusy_request_body)
-    # print("BODY: ",request_body, "REQUEST: ", request)
     response = freebusy_request.execute()
-    # print("RESPONSE", response)
     service.close()
-    # print("NAMES:", calendar_names)
     return(response, calendar_names)
 
 #final product - RUN THIS
@@ -171,9 +147,7 @@ def get_freebusy(query_min = query_min, query_max = query_max, auth_code = ""):
     body = make_query(query_min, query_max)
     request = send_request(body, auth_code)
     query = request[0] #sets query equal to api response
-    # print("QUERY", query)
     commitments = send_commitments(query, request[1])
     return (commitments)
 
 #testing:
-# print("RESULT: ", get_freebusy(auth_code="ya29.a0Aa4xrXPf7soIxP6p37Yr49umkFMtAHL5ajQanjrluDYCsBdHMGobWekgRDNj05QDgiCAxUlM2A8h_ICpZckbiLy9dBenBRa4pyg7LLbgEYRAJhxKzIPGv8CQd6AbEcg4SEvPVYH5BOPMnE3bJ59MFYd9hJy3MQaCgYKATASARASFQEjDvL9tz2eTsBmN_ajMrmGIfZjeA0165"))

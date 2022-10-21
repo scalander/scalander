@@ -12,6 +12,7 @@ COPY --from=build /usr/src/app/build .
 COPY --from=build /usr/src/app/package.json .
 COPY --from=build /usr/src/app/package-lock.json .
 RUN npm ci
+ENV PORT 8080
 EXPOSE 8080
 RUN chown node /app
 USER node

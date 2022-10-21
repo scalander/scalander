@@ -1,173 +1,237 @@
 import datetime
 import json
 import api_app.api as api
+import time as ttt # because time is a variable name
+import datetime
 
+from typing import List
+
+# data classes
+from dataclasses import dataclass
+
+@dataclass
 class Block:
-    def __init__(self, start, end):
-        self.start, self.end = start, end
+    """A Block of Time (duration) start+end
+    @dataclass
+
+    Members:
+       start: datetime.datetime - start time of block
+       end: datetime.datetime - end time of block
+    """
+    start: datetime.datetime
+    end: datetime.datetime
+
+@dataclass
+class Proposal:
+    """A proposal for time availability
+    @dataclass
+
+    Members:
+       start: datetime.datetime - start time of block
+       end: datetime.datetime - end time of block
+       can: [int] - tickets that can make it
+       cannot: [int] - tickets that cannot make it
+       total_weight: int - total weights of those can make it
+    """
+
+    start: datetime.datetime
+    end: datetime.datetime
+    can: List[int]
+    cannot: List[int]
+    total_weight: int
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment, meeting):  # if meeting and commitment intersect, return True
-    return (commitment.start < meeting.start < commitment.end) or (commitment.start < meeting.end < commitment.end) or (meeting.start <= commitment.start and commitment.end <= meeting.end)
+def check_multiple_users(time: Block, tickets: List[int]) -> dict:
+    """Checks whether a list of tickets is available at a specific time
 
-def check_user_commits(meeting, user):  # check all the user's commitments with a meeting, return True if meeting time works
-    for c in user.commitments:
-        if commitment_check(c, meeting):
-            return False
-    return True  # add isAbsolute functionality to commitments later
+    Arguments:
+        time: Block - a time block to check
+        tickets: [int] - a list of meeting tickets
+                         (UserMeetingSubscription IDs) to check
 
-def check_user_subs(meeting, user):  # check all the user's meeting subscriptions with a meeting, return True if meeting time works
-    for c in user.meetingSubscriptions:
-        if commitment_check(c.meeting, meeting):
-            return False
-    return True  # maybe add lockInDate functionality later?
+    Returns:
+        {"can": [int - available tickets],
+         "cannot": [int - unavailable tickets]}
+    """
 
-def check_both(meeting, user):  # check both subs and commits, return True if it still works
-    return check_user_commits(meeting, user) and check_user_subs(meeting, user)
+    # check for users that can make it
+    can = api.check_commitment(tickets, time.start, time.end)
 
-def check_multiple_users(meeting, users):
-    can, cannot = [], []
-    for u in range(len(users)):
-        if check_both(meeting, users[u]):
-            can.append(u)
-        else:
-            cannot.append(u)
-    return [can, cannot]
+    # those that cannot make it are the rest
+    cannot = list(filter(lambda x:x not in can, tickets))
 
-def check_all_times(times, users):  # times is a list of the meeting object (not rly storage efficient but whatever)
-    return list(map(lambda t: check_multiple_users(t, users), times))
+    return {"can": can, "cannot": cannot}
 
-def chunk_times(times, users):
-    arr = check_all_times(times, users)  # len(times) and len(arr) are equal
+def check_all_times(times: [Block], tickets: List[int]) -> List[Proposal]:
+    """Returns whether or not a list of users is available for a list
+
+    Arguments:
+        times: [Block] - a list of blocks to check
+        tickets: [int] - a list of tickets
+                         (UserMeetingSubscription IDs) to check
+
+    Returns:
+        a list of Proposals
+    """
+
+    # we will calculate the users' availabilities
+    availabilities = [check_multiple_users(t, tickets) for t in times]
+    # tallyed proposals
+    proposals = []
+
+    # we will deserialize the blocks onto each availiblity
+    # to create proposals
+    for time, avail in zip(times, availabilities):
+        avail["start"] = time.start
+        avail["end"] = time.end
+
+        # now, we need to tally the weights of those tha
+        # can make it and get their total weight
+        weight = 0
+        
+        # for each ticket, add
+        for ticket_id in avail["can"]:
+            info = api.get_attendee(ticket_id)
+            weight += info.weight
+
+        # set it back to avail object
+        avail["total_weight"] = weight
+
+        proposals.append(Proposal(**avail))
+    
+    return proposals
+
+def create_time_chunks(ranges:[Block], meeting_length:int,
+                       time_increment:int) -> List[Block]:
+    """Creates a list of `Blocks` of `timeIncrement` length between `ranges`
+
+    Arguments:
+        ranges: [Block] - ranges of times in which to create smaller chunks of 
+        meeting_length: int - number of **minutes** which the meeting should last
+        time_increment: int - number of **minutes** that should be between the starts
+                              of two blocks of output (how close should proposals be?)
+
+    Returns:
+        list of `Blocks` for possible chunks
+    """
+
     chunks = []
-    for i in range(len(arr)):
-        if i == 0:  # start off the chunks with index 0
-            chunks.append([times[i].start, None, arr[0][0], arr[0][1]])
-            continue
-        if not arr[i] == arr[i-1]:  # if the current index's list of available users is different from the last, end current chunk and start a new one
-            chunks[-1][1] = times[i-1].end
-            chunks.append([times[i].start, None, arr[i][0], arr[i][1]])
-    chunks[-1][1] = times[-1].end
-    return chunks  # chunks are structured as such: [start, end, [userIndex, ...], [userIndex, ...]]; first array is those who can make the meeting and second is those who cannot
+    
+    # our meeting length, as a timedelta
+    meeting_length_delta = datetime.timedelta(minutes=meeting_length)
+    time_increment_delta = datetime.timedelta(minutes=time_increment)
 
-# reduce_chunks used to be above create times but it caused chunks to not be reduced correctly
+    # for each range
+    for r in ranges:
+        # get the start time, and start iterating by time_increment
+        # epoch is our pointer of start of blocks
+        epoch = r.start
 
-# def if_neg(n):  # return 1 if the number is negative (basically if it crosses months I have to return one because it crosses days, else return the normal so it does whatever it normally would do)
-#     if n < 0:
-#         return 1
-#     else:
-#         return n
+        # for as long as we didn't hit the ending yet
+        # recall `epoch` is the poniter to start so
+        # we subtract a meeting_length_delta
+        while epoch < r.end-meeting_length_delta:
+            # append the chunk, as it works
+            chunks.append(Block(epoch, epoch+meeting_length_delta))
+                
+            # check the next time increment 
+            epoch += time_increment_delta
 
-def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName):  # timeIncrement is the increment between start times in minutes (>1), meetingLength is the length of the meeting in minutes (>1), meetingName is unnecessary
-    # this is all under the assumption of <12h blocks, but will still work as long as they are under 24 hours
-    chunks = []
-    for i in blocks:
-        times = []
-        # meetingLength must be less than blockLen
-        # blockLen = i.end.minute - i.start.minute + (i.end.hour - i.start.hour) * 60 + if_neg(i.end.day - i.start.day) * 60 * 24
-        blockLen = (i.end - i.start).total_seconds() // 60
-        # if meetingLength > blockLen: return -1  # figure out a way to throw errors later
-        timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
-        for j in range(timeQuantity):  # go through the block and add a time every time increment
-            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
-        chunks += chunk_times(times, list(map(lambda a: a.user, attendees)))
+    # return the generated chunks
     return chunks
+    
 
-def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
-    chunks, chunkmap = create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName), []  # attendees is a list of the MeetingAttendee model, user is a child
-    for i in range(len(chunks)):  # chunkmap format is as such: [[chunkIndex, value], ...]
-        shouldContinue = False
-        for j in chunks[i][3]:
-            # TODO: optimize by caching
-            attendee = api.get_attendee(attendees[j])
-            if attendee.isCritical:
-                shouldContinue = True
-                break
-        if shouldContinue:
+def create_times(schedule_during:[Block], meeting_length,
+                 tickets, time_increment=5) -> List[Proposal]:
+    """creates suitable times and calculates user availability
+
+
+    Arguments:
+        ranges: [Block] - ranges of times in which to create smaller chunks of 
+        meeting_length: int - number of **minutes** which the meeting should last
+        tickets: int - the UserMeetingSubscription ticket IDs for the participating users
+        [time_increment]: int - number of **minutes** that should be between the starts
+                                of two blocks of output (how close should proposals be?)
+
+    Returns:
+        a list of Proposals representing the meaningful times we have created
+    """
+
+    # create the possible chunks
+    chunks = create_time_chunks(schedule_during, meeting_length, time_increment)
+
+    # check the times and create proposals
+    proposals = check_all_times(chunks, tickets)
+
+    # abort if we have nothing
+    if len(proposals) == 0:
+        return []
+
+    # This is important. Now, if we just returned the result, the user would have
+    # about 5 different proposals which is literally just 5 minutes apart --- if
+    # they have a large block shared. This is no bueno.
+    #
+    # Therefore, we iterate through the times and remove "redundant" chunks --- keeping
+    # only the top one. What does "redundant" mean? Two chunks are redundant IFF they
+    # have the 1) same availability (can, cannot) and 2) are `time_increment` minutes
+    # apart only.
+
+    # create an array of meaningful blocks, starting with the first proposal
+    meaningful_proposals = [proposals.pop(0)]
+
+    # recall thath we are comparing agaist last time, not just last menangful
+    # time, to do meaningful blocks (i.e. otherwise we will schedule over
+    # things like long contiousl blocks where every *n* will be meannigful)
+    last = proposals.pop(0)
+
+    # for each proposal, check if its meaningful against the last
+    # this assumes that the times are sorted. which they should be if
+    # generated
+    for proposal in proposals:
+        # check for attendee
+        if (proposal.can != last.can) or (proposal.cannot != last.cannot):
+            meaningful_proposals.append(proposal)
+            last = proposal # set comp
             continue
-        value = 0
-        for j in chunks[i][2]:
-            attendee = api.get_attendee(attendees[j])
-            if not attendee.isCritical:
-                value += attendee[j].weight
-        chunkmap.append([i, value])
-    while len(chunkmap) > minChunks:  # chunkmap could potentially return less than minChunks values, which is fine
-        # should maybe add a loop count limit to prevent crash abuse once I figure out errors
-        indvalue, ind = chunkmap[0][1], 0
-        for i in range(1, len(chunkmap)):
-            if chunkmap[i][1] < indvalue:
-                indvalue = chunkmap[i][1]
-                ind = i  # used to be chunkmap[i][0]
-        chunkmap.pop(ind)
-    return list(map(lambda c: chunks[c[0]], chunkmap))  # return the chunks as specified in the chunkmap indexes
 
-def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
-    return list(map(lambda r: {
-        "start": r[0], 
-        "end": r[1], 
-        "can": list(map(lambda x: attendees[x], r[2])), 
-        "cannot": list(map(lambda x: attendees[x], r[3]))
-    }, reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName)))
+        # check for time delta, if its larger than time_increment, then its meaningufl
+        # timedelta doesn't store minutes arg
+        if (proposal.start-last.start).seconds//60 > time_increment:
+            meaningful_proposals.append(proposal)
+            last = proposal # set comp
+            continue
 
+        # otherwise, they are not meaningful so we don't append
+        last = proposal # set comp
 
-### TEST LOADING AND RUNNING
+    # return all meaningful blocks
+    return meaningful_proposals
+                                
+def schedule(ranges:[Block], meeting_length: int, tickets: int,
+             time_increment=5, max_chunks:int=None) -> List[Proposal]:
+    """Performs scheduling `meeting_length` blocks for `tickets` between `ranges` 
 
-def test_main():
-    with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the test data
-        jsonData = json.load(read_file)
+    Arguments:
+        ranges: [Block] - ranges of times in which to create smaller chunks of 
+        meeting_length: int - number of **minutes** which the meeting should last
+        tickets: int - the UserMeetingSubscription ticket IDs for the participating users
+        [time_increment]: int - number of **minutes** that should be between the starts
+                                of two blocks of output (how close should proposals be?)
+        [max_chunks]: int - the maximum number of chunks to return
 
-    # print basic information about the test
-    print(jsonData["seed"])
-    print(jsonData["basetime"])
+    Returns:
+        a list of Proposals representing the meaningful times we have created,
+        sortedy by weight
+    """
 
-    # essentially read the json and turn it into classes and datetime objects accordingly
-    results = reduce_chunks(
-        blocks = list(map(lambda a: Block(
-            datetime.datetime.fromisoformat(a["start"]), 
-            datetime.datetime.fromisoformat(a["end"])
-            ), jsonData["iBlocks"])),
-        meetingLength = jsonData["iMeetingLength"],
-        meetingLockInDate = jsonData["iMeetingLockInDate"],
-        attendees = list(map(lambda a: api.MeetingAttendee(
-                api.User(
-                    a["user"]["name"], 
-                    list(map(lambda b: api.Commitment(
-                        datetime.datetime.fromisoformat(b["start"]), 
-                        datetime.datetime.fromisoformat(b["end"]), 
-                        b["isAbsolute"]
-                    ), a["user"]["commitments"])),
-                    list(map(lambda b: api.UserAttendence(
-                        api.Meeting(
-                            b["meeting"]["name"], 
-                            datetime.datetime.fromisoformat(b["meeting"]["start"]), 
-                            datetime.datetime.fromisoformat(b["meeting"]["end"]),
-                            b["meeting"]["subscribedUsers"],
-                            datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
-                        ),
-                        b["isCritical"],
-                        b["weight"]
-                    ), a["user"]["meetingSubscriptions"])),
-                    a["user"]["id"]
-                ), 
-                a["isCritical"], 
-                a["weight"]
-            ), jsonData["iAttendees"])),
-        minChunks = jsonData["iMinChunks"],
-        timeIncrement = jsonData["iTimeIncrement"]
-    )
+    # get scratch results
+    result = create_times(ranges, meeting_length, tickets, time_increment)
 
-    #  processes the results into a json serializable object
-    results = list(map(lambda r: {
-        "start": r[0].isoformat(timespec="minutes"), 
-        "end": r[1].isoformat(timespec="minutes"), 
-        "can": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[2])), 
-        "cannot": list(map(lambda x: jsonData["iAttendees"][x]["user"]["id"], r[3]))
-        }, results))
+    # sort the results by weight
+    result = list(reversed(sorted(result, key=lambda x:x.total_weight)))
 
-    #  prints the results and length of the results
-    #  print(results)
-    print(len(results))
+    # crop and return result
+    # note that cropping by None does nothing, so this behavior is acceptable
+    return result[:max_chunks]
 
-    with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
-        json.dump({"seed":jsonData["seed"], "basetime":jsonData["basetime"], "results":results}, write_file, indent=4)

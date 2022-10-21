@@ -5,6 +5,16 @@ import api_app.api as api
 from scheduling.scheduling import schedule, Block
 from google_api.get_freebusy import get_freebusy
 
+def schedule_meeting(user):
+    for m_id in user.meeting_subscriptions:
+        sub = api.get_attendance(m_id)
+        meeting = api.get_meeting(sub.meeting)
+        results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.subscribed_users, 15, 5)
+        # TODO: more accurate optimality calculation
+        new_proposals = list(map(lambda result: api.MeetingTimeProposal(result.start, result.end, result.can, result.cannot, result.total_weight), results))
+        meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
+        api.update_meeting(sub.meeting, meeting)
+
 class User(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
@@ -20,22 +30,12 @@ class User(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.User(name=data["name"], emails=data["emails"], commitments=data["commitments"], meeting_subscriptions=data["meetingSubscriptions"])
         api.update_user(id, obj)
-        self.schedule_meeting(obj)
+        schedule_meeting(obj)
         return HttpResponse(status=204)
 
     def delete(self, request, id):
         api.delete_user(id)
         return HttpResponse(status=204)
-    
-    def schedule_meeting(self, user):
-        for m_id in user.meeting_subscriptions:
-            sub = api.get_attendance(m_id)
-            meeting = api.get_meeting(sub.meeting)
-            results = schedule([Block(meeting.start, meeting.end)], meeting.length, meeting.lock_in_date, meeting.subscribed_users, 5, 5, meeting.name)
-            # TODO: more accurate optimality calculation
-            new_proposals = list(map(lambda result: api.MeetingTimeProposal(result["start"], result["end"], result["can"], result["cannot"], sum(list(map(lambda s: api.get_attendee(s).weight, result["can"])))), results))
-            meeting.proposals = list(map(lambda p: api.create_proposal(p), new_proposals))
-            api.update_meeting(meeting, sub.meeting)
 
 class Commitment(View):
     def post(self, request):
@@ -61,9 +61,9 @@ class Commitment(View):
 class Meeting(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         model_id = api.create_meeting(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_meeting(id)
@@ -71,7 +71,7 @@ class Meeting(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         api.update_meeting(id, obj)
         return HttpResponse(status=204)
 
@@ -84,11 +84,18 @@ class Proposal(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.MeetingTimeProposal(start=data["start"], end=data["end"], committed_users=data["committedUsers"], unavailable_users=data["unavailableUsers"], optimality=data["optimality"])
         model_id = api.create_proposal(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_proposal(id)
-        return JsonResponse(obj.json_object())
+        # we need to serialize this custom-ly because
+        # it has foreign keys in it
+        return JsonResponse({
+            "start": obj.start,
+            "end": obj.end,
+            "commitedUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.committed_users)),
+            "unavailableUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.unavailable_users))
+        });
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -105,10 +112,10 @@ class Attendee(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.MeetingAttendee(user=data["user"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendee(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
-        obj = api.get_attendee(id)
+        obj = api.time(id)
         return JsonResponse(obj.json_object())
     
     def put(self, request, id):
@@ -126,7 +133,7 @@ class Attendance(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.UserAttendance(meeting=data["meeting"], is_critical=data["isCritical"], weight=data["weight"])
         model_id = api.create_attendance(obj)
-        return HttpResponse(status=201, headers={"Location": model_id})
+        return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
         obj = api.get_attendance(id)
@@ -143,9 +150,17 @@ class Attendance(View):
         return HttpResponse(status=204)
 
 class FreeBusy(View):
-    def get(self, request, id):
+    def get(self, request):
         auth_header = auth_code=request.headers["Authorization"]
         if len(auth_header.split(" ")) < 2:
             return HttpResponse(status=401)
         obj = get_freebusy(auth_code=auth_header.split(" ")[1])
         return JsonResponse(obj)
+
+class ManyCommitments(View):
+    def post(self, request, id):
+        commitment_list = json.loads(request.body.decode("utf-8"))
+        api.create_many_commitments(id, commitment_list)
+        obj = api.get_user(id)
+        schedule_meeting(obj)
+        return HttpResponse(status=204)

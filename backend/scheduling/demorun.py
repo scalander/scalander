@@ -10,8 +10,8 @@ with open("backend/scheduling/testdata.json", "r") as read_file:  # loads the te
     jsonData = json.load(read_file)
 
 # print basic information about the test
-print(jsonData["seed"])
-print(jsonData["basetime"])
+# print(jsonData["seed"])
+# print(jsonData["basetime"])
 
 # essentially read the json and turn it into classes and datetime objects accordingly
 results = reduce_chunks(
@@ -59,7 +59,7 @@ results = list(map(lambda r: {
 
 #  prints the results and length of the results
 #  print(results)
-print(len(results))
+# print(len(results))
 
 with open("backend/scheduling/results.json", "w") as write_file:  # downloads the results into another json file
     json.dump({"seed":jsonData["seed"], "basetime":jsonData["basetime"], "results":results}, write_file, indent=4)
