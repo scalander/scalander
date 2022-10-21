@@ -16,7 +16,7 @@ class Commitment:
 
 class Meeting:
     def __init__(self, name, start, end, length, proposals, subscribed_users, lock_in_date):
-        self.name, self.start, self.end, self.length, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, proposals, subscribed_users, lock_in_date
+        self.name, self.start, self.end, self.length, self.proposals, self.subscribed_users, self.lock_in_date = name, start, end, length, proposals, subscribed_users, lock_in_date
     
     def json_object(self):
         return {"name": self.name, "start": self.start, "end": self.end, "length": self.length, "proposals": self.proposals, "subscribedUsers": self.subscribed_users, "lockInDate": self.lock_in_date}
@@ -59,6 +59,10 @@ def get_user(id):
     commitment_ids = list(map(lambda com: com.id, models.Commitment.objects.filter(user_id=id).all()))
     meeting_subscription_ids = list(map(lambda sub: sub.id, models.UserMeetingSubscription.objects.filter(user_id=id).all()))
     return User(user.name, user.email, commitment_ids, meeting_subscription_ids)
+
+def get_user_by_subscription(id):
+    attendence = models.UserMeetingSubscription.objects.get(id=id)
+    return get_user(attendence.user.id)
 
 def update_user(id, obj):
     user = models.User.objects.get(id=id)
@@ -123,7 +127,7 @@ def delete_commitment(id):
     commitment.delete()
 
 def create_meeting(obj):
-    model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, lock_in_date=obj.lock_in_date)
+    model = models.Meeting.objects.create(name=obj.name, start=obj.start, end=obj.end, length=obj.length, lock_in_date=obj.lock_in_date)
     for proposal in obj.proposals:
         proposal_model = models.MeetingTimeProposal.objects.get(id=proposal)
         proposal_model.meeting_id = model.id
@@ -142,16 +146,16 @@ def get_meeting(id):
     proposals = models.MeetingTimeProposal.objects.filter(meeting=meeting).order_by("-optimality")
     proposal_ids = list(map(lambda prop: prop.id, proposals))
     
-    return Meeting(meeting.name, meeting.start, meeting.end, proposal_ids, subscription_ids, meeting.lock_in_date)
+    return Meeting(meeting.name, meeting.start, meeting.end, meeting.length, proposal_ids, subscription_ids, meeting.lock_in_date)
 
 def update_meeting(id, obj):
     meeting = models.Meeting.objects.get(id=id)
-    meeting.name, meeting.start, meeting.end, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.lock_in_date
+    meeting.name, meeting.start, meeting.end, meeting.length, meeting.lock_in_date = obj.name, obj.start, obj.end, obj.length, obj.lock_in_date
     meeting.save()
 
     # Update time proposals
     proposal_models = dict(map(lambda com: (com.id, com), models.MeetingTimeProposal.objects.filter(meeting=id).all()))
-    current_proposals = set(map(lambda com: com.id, proposal_models))
+    current_proposals = set(map(lambda com: com, proposal_models))
     to_attach = set(obj.proposals) - current_proposals
     to_delete = current_proposals - set(obj.proposals)
     for proposal_id in to_attach:
@@ -233,7 +237,7 @@ def update_proposal(id, obj):
         unavailable_user.delete()
 
 def delete_proposal(id):
-    proposal = models.Meeting.objects.get(id=id)
+    proposal = models.MeetingTimeProposal.objects.get(id=id)
     attendance_models = models.MeetingProposalAttendance.objects.filter(proposal=id).all()
     for attendance in attendance_models:
         attendance.delete()
@@ -282,3 +286,24 @@ def create_many_commitments(id, commitments):
         c = models.Commitment.objects.create(start=c["start"], end=c["end"],
                                              is_absolute=True,
                                              user_id=id)
+
+def check_commitment(uid, start, end):
+    """Checks if any of a user's commitment includes a time range
+
+    Arguments:
+        uid ([uidType]) - user ID 
+        start (datetime.DateTime) - start of range
+        end (datetime.DateTime) - end of range
+
+    Returns:
+        bool is the user available?
+    """
+
+    # get commitments
+    res = models.Commitment.objects.filter(user_id=uid, # users
+                                           start__lte=start, # start time must fit
+                                           end__gte=end) # end time ALSO must fit!
+
+    # we hope to have some non-empty result, if user is available
+    return len(res)>0
+    

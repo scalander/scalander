@@ -1,6 +1,7 @@
 import datetime
 import json
 import api_app.api as api
+import time as ttt # because time is a variable name
 
 class Block:
     def __init__(self, start, end):
@@ -8,20 +9,10 @@ class Block:
 
 # functions here generally call the one(s) directly above them
 
-def commitment_check(commitment_id, time):  # if time and commitment intersect, return True
-    commitment = api.get_commitment(commitment_id)
-    return (commitment.start <= time.start) and (commitment.end >= time.end)
-
-def check_user_commits(time, user):  # check all the user's commitments with a meeting, return True if meeting time works
-    for c in api.get_user(user).commitments:
-        if commitment_check(c, time):
-            return True
-    return False  # add isAbsolute functionality to commitments later
-
 def check_multiple_users(time, users):
     can, cannot = [], []
     for u in users:
-        if check_user_commits(time, u):
+        if api.check_commitment(api.get_attendee(u).user, time.start, time.end):
             can.append(u)
         else:
             cannot.append(u)
@@ -64,8 +55,8 @@ def create_times(blocks, meetingLength, meetingLockInDate, attendees, minChunks,
         timeQuantity = (blockLen - meetingLength) // timeIncrement + 1
         for j in range(timeQuantity):  # go through the block and add a time every time increment
             # TODO refactor. this is API abuse but we are creating "meeting" objects
-            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
-        chunks += chunk_times(times, list(map(lambda a: api.get_attendee(a).user, attendees)))
+            times.append(api.Meeting(meetingName, i.start + datetime.timedelta(minutes=timeIncrement*j), i.start + datetime.timedelta(minutes=meetingLength+timeIncrement*j), 30, [], attendees, meetingLockInDate))  # change Meeting class later once we standardize the classes
+        chunks += chunk_times(times, attendees)
     return chunks
 
 def reduce_chunks(blocks, meetingLength, meetingLockInDate, attendees, minChunks, timeIncrement, meetingName=" "):
@@ -114,6 +105,7 @@ def schedule(blocks, meetingLength, meetingLockInDate, attendees, minChunks, tim
     }, result))
 
 
+
 ### TEST LOADING AND RUNNING
 
 def test_main():
@@ -145,6 +137,7 @@ def test_main():
                             b["meeting"]["name"], 
                             datetime.datetime.fromisoformat(b["meeting"]["start"]), 
                             datetime.datetime.fromisoformat(b["meeting"]["end"]),
+                            30,
                             b["meeting"]["subscribedUsers"],
                             datetime.datetime.fromisoformat(b["meeting"]["lockInDate"])
                         ),

@@ -61,7 +61,7 @@ class Commitment(View):
 class Meeting(View):
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         model_id = api.create_meeting(obj)
         return JsonResponse({"status": "success", "id": model_id})
 
@@ -71,7 +71,7 @@ class Meeting(View):
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
-        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
+        obj = api.Meeting(name=data["name"], start=data["start"], end=data["end"], length=data["length"], proposals=data["proposals"], subscribed_users=data["subscribedUsers"], lock_in_date=data["lockInDate"])
         api.update_meeting(id, obj)
         return HttpResponse(status=204)
 
@@ -88,7 +88,14 @@ class Proposal(View):
 
     def get(self, request, id):
         obj = api.get_proposal(id)
-        return JsonResponse(obj.json_object())
+        # we need to serialize this custom-ly because
+        # it has foreign keys in it
+        return JsonResponse({
+            "start": obj.start,
+            "end": obj.end,
+            "commitedUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.committed_users)),
+            "unavailableUsers": list(map(lambda x:api.get_user_by_subscription(x.id).__dict__, obj.unavailable_users))
+        });
     
     def put(self, request, id):
         data = json.loads(request.body.decode("utf-8"))
@@ -108,7 +115,7 @@ class Attendee(View):
         return JsonResponse({"status": "success", "id": model_id})
 
     def get(self, request, id):
-        obj = api.get_attendee(id)
+        obj = api.time(id)
         return JsonResponse(obj.json_object())
     
     def put(self, request, id):
