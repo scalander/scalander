@@ -10,11 +10,17 @@ import environ
 
 #TODO internationalize
 
-ENDPOINT="no_reply@em6498.scalander.com"
+ENDPOINT=("no_reply@em6498.scalander.com", "Team Scalander")
 # Take environment variables from .env file
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env() #acessing .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #reading env file
+
+
+#TODO put this somewhere
+with open("./emailing/availability.html", "r") as avail:
+    availability_email_text = avail.read().strip()
+
 
 # def meeting_confirm
 def inviteEmail(id): #takes meeting id string
@@ -35,9 +41,6 @@ def inviteEmail(id): #takes meeting id string
     try:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
-        print(response.status_code) #checkin if the email went through
-        print(response.body)
-        print(response.headers)
     except Exception as e:
         print(e.message) #if it didn't, throwing an error
 
@@ -48,12 +51,14 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         from_email=ENDPOINT,
         to_emails=[user.emails], # email(s) being plural is a misnomer, email is singular
         subject=f'{meeting.name} Availability Confirmation',
-        html_content=f'<p><h1>{meeting.name} is being scheduled, please tell us your availability. <br><br><a href="https://scalander.com/schedule/{uid}">Click Here to Input Availability.</a> Thank You!</h1></p>')
+        html_content=availability_email_text % {
+            "meeting_name": meeting.name,
+            "meeting_url": f"https://scalander.com/meeting/{id}",
+            "scheduling_url": f"https://scalander.com/schedule/{uid}",
+            "recipient": user.emails # its actually singular
+        }) # old style format
     try:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
-        print(response.status_code) #checkin if the email went through
-        print(response.body)
-        print(response.headers)
     except Exception as e:
         print(e.message) #if it didn't, throwing an error

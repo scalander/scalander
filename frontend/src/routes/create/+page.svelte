@@ -84,7 +84,7 @@
             });
             let sub_id = ((await (await sub_req).json()).id);
             // TODO (make persistent users when auth is done) make
-            // a user and stamp the ticket to the user
+            // a user and staple the ticket to the user
             let user_req = fetch(user_endpoint.href, {
                 method: "POST",
                 headers: {

@@ -1,4 +1,5 @@
 import api_app.models as models
+from emailing.sendemail import availabilityEmail
 
 class User:
     def __init__(self, name, emails, commitments, meeting_subscriptions):
@@ -52,6 +53,9 @@ def create_user(obj):
         subscription_model = models.UserMeetingSubscription.objects.get(id=subscription)
         subscription_model.user_id = model.id
         subscription_model.save()
+        # we need to send an email out to that user asking to schedule each meeeting
+        # they commited to
+        availabilityEmail(subscription_model.meeting.id, model.id)
     return model.id
 
 def get_user(id):
@@ -92,6 +96,9 @@ def update_user(id, obj):
         subscription = subscription_models[subscription_id]
         subscription.user_id = id
         subscription.save()
+        # if the user has a newly attachable commitment
+        # we need to send an email out to that user asking to schedule the meeting
+        availabilityEmail(subscription.meeting.id, id)
     for subscription_id in to_delete:
         # TODO: [OPTIMIZE] extra db query here, and everywhere else this strategy is used
         delete_subscription(id)
