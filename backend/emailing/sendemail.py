@@ -31,7 +31,7 @@ def inviteEmail(id): #takes meeting id string
         from_email=ENDPOINT,
         to_emails=[api.get_user(u).emails for u in meeting.subscribed_users], # email(s) being plural is a misnomer, email is singular
         subject=f'{meeting.name} Time Confirmation',
-        html_content=f'<p><h1>{meeting.name} has been scheduled for <strong>{meetingtime.start}</strong> and will last for <strong>{meeting.length}</strong>.<br><br><a href="http://scalander.com/{id}">Click Here to See Meeting Details</a></h1></p>')
+        html_content=f'<p><h1>{meeting.name} has been scheduled for <strong>{meetingtime.start}</strong> and will last for <strong>{meeting.length}</strong>.<br><br><a href="https://scalander.com/{id}">Click Here to See Meeting Details</a></h1></p>')
     try:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
@@ -48,7 +48,7 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         from_email=ENDPOINT,
         to_emails=[user.emails], # email(s) being plural is a misnomer, email is singular
         subject=f'{meeting.name} Availability Confirmation',
-        html_content=f'<p><h1>{meeting.name} is being scheduled, please tell us your availability. <br><br><a href="http://scalander.com/schedule/{uid}">Click Here to Input Availability.</a> Thank You!</h1></p>')
+        html_content=f'<p><h1>{meeting.name} is being scheduled, please tell us your availability. <br><br><a href="https://scalander.com/schedule/{uid}">Click Here to Input Availability.</a> Thank You!</h1></p>')
     try:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
