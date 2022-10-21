@@ -180,25 +180,30 @@ def create_times(schedule_during:[Block], meeting_length,
     # create an array of meaningful blocks, starting with the first proposal
     meaningful_proposals = [proposals.pop(0)]
 
+    # recall thath we are comparing agaist last time, not just last menangful
+    # time, to do meaningful blocks (i.e. otherwise we will schedule over
+    # things like long contiousl blocks where every *n* will be meannigful)
+    last = proposals.pop(0)
+
     # for each proposal, check if its meaningful against the last
     # this assumes that the times are sorted. which they should be if
     # generated
     for proposal in proposals:
-        # get last meaningful proposal
-        last = meaningful_proposals[-1]
-
         # check for attendee
         if (proposal.can != last.can) or (proposal.cannot != last.cannot):
             meaningful_proposals.append(proposal)
+            last = proposal # set comp
             continue
 
         # check for time delta, if its larger than time_increment, then its meaningufl
         # timedelta doesn't store minutes arg
         if (proposal.start-last.start).seconds//60 > time_increment:
             meaningful_proposals.append(proposal)
+            last = proposal # set comp
             continue
 
         # otherwise, they are not meaningful so we don't append
+        last = proposal # set comp
 
     # return all meaningful blocks
     return meaningful_proposals
