@@ -8,6 +8,9 @@ from datetime import datetime, date
 
 from typing import List
 
+# timezone handler
+from django.utils import timezone
+
 @dataclass
 class User:
     name: str # user's name 
@@ -292,9 +295,15 @@ def schedule_user(user):
         # remove all old proposals for that meeting
         models.MeetingTimeProposal.objects.filter(meeting_id=sub.meeting).delete()
         
-        # submit new proposals for creation
-        [create_proposal(i) for i in new_proposals]
+        # if we are BEFORE the lock date of the meeting
+        # this is a handler which uses handler
+        if timezone.now() < meeting.lock_in_date:
+            # submit new proposals for creation
+            [create_proposal(i) for i in new_proposals]
         
+
+
         
+
 
 
