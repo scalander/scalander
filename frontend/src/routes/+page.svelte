@@ -64,7 +64,7 @@
 
     #center-clearfix {
         width: 100vw;
-        height: calc(100vh - 50px); /* for header */
+        height: calc(100vh - 50px - 30px); /* for header and footer */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -94,7 +94,7 @@
     }
 
     #copyright {
-        position: absolute;
+        height: 30px;
         bottom: 5px;
         color: var(--background-contrast);
         font-size: 8px;
