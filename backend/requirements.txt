@@ -7,3 +7,8 @@ google_auth_oauthlib
 django-cors-headers
 sendgrid
 django-environ
+dnspython
+pymongo==3.12.1
+djongo
+gunicorn
+pytz

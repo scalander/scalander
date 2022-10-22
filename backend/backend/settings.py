@@ -10,21 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
+import os,sys
 from pathlib import Path
+import djongo
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# environ 
+import environ
+
+env = environ.Env() #acessing .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #reading env file
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = (os.environ.get("MODE","").lower()!="production")
+# DEBUG = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o9gf_g=7(k4&!yn7l8pno^hr=ac!0r9d^8pm=pk6i-7hi)doe('
+SECRET_KEY = env("DJANGO_ROOT_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ["scalander.com", "localhost", "127.0.0.1"]
 
@@ -77,12 +85,24 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'djongo',
+            'NAME': 'scalander',
+            'ENFORCE_SCHEMA': False,
+            'CLIENT': {
+                'host': env("PRODUCTION_DATABASE")
+            }
+        }
+    }
 
 
 # Password validation
