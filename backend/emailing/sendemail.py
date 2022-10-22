@@ -13,6 +13,9 @@ import environ
 ENDPOINT=("no_reply@em6498.scalander.com", "Team Scalander")
 AVAILABILITY_EMAIL_TEMPLATE="d-85e6eb3f7b524d36bfb557cf0796b60e"
 
+# Emanuel mode (i.e. debug)
+DONTDOIT = False
+
 
 # Take environment variables from .env file
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,21 +35,18 @@ def inviteEmail(id): #takes meeting id string
 
     message = Mail( #describing the email to send
         from_email=ENDPOINT,
-        to_emails=[api.get_user(u).emails for u in meeting.subscribed_users], # email(s) being plural is a misnomer, email is singular
+        to_email=[api.get_user(u).email for u in meeting.subscribed_users], 
         subject=f'{meeting.name} Time Confirmation',
         html_content=f'<p><h1>{meeting.name} has been scheduled for <strong>{meetingtime.start}</strong> and will last for <strong>{meeting.length}</strong>.<br><br><a href="https://scalander.com/{id}">Click Here to See Meeting Details</a></h1></p>')
-    try:
-        sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
-        response = sg.send(message) #sending message
-    except Exception as e:
-        print(e.message) #if it didn't, throwing an error
+    sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
+    response = sg.send(message) #sending message
 
 def availabilityEmail(id, uid): #takes meeting id string, user id string
     meeting = api.get_meeting(id)
     user = api.get_user(uid)
     message = Mail( #describing the email to send
         from_email=ENDPOINT,
-        to_emails=[user.emails], # email(s) being plural is a misnomer, email is singular
+        to_emails=[user.email], # email(s) being plural is a misnomer, email is singular
         subject=f'Finding time for {meeting.name}')
 
     message.template_id = AVAILABILITY_EMAIL_TEMPLATE
@@ -55,11 +55,8 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         "meeting_name": meeting.name,
         "meeting_url": f"https://scalander.com/meeting/{id}",
         "scheduling_url": f"https://scalander.com/schedule/{uid}",
-        "recipient": user.emails # its actually singular
+        "recipient": user.email # its actually singular
     }
 
-    try:
-        sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
-        response = sg.send(message) #sending message
-    except Exception as e:
-        print(e.message) #if it didn't, throwing an error
+    sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
+    response = sg.send(message) #sending message

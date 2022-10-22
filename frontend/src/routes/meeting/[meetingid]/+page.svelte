@@ -82,15 +82,13 @@
             <div>
                 <span class="sublabel">{strings.RESULT_AVAILABLE} ({meeting.proposals[view_proposal].commitedUsers.length})</span>
                 {#each meeting.proposals[view_proposal].commitedUsers as commited}
-                    <span class="email">{commited.emails}</span>
-                    <!-- TODO plural because user email is plural (aaa) -->
+                    <span class="email">{commited.email}</span>
                 {/each}
             </div>
             <div>
                 <span class="sublabel">{strings.RESULT_UNAVAILABLE} ({meeting.proposals[view_proposal].unavailableUsers.length})</span>
                 {#each meeting.proposals[view_proposal].unavailableUsers as uncommited}
-                    <span class="email">{uncommited.emails}</span>
-                    <!-- TODO plural because user email is plural (aaa) -->
+                    <span class="email">{uncommited.email}</span>
                 {/each}
             </div>
         </div>

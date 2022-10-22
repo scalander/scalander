@@ -55,8 +55,14 @@ def check_multiple_users(time: Block, tickets: List[int]) -> dict:
          "cannot": [int - unavailable tickets]}
     """
 
-    # check for users that can make it
-    can = api.check_commitment(tickets, time.start, time.end)
+    # build mappings between UID and subscription ticket ID
+    # (to read the output of checking)
+    uid_to_ticket = {api.get_uid_by_subscription(i):i for i in tickets}
+
+    # check for users that can make it (we pass uid)
+    result = api.check_commitment(list(uid_to_ticket.keys()), time.start, time.end)
+    # map back to tickets
+    can = [uid_to_ticket[i] for i in result]
 
     # those that cannot make it are the rest
     cannot = list(filter(lambda x:x not in can, tickets))
@@ -92,7 +98,7 @@ def check_all_times(times: [Block], tickets: List[int]) -> List[Proposal]:
         
         # for each ticket, add
         for ticket_id in avail["can"]:
-            info = api.get_attendee(ticket_id)
+            info = api.get_attendance(ticket_id)
             weight += info.weight
 
         # set it back to avail object
