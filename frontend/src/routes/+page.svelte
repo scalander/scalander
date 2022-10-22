@@ -95,9 +95,9 @@
 
     #copyright {
         position: absolute;
-        bottom: min(25px, 5vh);
+        bottom: 5px;
         color: var(--background-contrast);
-        font-size: 10px;
+        font-size: 8px;
         text-align: center;
         margin: 0 auto;
         padding: 10px;
