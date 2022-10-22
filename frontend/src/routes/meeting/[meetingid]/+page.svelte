@@ -74,9 +74,9 @@
         <span id="meeting-length">{formatDistance(0, meeting.length*60*1000)}</span>
         {#if meeting.proposals.length > 0}
         <br />
-        <span class="date">{format((new Date(meeting.proposals[view_proposal].start)), "EEEE, MMMM dd yyyy")}</span>
+        <span class="date">{format((new Date(meeting.proposals[view_proposal].start)), strings.UNIVERSAL_DATE_FORMAT)}</span>
         <div class="time">
-            <span class="start-time">{format((new Date(meeting.proposals[view_proposal].start)), "hh:mm aa")}</span> — <span class="end-time">{format((new Date(meeting.proposals[view_proposal].end)), "hh:mm aa")}</span>
+            <span class="start-time">{format((new Date(meeting.proposals[view_proposal].start)), strings.UNIVERSAL_TIME_FORMAT)}</span> — <span class="end-time">{format((new Date(meeting.proposals[view_proposal].end)), strings.UNIVERSAL_TIME_FORMAT)}</span>
         </div>
         <div class="availability" style="margin-bottom: 20px">
             <div>
@@ -93,8 +93,9 @@
             </div>
         </div>
 
+        <!-- If we are not locked in yet -->
+        {#if (new Date())<(new Date(meeting.lock_in_date))}
         <hr />
-
         <span class="sublabel">{strings.RESULT_ALTERNATE}</span> <span class="order">{strings.RESULT_ORDERING}</span>
         <div class="buttonrow">
         {#each [...Array(number_plans).keys()] as t}
@@ -102,11 +103,13 @@
                  on:click={()=>{view_proposal=t}}>{t+1}</div>
         {/each}
         </div>
+        <span id="lockin">{strings.MEETING_LOCK_IN.replace("{date}", format(new Date(meeting.lock_in_date), strings.UNIVERSAL_DATE_FORMAT))}</span>
+        {/if}
         {:else}
             <div id="notscheduled">
             <div id="notscheduled-msg">{strings.MEETING_NOT_SCHEDULED}</div>
             <span class="sublabel">{strings.MEETING_RANGE}</span> 
-            <p class="bold">{format((new Date(meeting.start)), "EEEE, MMMM dd yyyy")} — {format((new Date(meeting.end)), "EEEE, MMMM dd yyyy")}</p>
+            <p class="bold">{format((new Date(meeting.start)), strings.UNIVERSAL_DATE_FORMAT)} — {format((new Date(meeting.end)), strings.UNIVERSAL_DATE_FORMAT)}</p>
             </div>
         {/if}
 
@@ -139,6 +142,7 @@
     .buttonrow {
         display: flex;
         width: 100%;
+        margin-top: 2px;
     }
 
     .centering-container {
@@ -209,5 +213,12 @@
 
     .bold {
         font-weight: 600;
+    }
+
+    #lockin {
+        display: block;
+        font-size: 11px;
+        transform: translateX(-1px);
+        color: var(--accent);
     }
 </style>

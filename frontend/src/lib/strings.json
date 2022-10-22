@@ -1,4 +1,6 @@
 {
+    "UNIVERSAL_DATE_FORMAT": "EEEE, MMMM dd yyyy",
+    "UNIVERSAL_TIME_FORMAT": "hh:mm aa",
     "HOMEPAGE_CALLOUT": "Your meetings, scheduled.",
     "HOMEPAGE_DESCRIPTION":"We get it—scheduling between people sucks. Scalander is a digital meeting scheduling tool that fixes scheduling: once and for all. It's as easy as telling us who is showing up; we will handle the rest. ",
     "HOMEPAGE_BUTTON":"Schedule a Meeting",
@@ -30,6 +32,7 @@
     "MEETING_LOADING": "Working hard with the scheduling bots...",
     "MEETING_DONE": "Done! Each invitee will get an email with futher instructions.",
     "MEETING_NOT_SCHEDULED": "We have not yet identified a viable time for this meeting. Keep your eyes peeled on this page!",
+    "MEETING_LOCK_IN": "Confirming by: {date}",
     "MEETING_RANGE": "Possible Date Range",
     "RESULT_AVAILABLE": "Available",
     "RESULT_UNAVAILABLE": "Unavailable",
