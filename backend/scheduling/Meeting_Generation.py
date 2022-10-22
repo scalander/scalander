@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import datetime
 import os.path
+import api_app.api as api
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -64,22 +65,25 @@ def datetime_to_ics(time):
             time2[i] = "0"+time2[i]
     newtime=str(time.year)+"-"+time2[0]+"-"+time2[1]+"T"+time2[2]+":"+time2[3]+":"+time2[4]+"-07:00"
     return newtime
-def generate_ics(meeting):
-    #meeting is a MeetingTimeProposal
+def generate_ics(id): #taked in id of meeting
+    meeting = api.get_meeting(id)
+    op = 0
+    meetingnum = 0
+    for i in range(len(meeting.proposals)):  # passing through meeting time proposals to get most optimal proposal
+        if meeting.proposals[i].optimality > op:  # we might not need to do this passing through
+            op = meeting.proposals[i].optimality
+            meetingnum = i
+    meetingtime = datetime.strptime(meeting.proposals[meetingnum])
     event=event_template
-    print(event)
-    print(event["attendees"])
-    event["summary"]="Scalander Test Event" #need to get an input here
-    event["description"]="Testing Schedule Generation" #also need to get an input here
+    event["summary"]=meeting.name
+    event["description"]="Scalander generated meeting" #also need to get an input here
     #also need an input for location
-    event["start"]["dateTime"] = datetime_to_ics(meeting.start)
-    event["end"]["dateTime"] = datetime_to_ics(meeting.end)
+    event["start"]["dateTime"] = datetime_to_ics(meetingtime.start)
+    event["end"]["dateTime"] = datetime_to_ics(meetingtime.end)
     event["attendees"]=[]
-    for i in range(len(meeting.commitedUsers)):
-        email = meeting.commitedUsers[i].user.emails
+    for i in range(len(meetingtime.commitedUsers)):
+        email = meetingtime.commitedUsers[i].user.emails
         event["attendees"].append({"email":email})
-    print(event)
-    print(event["attendees"])
     event = service.events().insert(calendarId='primary', body=event).execute()
     print('Event created: %s' % (event.get('htmlLink')))
 
