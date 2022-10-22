@@ -36,4 +36,5 @@ RUN yes yes | python manage.py collectstatic
 RUN python manage.py migrate
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["gunicorn", "-b :8082", "-w 4", "backend.wsgi"]
+# scheduling takes a *long time* TODO
+CMD ["gunicorn", "-b :8082", "-w 4", "--timeout 8000", "backend.wsgi"]
