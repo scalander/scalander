@@ -72,7 +72,7 @@
 
     #background {
         width: 100vw;
-        height: calc(100vh - 50px);
+        height: 100vh;
         position: absolute;
         background: url("$lib/background.svg");
         z-index: -1;
