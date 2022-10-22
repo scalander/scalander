@@ -10,8 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Install pip requirements
-COPY requirements.txt .
 RUN apt update && apt install -y build-essential
+COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
