@@ -270,7 +270,7 @@ def check_commitment(users, start, end):
     # we hope to have some non-empty result, if user is available
     return avail_ids
     
-def schedule_meeting(user):
+def schedule_user(user):
     """Reschedules all of a user's meetings, if they are BEFOER the lock date
 
     Arguments:

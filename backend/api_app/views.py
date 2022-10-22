@@ -19,7 +19,7 @@ class User(View):
         data = json.loads(request.body.decode("utf-8"))
         obj = api.User(name=data["name"], email=data["email"])
         api.update_user(id, obj)
-        api.schedule_meeting(obj)
+        api.schedule_user(obj)
         return HttpResponse(status=204)
 
     def delete(self, request, id):
@@ -130,5 +130,5 @@ class ManyCommitments(View):
                                                         end=i["end"],
                                                         is_absolute=i["isAbsolute"]) for i in commitment_list])
         obj = api.get_user(id)
-        api.schedule_meeting(obj)
+        api.schedule_user(obj)
         return HttpResponse(status=204)
