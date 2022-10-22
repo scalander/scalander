@@ -37,4 +37,4 @@ RUN python manage.py migrate
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
 # scheduling takes a *long time* TODO
-CMD ["gunicorn", "-b :8082", "-w 4", "--timeout 8000", "backend.wsgi"]
+CMD ["gunicorn", "-b :8082", "-w 4", "-t 8000", "backend.wsgi"]
