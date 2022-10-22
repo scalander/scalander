@@ -14,7 +14,7 @@ ENDPOINT=("no_reply@em6498.scalander.com", "Team Scalander")
 AVAILABILITY_EMAIL_TEMPLATE="d-85e6eb3f7b524d36bfb557cf0796b60e"
 
 # Emanuel mode (i.e. debug)
-DONTDOIT = True
+DONTDOIT = False
 
 
 # Take environment variables from .env file
