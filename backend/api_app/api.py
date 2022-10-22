@@ -211,6 +211,9 @@ def create_attendance(obj):
                                                           meeting_id=obj.meeting,
                                                           is_critical=obj.is_critical,
                                                           weight=obj.weight)
+    # if a user wants to attend, they get te get an email
+    # about getting their time!
+    availabilityEmail(obj.meeting, obj.user)
     return model.id
 
 def get_attendance(id):
