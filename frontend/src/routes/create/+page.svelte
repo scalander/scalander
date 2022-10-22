@@ -70,19 +70,6 @@
         let user_endpoint = new URL("api/user",
                                      import.meta.env.VITE_BACKEND_ENDPOINT);
         for (let [email,weight] of users) {
-            // generate a meeting subscription ticket
-            let sub_req = fetch(meeting_sub_endpoint.href, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    weight: weight,
-                    meeting: meeting_id,
-                    isCritical: false // TODO, but trying to scehdule most for now
-                })
-            });
-            let sub_id = ((await (await sub_req).json()).id);
             // TODO (make persistent users when auth is done) make
             // a user and staple the ticket to the user
             let user_req = fetch(user_endpoint.href, {
@@ -92,38 +79,26 @@
                 },
                 body: JSON.stringify({
                     name: "TODO",
-                    emails:email, // TODO, but trying to scehdule most for now
-                    //// AAAAAA email is plural
-                    commitments: [], // backend will send email for form
-                    meetingSubscriptions: [sub_id] // stamping with our ticket
+                    email:email, // TODO, but trying to scehdule most for now
+                })
+            });
+            let uid = ((await (await user_req).json()).id);
+            // generate a meeting subscription ticket
+            let sub_req = fetch(meeting_sub_endpoint.href, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    weight: weight,
+                    user: uid,
+                    meeting: meeting_id,
+                    isCritical: false // TODO, but trying to scehdule most for now
                 })
             });
             // send request and wait for it to finish
-            await user_req;
-            sub_tickets.push(sub_id);
         }
 
-        let meeting_new_endpoint = new URL(`api/meeting/${meeting_id}`,
-                               import.meta.env.VITE_BACKEND_ENDPOINT);
-        let meeting_update_req = fetch(meeting_new_endpoint.href, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                // TODO we need to supply all the meeting info again
-                // because PUT overwrites
-                name,
-                start: new Date(start),
-                end: new Date(end),
-                length,
-                lockInDate: new Date(lockin), // TODO we hard-code meetings to be scheduled by this time; we can also just ask the user
-                proposals: [],
-                subscribedUsers: sub_tickets,
-            })
-        });
-
-        await meeting_update_req;
         bottomText = strings.MEETING_DONE;
 
 

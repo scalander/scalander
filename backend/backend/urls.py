@@ -29,8 +29,6 @@ urlpatterns = [
     path('api/meeting', csrf_exempt(views.Meeting.as_view(http_method_names=['post']))),
     path('api/proposal/<str:id>', csrf_exempt(views.Proposal.as_view())),
     path('api/proposal', csrf_exempt(views.Proposal.as_view(http_method_names=['post']))),
-    path('api/attendee/<str:id>', csrf_exempt(views.Attendee.as_view())),
-    path('api/attendee', csrf_exempt(views.Attendee.as_view(http_method_names=['post']))),
     path('api/attendance/<str:id>', csrf_exempt(views.Attendance.as_view())),
     path('api/attendance', csrf_exempt(views.Attendance.as_view(http_method_names=['post']))),
     path('api/freebusy/', csrf_exempt(views.FreeBusy.as_view(http_method_names=['get']))),
