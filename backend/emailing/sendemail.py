@@ -56,7 +56,7 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         "meeting_url": f"https://scalander.com/meeting/{id}",
         "scheduling_url": f"https://scalander.com/schedule/{uid}",
         "recipient": user.email, # its actually singular
-        "lockin_date": meeting.lock_in_date.strftime("%b %d, %Y")
+        "lockin_date": meeting.lock_in_date.strftime("%a, %b %d, %Y")
     }
 
     sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
