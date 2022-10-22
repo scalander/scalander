@@ -323,4 +323,8 @@
         font-weight: 600;
     }
 
+    #create-form {
+        padding: 20px;
+    }
+
 </style>

@@ -52,7 +52,7 @@
     .callout {
         color: var(--accent);
         font-weight: 700;
-        font-size: 100px;
+        font-size: min(100px, 15vw);
         line-height: 1.3;
         mix-blend-mode: darken;
     }
@@ -95,11 +95,12 @@
 
     #copyright {
         position: absolute;
-        bottom: min(30px, 10vh);
+        bottom: min(25px, 5vh);
         color: var(--background-contrast);
         font-size: 10px;
         text-align: center;
         margin: 0 auto;
+        padding: 10px;
         width: 100%;
     }
 

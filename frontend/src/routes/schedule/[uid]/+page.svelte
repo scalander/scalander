@@ -175,6 +175,7 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
         border-radius: 5px;
         padding: 20px;
     }
+
     .schedule-container-small {
         width: min(80vw, 500px);
         height: min(80vh, 250px);
