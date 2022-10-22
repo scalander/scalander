@@ -78,7 +78,7 @@
         <div class="time">
             <span class="start-time">{format((new Date(meeting.proposals[view_proposal].start)), "hh:mm aa")}</span> — <span class="end-time">{format((new Date(meeting.proposals[view_proposal].end)), "hh:mm aa")}</span>
         </div>
-        <div class="availability">
+        <div class="availability" style="margin-bottom: 20px">
             <div>
                 <span class="sublabel">{strings.RESULT_AVAILABLE} ({meeting.proposals[view_proposal].commitedUsers.length})</span>
                 {#each meeting.proposals[view_proposal].commitedUsers as commited}
@@ -95,6 +95,7 @@
             </div>
         </div>
 
+        <hr />
 
         <span class="sublabel">{strings.RESULT_ALTERNATE}</span> <span class="order">{strings.RESULT_ORDERING}</span>
         <div class="buttonrow">
@@ -179,11 +180,12 @@
     .email {
         display: block;
         font-size: 14px;
+        font-weight: 300;
     }
 
     .availability {
         display: flex;
-        gap: 20px;
+        gap: 60px;
         flex-wrap: wrap;
     }
 

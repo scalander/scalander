@@ -30,8 +30,8 @@
     "MEETING_DONE": "Done! Each invitee will get an email with futher instructions.",
     "MEETING_NOT_SCHEDULED": "We have not yet identified a viable time for this meeting. Keep your eyes peeled on this page!",
     "MEETING_RANGE": "Possible Date Range",
-    "RESULT_AVAILABLE": "Available Attendees",
-    "RESULT_UNAVAILABLE": "Unavailable Attendees",
+    "RESULT_AVAILABLE": "Available",
+    "RESULT_UNAVAILABLE": "Unavailable",
     "RESULT_ALTERNATE": "Alternate Schedules",
     "RESULT_ORDERING": "ordered by optimality"
 }

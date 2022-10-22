@@ -203,7 +203,7 @@ def create_proposal(obj):
     for committed in obj.committed_users:
         committed_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=True)
     for unavailable in obj.unavailable_users:
-        unavailable_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=committed, is_committed=False)
+        unavailable_model = models.MeetingProposalAttendance.objects.create(proposal_id=model.id, user_subscription_id=unavailable, is_committed=False)
     return model.id
 
 def get_proposal(id):
