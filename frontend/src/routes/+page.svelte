@@ -17,7 +17,7 @@
 <div id="center-clearfix">
     <div id="center">
         <!-- hard coded string because its the darn app's name -->
-        <h2 class="callout">Your meetings scheduled.</h2>
+        <h2 class="callout">{strings.HOMEPAGE_CALLOUT}</h2>
         <p class="callout-text">{strings.HOMEPAGE_DESCRIPTION}</p>
         <br />
         <a href="./create"><Button primary>{strings.HOMEPAGE_BUTTON}</Button></a>
@@ -36,7 +36,6 @@
         float: top;
         height: 50px;
         padding: 10px;
-        background: var(--accented-background);
         display: flex;
         flex-direction: row;
         align-items: center;

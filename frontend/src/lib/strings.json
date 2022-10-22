@@ -1,4 +1,5 @@
 {
+    "HOMEPAGE_CALLOUT": "Your meetings, scheduled.",
     "HOMEPAGE_DESCRIPTION":"We get it—scheduling between people sucks. Scalander is a digital meeting scheduling tool that fixes scheduling: once and for all. It's as easy as telling us who is showing up; we will handle the rest. ",
     "HOMEPAGE_BUTTON":"Schedule a Meeting",
     "DATETIMERANGEPICKER_SELECT_DATE": "Select a date on the left!",
