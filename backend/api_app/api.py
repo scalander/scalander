@@ -297,9 +297,10 @@ def schedule_user(user):
         
         # if we are BEFORE the lock date of the meeting
         # this is a handler which uses handler
-        if timezone.now() < meeting.lock_in_date:
-            # submit new proposals for creation
-            [create_proposal(i) for i in new_proposals]
+        # if timezone.now() < meeting.lock_in_date:
+        # submit new proposals for creation
+        # TODO
+        [create_proposal(i) for i in new_proposals]
         
 
 
