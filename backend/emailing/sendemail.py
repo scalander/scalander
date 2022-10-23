@@ -20,7 +20,7 @@ env = environ.Env() #acessing .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #reading env file
 
 # Emanuel mode (i.e. debug)
-DONTDOIT = (env("MODE").lower() != "production")
+DONTDOIT = (os.environ.get("MODE","").lower()!="production")
 
 # def meeting_confirm
 def inviteEmail(id): #takes meeting id string
