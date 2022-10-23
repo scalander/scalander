@@ -38,7 +38,7 @@ def inviteEmail(id): #takes meeting id string
         to_email=[api.get_user(u).email for u in meeting.subscribed_users], 
         subject=f'{meeting.name} Time Confirmation',
         html_content=f'<p><h1>{meeting.name} has been scheduled for <strong>{meetingtime.start}</strong> and will last for <strong>{meeting.length}</strong>.<br><br><a href="https://scalander.com/{id}">Click Here to See Meeting Details</a></h1></p>')
-    if DONTDOIT:
+    if not DONTDOIT:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
 
@@ -60,6 +60,6 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
         "lockin_date": meeting.lock_in_date.strftime("%a, %b %d, %Y")
     }
 
-    if DONTDOIT:
+    if not DONTDOIT:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
         response = sg.send(message) #sending message
