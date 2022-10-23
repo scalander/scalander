@@ -106,7 +106,6 @@
 
     </script>
 
-
 <div id="page-container">
     <div id="create-form">
         <h1>{strings.CREATE_A_MEETING}</h1>

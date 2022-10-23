@@ -164,19 +164,4 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 CORS_ALLOW_ALL_ORIGINS = False
 
-LOGGING = {                                                                                                                 
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'logfile': {
-            'class': 'logging.FileHandler',
-            'filename': 'server.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['logfile'],
-        },
-    },
-}
 

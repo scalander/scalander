@@ -111,6 +111,12 @@ def get_commitment(id):
     return Commitment(start=commitment.start,
                       end=commitment.end,
                       is_absolute=commitment.is_absolute)
+def get_commitments_by_user(uid):
+    commitments = models.Commitment.objects.filter(user_id=uid)
+    return [Commitment(start=commitment.start,
+                       end=commitment.end,
+                       is_absolute=commitment.is_absolute)
+            for commitment in commitments]
 
 # U
 def update_commitment(id, obj):

@@ -40,113 +40,120 @@ class Proposal:
     cannot: List[int]
     total_weight: int
 
-# functions here generally call the one(s) directly above them
-
-def check_multiple_users(time: Block, tickets: List[int]) -> dict:
-    """Checks whether a list of tickets is available at a specific time
+def block_in_blocks(block:Block, blocks:List[Block]):
+    """utility function to check if a block is in blocks
 
     Arguments:
-        time: Block - a time block to check
-        tickets: [int] - a list of meeting tickets
-                         (UserMeetingSubscription IDs) to check
+        block: Block - block to check if its in...
+        blocks: [Block] - these blocks
 
     Returns:
-        {"can": [int - available tickets],
-         "cannot": [int - unavailable tickets]}
+        bool - is `block` in `blocks`?
     """
 
-    # build mappings between UID and subscription ticket ID
-    # (to read the output of checking)
-    uid_to_ticket = {api.get_uid_by_subscription(i):i for i in tickets}
+    for b in blocks:
+        # starts after start and ends before end means its in
+        if block.start >= b.start and block.end <= b.end:
+            return True
 
-    # check for users that can make it (we pass uid)
-    result = api.check_commitment(list(uid_to_ticket.keys()), time.start, time.end)
-    # map back to tickets
-    can = [uid_to_ticket[i] for i in result]
+    return False
+    
 
-    # those that cannot make it are the rest
-    cannot = list(filter(lambda x:x not in can, tickets))
+def sweep(commitments):
+    """the sweep line algorithm
 
-    return {"can": can, "cannot": cannot}
-
-def check_all_times(times: [Block], tickets: List[int]) -> List[Proposal]:
-    """Returns whether or not a list of users is available for a list
+    USACO style :sunglasses:
 
     Arguments:
-        times: [Block] - a list of blocks to check
-        tickets: [int] - a list of tickets
-                         (UserMeetingSubscription IDs) to check
+        commitments: [(UID_TYPE, (datetime, datetime))] - the list of commitments to sweep
 
     Returns:
-        a list of Proposals
+        a list [([UID_TYPE... ], Block)...] representing possible chunks
+       and when they are available
+
+    Implementation:
+        This is implemented as the classic sweep-line with some greedyness mixed in. We
+        will go through the commitments, split into "push" and "pop" actions on a stack
+        then sort them. We then set an epoch (line) through the times.
+        As our list is now guaranteed sorted, we know our NEXT element
+        will start at least after if not with our current element (it is monotonic). Hence,
+        we will keep intervals that intersect by sweeping through and keeping thrack of
+        who's available.
+
+        m = time blocks, n = availbilities
+        Sweep O(m), Sort O(nlogn), Total: O(max(nlogn,m))
+
+        See: http://www.usaco.org/index.php?page=viewproblem2&cpid=786
     """
 
-    # we will calculate the users' availabilities
-    availabilities = [check_multiple_users(t, tickets) for t in times]
-    # tallyed proposals
-    proposals = []
+    # if we have no commitments from nobody, do nothing
+    if len(commitments) == 0:
+        return []
 
-    # we will deserialize the blocks onto each availiblity
-    # to create proposals
-    for time, avail in zip(times, availabilities):
-        avail["start"] = time.start
-        avail["end"] = time.end
+    # we begin by splitting our commitments into two events
+    # START event, and END event. This allow us to sweep a line
+    # through the events.
+    flattened = [] # each is ("START/END", ticket_id, time)
+    for c in commitments:
+        flattened.append(("START", c[0], c[1][0]))
+        flattened.append(("END", c[0], c[1][1]))
 
-        # now, we need to tally the weights of those tha
-        # can make it and get their total weight
-        weight = 0
-        
-        # for each ticket, add
-        for ticket_id in avail["can"]:
-            info = api.get_attendance(ticket_id)
-            weight += info.weight
+    # now, our next job is to sort it so thaht flattened is
+    # monotonic.
+    # sort commitments by their start date
+    flattened = sorted(flattened, key=lambda x:x[2])
 
-        # set it back to avail object
-        avail["total_weight"] = weight
 
-        proposals.append(Proposal(**avail))
-    
-    return proposals
+    # generated scratch blocks (should contain Block objects)
+    blocks = []
+    # generated availabilities (should contain tuples of IDs)
+    availabilities = []
 
-def create_time_chunks(ranges:[Block], meeting_length:int,
-                       time_increment:int) -> List[Block]:
-    """Creates a list of `Blocks` of `timeIncrement` length between `ranges`
+    # pop the top to seed our search
+    c1 = flattened.pop(0)
 
-    Arguments:
-        ranges: [Block] - ranges of times in which to create smaller chunks of 
-        meeting_length: int - number of **minutes** which the meeting should last
-        time_increment: int - number of **minutes** that should be between the starts
-                              of two blocks of output (how close should proposals be?)
+    # CONFUSING: c1 is the FIRST commitment object
+    # online is an arary of who's "online" (i.e. on the line being sweeped),
+    # "epoch" is where the line currently is (at the start of the first commitment) 
+    #
+    # if confused see solution to lifegards problem linked above
+    # the first block is also garanteed to be START
+    online = [c1[1]]
+    epoch = c1[2]
 
-    Returns:
-        list of `Blocks` for possible chunks
-    """
+    # until we have read all
+    while len(flattened) > 0:
+        # get the next one
+        c = flattened.pop(0)
 
-    chunks = []
-    
-    # our meeting length, as a timedelta
-    meeting_length_delta = datetime.timedelta(minutes=meeting_length)
-    time_increment_delta = datetime.timedelta(minutes=time_increment)
+        # terminate and push the last block
+        # which started at the last epoch (where line was)
+        # and ends at this new start
+        new_block = Block(epoch, c[2])
+        # we push this and the old online info to what we have
+        # this is given that we had somebody online during this
+        # block (i.e. its possible the block ended but the next
+        # one didn't start yet)
+        if len(online) > 0:
+            blocks.append(new_block)
+            availabilities.append(online.copy())
 
-    # for each range
-    for r in ranges:
-        # get the start time, and start iterating by time_increment
-        # epoch is our pointer of start of blocks
-        epoch = r.start
+        # if we have a START event
+        if c[0] == "START":
+            # now, our new patron is available, so we push
+            # them on the list
+            online.append(c[1])
+        # if we have an END event
+        elif c[0] == "END":
+            # now, our new patron is unavailable, so we remove
+            # them from the list
+            online.remove(c[1])
 
-        # for as long as we didn't hit the ending yet
-        # recall `epoch` is the poniter to start so
-        # we subtract a meeting_length_delta
-        while epoch < r.end-meeting_length_delta:
-            # append the chunk, as it works
-            chunks.append(Block(epoch, epoch+meeting_length_delta))
-                
-            # check the next time increment 
-            epoch += time_increment_delta
+        # we set our epoch to when the last modification happened
+        epoch = c[2]
 
-    # return the generated chunks
-    return chunks
-    
+
+    return list(zip(availabilities, blocks))
 
 def create_times(schedule_during:[Block], meeting_length,
                  tickets, time_increment=5) -> List[Proposal]:
@@ -164,55 +171,54 @@ def create_times(schedule_during:[Block], meeting_length,
         a list of Proposals representing the meaningful times we have created
     """
 
-    # create the possible chunks
-    chunks = create_time_chunks(schedule_during, meeting_length, time_increment)
+    # get a list of user's commitments
+    # note that commitments here mean times for which the user *is* available
+    # map from ticket:commitment
 
-    # check the times and create proposals
-    proposals = check_all_times(chunks, tickets)
+    commitments = [] # each object (ticket_id, (start,end))
 
-    # abort if we have nothing
-    if len(proposals) == 0:
-        return []
+    for ticket in tickets:
+        # get uid
+        uid = api.get_uid_by_subscription(ticket)
+        # check commitments and append
+        user_commitments = api.get_commitments_by_user(uid)
+        # we will create a list of ticket, commitment
+        commitments += [(ticket, (c.start, c.end)) for c in user_commitments]
+        
+    # now we have chunks and people's availability in them,
+    # we will parcel them out 
+    chunks = sweep(commitments)
+    # recall each object: [([UID_TYPE... ], Block)...]
 
-    # This is important. Now, if we just returned the result, the user would have
+    # final proposals
+    proposals = []
+
+    # for each time block, we then create **one** chunk
+    # This is important. Now, if we just made all the chunks, the user would have
     # about 5 different proposals which is literally just 5 minutes apart --- if
     # they have a large block shared. This is no bueno.
     #
-    # Therefore, we iterate through the times and remove "redundant" chunks --- keeping
-    # only the top one. What does "redundant" mean? Two chunks are redundant IFF they
-    # have the 1) same availability (can, cannot) and 2) are `time_increment` minutes
-    # apart only.
+    # Therefore, we only make one time proposal per chunk
+    for chunk in chunks:
+        # check if proposed block is long enough
+        meeting_fits = (chunk[1].end-chunk[1].start).seconds//60 > meeting_length
 
-    # create an array of meaningful blocks, starting with the first proposal
-    meaningful_proposals = [proposals.pop(0)]
+        if meeting_fits and block_in_blocks(chunk[1], schedule_during):
+            # create the start and end time
+            start = chunk[1].start
+            end = start+datetime.timedelta(minutes=meeting_length)
+            # tickets that can make it is in the first item
+            can = chunk[0]
+            # cannot is those tickets that are not in can
+            cannot = list(filter(lambda x:x not in can, tickets))
+            # calculate weight 
+            total_weight = sum(api.get_attendance(i).weight for i in can)
 
-    # recall thath we are comparing agaist last time, not just last menangful
-    # time, to do meaningful blocks (i.e. otherwise we will schedule over
-    # things like long contiousl blocks where every *n* will be meannigful)
-    last = proposals.pop(0)
-
-    # for each proposal, check if its meaningful against the last
-    # this assumes that the times are sorted. which they should be if
-    # generated
-    for proposal in proposals:
-        # check for attendee
-        if (proposal.can != last.can) or (proposal.cannot != last.cannot):
-            meaningful_proposals.append(proposal)
-            last = proposal # set comp
-            continue
-
-        # check for time delta, if its larger than time_increment, then its meaningufl
-        # timedelta doesn't store minutes arg
-        if (proposal.start-last.start).seconds//60 > time_increment:
-            meaningful_proposals.append(proposal)
-            last = proposal # set comp
-            continue
-
-        # otherwise, they are not meaningful so we don't append
-        last = proposal # set comp
-
+            # create the proposal
+            proposals.append(Proposal(start, end, can, cannot, total_weight))
+           
     # return all meaningful blocks
-    return meaningful_proposals
+    return proposals
                                 
 def schedule(ranges:[Block], meeting_length: int, tickets: int,
              time_increment=5, max_chunks:int=None) -> List[Proposal]:
