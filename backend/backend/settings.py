@@ -25,7 +25,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env')) #reading env file
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get("MODE","").lower()!="production")
-# DEBUG = False
+# override to use production DB 
+PRODUCTION_DB_OVERRIDE = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -85,7 +86,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-if DEBUG:
+if DEBUG and not PRODUCTION_DB_OVERRIDE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
