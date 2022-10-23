@@ -3,7 +3,7 @@
 </svelte:head>
 
 
-    <script>
+<script>
     // page info and svelte tooling
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
@@ -18,6 +18,9 @@
     // strings
     import strings from "$lib/strings.json";
 import { exclude_internal_props, validate_component } from 'svelte/internal';
+
+    // import googlebutton image
+    import GoogleButton from "$lib/resources/google.png";
 
     // current changes
     let change = []
@@ -125,9 +128,9 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
                         Loading your Calendars...
                     {:else}
                         {#if oauth_ready}
-                        <Button primary
-                                on:click={()=>client.requestAccessToken()}>
-                            {strings.SCHEDULE_READ_CAL}</Button>
+                            <img id="gbutton"
+                                 src={GoogleButton}
+                                 on:click={()=>client.requestAccessToken()}/>
                         or
                         {/if}
                         <Button primary
@@ -221,5 +224,10 @@ import { exclude_internal_props, validate_component } from 'svelte/internal';
         font-weight: 700;
         color: var(--accent);
         font-size: 30px;
+    }
+
+    #gbutton {
+        cursor: pointer;
+        width: 160px;
     }
 </style>

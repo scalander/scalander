@@ -28,6 +28,7 @@ DEBUG = (os.environ.get("MODE","").lower()!="production")
 # override to use production DB 
 PRODUCTION_DB_OVERRIDE = False
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -35,7 +36,7 @@ PRODUCTION_DB_OVERRIDE = False
 SECRET_KEY = env("DJANGO_ROOT_KEY")
 
 
-ALLOWED_HOSTS = ["scalander.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["api.scalander.com", "scalander.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/var/tmp/django_cache',
+        'LOCATION': '/tmp/scalander_cache',
     }
 }
 
