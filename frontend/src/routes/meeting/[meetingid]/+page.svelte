@@ -38,17 +38,18 @@
         // display the other times, we also will get all the proposas.
 
         let proposal_ids = meeting_info.proposals;
-        let proposals = [];
 
-        for (let proposal of proposal_ids) {
+        async function fetch_proposal(proposal) {
             // meeting info endpoint
             endpoint = new URL(`api/proposal/${proposal}`,
                                import.meta.env.VITE_BACKEND_ENDPOINT);
             req = fetch(endpoint.href);
             // get proposal info
             let proposal_json = await ((await req).json());
-            proposals.push(proposal_json);
+            return proposal_json;
         }
+
+        let proposals = await Promise.all(proposal_ids.map(fetch_proposal));
 
         // get proposal number
         number_plans = proposals.length;

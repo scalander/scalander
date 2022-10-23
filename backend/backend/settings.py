@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ["scalander.com", "localhost", "127.0.0.1"]
 # Application definition
 
 INSTALLED_APPS = [
+    'cachalot',
     'api_app',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -82,6 +83,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -96,12 +104,11 @@ if DEBUG and not PRODUCTION_DB_OVERRIDE:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'djongo',
+            'ENGINE': 'django.db.backends.mysql',
             'NAME': 'scalander',
-            'ENFORCE_SCHEMA': False,
-            'CLIENT': {
-                'host': env("PRODUCTION_DATABASE")
-            }
+            'USER': 'mysql',
+            'PASSWORD': env("PRODUCTION_DATABASE_PASSWORD"),
+            'HOST': env("PRODUCTION_DATABASE"),
         }
     }
 

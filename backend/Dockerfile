@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.8-slim
+FROM python:3.8.15-buster
 
 EXPOSE 8082
 
@@ -16,6 +16,10 @@ ENV PYTHONUNBUFFERED=1
 # Install pip requirements
 RUN apt update && apt install -y build-essential
 COPY requirements.txt .
+# install mysql
+RUN apt update
+RUN apt install -y default-mysql-client
+# install requirements
 RUN python -m pip install -r requirements.txt
 
 WORKDIR /app
