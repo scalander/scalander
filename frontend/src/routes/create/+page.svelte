@@ -11,6 +11,7 @@
 
     // our own UI components
     import Button from '$lib/components/ui/Button.svelte';
+    import MonthlyCalendarBase from '$lib/components/MonthlyCalendarBase.svelte'; 
 
     // strings
     import strings from "$lib/strings.json";
@@ -107,6 +108,9 @@
     </script>
 
 <div id="page-container">
+    <div id="hover">
+        <MonthlyCalendarBase />
+    </div>
     <div id="create-form">
         <h1>{strings.CREATE_A_MEETING}</h1>
         <form class = "meeting-form"> <!-- TODO: make a thing for input fields bc listing all of them here is hella messy -->
@@ -299,6 +303,12 @@
 
     #create-form {
         padding: 20px;
+    }
+
+    #hover {
+        position: absolute;
+        background: var(--accented-background);
+        z-index: 1;
     }
 
 </style>
