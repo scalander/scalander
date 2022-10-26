@@ -24,9 +24,29 @@
     let end, show_end_cal;
     let lockin, show_lockin_cal;
     let length;
+
     // this needs to be a ARRAY
     // user + priority
     let users=[["", 1]];
+
+    // TODO handfisted input validaition
+    function validate() {
+        if (start == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_START);
+            return false;
+        } else if (end == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_END);
+            return false;
+        } else if (lockin == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_LOCKIN);
+            return false;
+        } else if (isNaN(parseInt(length))) {
+            alert(strings.MEETING_VALIDATE_MISSING_LENGTH);
+            return false;
+        }
+        return true;
+    }
+
 
     // to replace button
     let bottomText=null;
@@ -47,6 +67,9 @@
 
 
     async function submitMeeting() {
+        // validate
+        if (validate() == false) return;
+
         // set bottom text
         bottomText = strings.MEETING_LOADING;
 
@@ -144,9 +167,11 @@
                    on:change={()=>{
                        // parse the date
                        let parsed = chrono.parseDate(start, (new Date()), {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       start = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       if (parsed) {
+                        // format the date and set to string
+                        start = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {start = undefined;}
+
                    }} required/>
 
             <div class="hover"
@@ -179,9 +204,10 @@
                    on:change={()=>{
                        // parse the date
                        let parsed = chrono.parseDate(end, (new Date()), {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       end = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       if (parsed) {
+                        // format the date and set to string
+                        end = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {end = undefined;}
                    }} required/>
 
             <div class="hover"
@@ -214,9 +240,11 @@
                    on:change={()=>{
                        // parse the date
                        let parsed = chrono.parseDate(lockin, (new Date()), {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       lockin = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       if (parsed) {
+                        // format the date and set to string
+                        lockin = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {lockin = undefined;}
+
                    }} required/>
             <div class="hover"
                  tabindex="0"
