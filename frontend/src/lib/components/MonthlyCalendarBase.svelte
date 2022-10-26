@@ -22,7 +22,7 @@
     export let mark = [];
 
     // set current selection
-    let selection = null;
+    export let selection = null;
 
     // get today
     const today = new Date();

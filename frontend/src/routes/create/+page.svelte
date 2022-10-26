@@ -146,7 +146,7 @@
                        let parsed = chrono.parseDate(start, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
-                       start = format(parsed, "EEEE, MMMM dd yyyy");
+                       start = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
                    }} required/>
 
             <div class="hover"
@@ -155,28 +155,60 @@
                  on:blur={(e)=>{
                     if (!isClickID(e, "start")) show_start_cal=false;
                  }}>
-                <MonthlyCalendarBase />
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(start)) ?
+                        (new Date(start)): null}
+                    month={!isNaN(Date.parse(start)) ?
+                        (new Date(start)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(start)) ?
+                        (new Date(start)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> start = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT)} />
             </div>
 
 
             <h2 class="meeting-subhead">{strings.MEETING_END}</h2>
             <input type="text"
+                   id="end"
                    placeholder="{strings.MEETING_END_PLACEHOLDER}"
+                   on:focus={()=>show_end_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_end_cal=false;
+                   }}
                    bind:value={end}
                    on:change={()=>{
                        // parse the date
                        let parsed = chrono.parseDate(end, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
-                       end = format(parsed, "EEEE, MMMM dd yyyy");
+                       end = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
                    }} required/>
 
-            <div class="hover" style:display="{show_end_cal?'inline':'none'}">
-                <MonthlyCalendarBase/>
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_end_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "end")) show_end_cal=false;
+                 }}>
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(end)) ?
+                        (new Date(end)): null}
+                    month={!isNaN(Date.parse(end)) ?
+                        (new Date(end)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(end)) ?
+                        (new Date(end)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> end = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT)} />
+
             </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LOCKIN}</h2>
             <input type="text"
+                   id="lockin"
+                   on:focus={()=>show_lockin_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_lockin_cal=false;
+                   }}
                    placeholder="{strings.MEETING_LOCKIN_PLACEHOLDER}"
                    bind:value={lockin}
                    on:change={()=>{
@@ -184,10 +216,23 @@
                        let parsed = chrono.parseDate(lockin, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
-                       lockin = format(parsed, "EEEE, MMMM dd yyyy");
+                       lockin = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
                    }} required/>
-            <div class="hover" style:display="{show_lockin_cal?'inline':'none'}">
-                <MonthlyCalendarBase/>
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_lockin_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "lockin")) show_lockin_cal=false;
+                 }}>
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)): null}
+                    month={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> lockin = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT)} />
             </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LENGTH}</h2>
