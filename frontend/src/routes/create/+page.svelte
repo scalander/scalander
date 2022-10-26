@@ -187,8 +187,8 @@
                         (new Date(start)).getMonth()+1: (new Date()).getMonth()+1}
                     year={!isNaN(Date.parse(start)) ?
                         (new Date(start)).getFullYear(): (new Date()).getFullYear()}
-                    on:select={(e)=> start = format(e.detail.date,
-                    strings.UNIVERSAL_DATE_FORMAT)} />
+                    on:select={(e)=> {start = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_start_cal=false}} />
             </div>
 
 
@@ -223,8 +223,8 @@
                         (new Date(end)).getMonth()+1: (new Date()).getMonth()+1}
                     year={!isNaN(Date.parse(end)) ?
                         (new Date(end)).getFullYear(): (new Date()).getFullYear()}
-                    on:select={(e)=> end = format(e.detail.date,
-                    strings.UNIVERSAL_DATE_FORMAT)} />
+                    on:select={(e)=> {end = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_end_cal=false}} />
 
             </div>
 
@@ -259,8 +259,8 @@
                         (new Date(lockin)).getMonth()+1: (new Date()).getMonth()+1}
                     year={!isNaN(Date.parse(lockin)) ?
                         (new Date(lockin)).getFullYear(): (new Date()).getFullYear()}
-                    on:select={(e)=> lockin = format(e.detail.date,
-                    strings.UNIVERSAL_DATE_FORMAT)} />
+                    on:select={(e)=> {lockin = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_lockin_cal=false}} />
             </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LENGTH}</h2>
