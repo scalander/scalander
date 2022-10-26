@@ -121,7 +121,7 @@
                    bind:value={start}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(start, {forwardDate: true});
+                       let parsed = chrono.parseDate(start, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
                        start = format(parsed, "EEEE, MMMM dd yyyy");
@@ -133,7 +133,7 @@
                    bind:value={end}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(end, {forwardDate: true});
+                       let parsed = chrono.parseDate(end, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
                        end = format(parsed, "EEEE, MMMM dd yyyy");
@@ -145,7 +145,7 @@
                    bind:value={lockin}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(lockin, {forwardDate: true});
+                       let parsed = chrono.parseDate(lockin, (new Date()), {forwardDate: true});
                        // format the date and set to string
                        // TODO internationalize the freedom units
                        lockin = format(parsed, "EEEE, MMMM dd yyyy");
