@@ -18,17 +18,33 @@
     import { exclude_internal_props } from 'svelte/internal';
     import { parseISO } from 'date-fns';
 
+    // calendar visibilities and variables
     let name;
-    let start;
-    let end;
+    let start, show_start_cal;
+    let end, show_end_cal;
+    let lockin, show_lockin_cal;
     let length;
-    let lockin;
     // this needs to be a ARRAY
     // user + priority
     let users=[["", 1]];
 
     // to replace button
     let bottomText=null;
+
+    // quick utility function to check if
+    // users are clicking the calendar
+    function isClickCalendar(e) {
+        return (e.relatedTarget &&
+                e.relatedTarget.classList.contains("hover"));
+    }
+
+    // check if users are clicking on item of id
+    function isClickID(e, id) {
+        return (e.relatedTarget &&
+                e.relatedTarget.id == id);
+    }
+
+
 
     async function submitMeeting() {
         // set bottom text
@@ -108,9 +124,6 @@
     </script>
 
 <div id="page-container">
-    <div id="hover">
-        <MonthlyCalendarBase />
-    </div>
     <div id="create-form">
         <h1>{strings.CREATE_A_MEETING}</h1>
         <form class = "meeting-form"> <!-- TODO: make a thing for input fields bc listing all of them here is hella messy -->
@@ -121,8 +134,13 @@
 
             <h2 class="meeting-subhead">{strings.MEETING_START}</h2>
             <input type="text"
+                   id="start"
                    placeholder="{strings.MEETING_START_PLACEHOLDER}"
                    bind:value={start}
+                   on:focus={()=>show_start_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_start_cal=false;
+                   }}
                    on:change={()=>{
                        // parse the date
                        let parsed = chrono.parseDate(start, (new Date()), {forwardDate: true});
@@ -130,6 +148,16 @@
                        // TODO internationalize the freedom units
                        start = format(parsed, "EEEE, MMMM dd yyyy");
                    }} required/>
+
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_start_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "start")) show_start_cal=false;
+                 }}>
+                <MonthlyCalendarBase />
+            </div>
+
 
             <h2 class="meeting-subhead">{strings.MEETING_END}</h2>
             <input type="text"
@@ -143,6 +171,10 @@
                        end = format(parsed, "EEEE, MMMM dd yyyy");
                    }} required/>
 
+            <div class="hover" style:display="{show_end_cal?'inline':'none'}">
+                <MonthlyCalendarBase/>
+            </div>
+
             <h2 class="meeting-subhead">{strings.MEETING_LOCKIN}</h2>
             <input type="text"
                    placeholder="{strings.MEETING_LOCKIN_PLACEHOLDER}"
@@ -154,6 +186,9 @@
                        // TODO internationalize the freedom units
                        lockin = format(parsed, "EEEE, MMMM dd yyyy");
                    }} required/>
+            <div class="hover" style:display="{show_lockin_cal?'inline':'none'}">
+                <MonthlyCalendarBase/>
+            </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LENGTH}</h2>
             <input type="number"
@@ -305,10 +340,16 @@
         padding: 20px;
     }
 
-    #hover {
-        position: absolute;
+    .hover {
+        position: fixed;
+        left: 0;
         background: var(--accented-background);
-        z-index: 1;
+        z-index: 5;
+        padding: 0 6px 10px 14px;
+        display: inline;
+        transform: scale(0.7) translateX(70vw) translateY(-25px);
+        border-radius: 10px;
+        border: 1px solid var(--tertiary);
     }
 
 </style>

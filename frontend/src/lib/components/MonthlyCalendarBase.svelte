@@ -146,7 +146,7 @@
     .calendar-container {
         /* Set the width and height */
         width: 300px;
-        height: 400px;
+        height: 380px;
     }
 
     .calendar {
