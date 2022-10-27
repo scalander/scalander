@@ -9,7 +9,7 @@ sendgrid
 django-environ
 dnspython
 pymongo==3.12.1
-djongo
+django
 gunicorn
 pytz
 mysqlclient
