@@ -22,7 +22,7 @@
     export let mark = [];
 
     // set current selection
-    let selection = null;
+    export let selection = null;
 
     // get today
     const today = new Date();
@@ -146,7 +146,7 @@
     .calendar-container {
         /* Set the width and height */
         width: 300px;
-        height: 300px;
+        height: 380px;
     }
 
     .calendar {

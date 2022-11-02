@@ -11,25 +11,65 @@
 
     // our own UI components
     import Button from '$lib/components/ui/Button.svelte';
+    import MonthlyCalendarBase from '$lib/components/MonthlyCalendarBase.svelte'; 
 
     // strings
     import strings from "$lib/strings.json";
     import { exclude_internal_props } from 'svelte/internal';
     import { parseISO } from 'date-fns';
 
+    // calendar visibilities and variables
     let name;
-    let start;
-    let end;
+    let start, show_start_cal;
+    let end, show_end_cal;
+    let lockin, show_lockin_cal;
     let length;
-    let lockin;
+
     // this needs to be a ARRAY
     // user + priority
     let users=[["", 1]];
 
+    // TODO handfisted input validaition
+    function validate() {
+        if (start == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_START);
+            return false;
+        } else if (end == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_END);
+            return false;
+        } else if (lockin == undefined) {
+            alert(strings.MEETING_VALIDATE_MISSING_LOCKIN);
+            return false;
+        } else if (isNaN(parseInt(length))) {
+            alert(strings.MEETING_VALIDATE_MISSING_LENGTH);
+            return false;
+        }
+        return true;
+    }
+
+
     // to replace button
     let bottomText=null;
 
+    // quick utility function to check if
+    // users are clicking the calendar
+    function isClickCalendar(e) {
+        return (e.relatedTarget &&
+                e.relatedTarget.classList.contains("hover"));
+    }
+
+    // check if users are clicking on item of id
+    function isClickID(e, id) {
+        return (e.relatedTarget &&
+                e.relatedTarget.id == id);
+    }
+
+
+
     async function submitMeeting() {
+        // validate
+        if (validate() == false) return;
+
         // set bottom text
         bottomText = strings.MEETING_LOADING;
 
@@ -117,39 +157,111 @@
 
             <h2 class="meeting-subhead">{strings.MEETING_START}</h2>
             <input type="text"
+                   id="start"
                    placeholder="{strings.MEETING_START_PLACEHOLDER}"
                    bind:value={start}
+                   on:focus={()=>show_start_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_start_cal=false;
+                   }}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(start, {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       start = format(parsed, "EEEE, MMMM dd yyyy");
+                       let parsed = chrono.parseDate(start, (new Date()), {forwardDate: true});
+                       if (parsed) {
+                        // format the date and set to string
+                        start = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {start = undefined;}
+
                    }} required/>
+
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_start_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "start")) show_start_cal=false;
+                 }}>
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(start)) ?
+                        (new Date(start)): null}
+                    month={!isNaN(Date.parse(start)) ?
+                        (new Date(start)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(start)) ?
+                        (new Date(start)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> {start = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_start_cal=false}} />
+            </div>
+
 
             <h2 class="meeting-subhead">{strings.MEETING_END}</h2>
             <input type="text"
+                   id="end"
                    placeholder="{strings.MEETING_END_PLACEHOLDER}"
+                   on:focus={()=>show_end_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_end_cal=false;
+                   }}
                    bind:value={end}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(end, {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       end = format(parsed, "EEEE, MMMM dd yyyy");
+                       let parsed = chrono.parseDate(end, (new Date()), {forwardDate: true});
+                       if (parsed) {
+                        // format the date and set to string
+                        end = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {end = undefined;}
                    }} required/>
+
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_end_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "end")) show_end_cal=false;
+                 }}>
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(end)) ?
+                        (new Date(end)): null}
+                    month={!isNaN(Date.parse(end)) ?
+                        (new Date(end)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(end)) ?
+                        (new Date(end)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> {end = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_end_cal=false}} />
+
+            </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LOCKIN}</h2>
             <input type="text"
+                   id="lockin"
+                   on:focus={()=>show_lockin_cal=true}
+                   on:blur={(e)=>{
+                       if (!isClickCalendar(e)) show_lockin_cal=false;
+                   }}
                    placeholder="{strings.MEETING_LOCKIN_PLACEHOLDER}"
                    bind:value={lockin}
                    on:change={()=>{
                        // parse the date
-                       let parsed = chrono.parseDate(lockin, {forwardDate: true});
-                       // format the date and set to string
-                       // TODO internationalize the freedom units
-                       lockin = format(parsed, "EEEE, MMMM dd yyyy");
+                       let parsed = chrono.parseDate(lockin, (new Date()), {forwardDate: true});
+                       if (parsed) {
+                        // format the date and set to string
+                        lockin = format(parsed, strings.UNIVERSAL_DATE_FORMAT);
+                       } else {lockin = undefined;}
+
                    }} required/>
+            <div class="hover"
+                 tabindex="0"
+                 style:display="{show_lockin_cal?'inline':'none'}"
+                 on:blur={(e)=>{
+                    if (!isClickID(e, "lockin")) show_lockin_cal=false;
+                 }}>
+                <MonthlyCalendarBase
+                    selection={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)): null}
+                    month={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)).getMonth()+1: (new Date()).getMonth()+1}
+                    year={!isNaN(Date.parse(lockin)) ?
+                        (new Date(lockin)).getFullYear(): (new Date()).getFullYear()}
+                    on:select={(e)=> {lockin = format(e.detail.date,
+                    strings.UNIVERSAL_DATE_FORMAT); show_lockin_cal=false}} />
+            </div>
 
             <h2 class="meeting-subhead">{strings.MEETING_LENGTH}</h2>
             <input type="number"
@@ -299,6 +411,18 @@
 
     #create-form {
         padding: 20px;
+    }
+
+    .hover {
+        position: fixed;
+        left: 0;
+        background: var(--accented-background);
+        z-index: 5;
+        padding: 0 6px 10px 14px;
+        display: inline;
+        transform: scale(0.7) translateX(70vw) translateY(-25px);
+        border-radius: 10px;
+        border: 1px solid var(--tertiary);
     }
 
 </style>
