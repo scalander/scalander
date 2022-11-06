@@ -23,7 +23,7 @@ from google.oauth2.credentials import Credentials
 # auth_response = auth_request.build_absolute_uri()
 # flow.fetch_token(authorization_response = auth_response)
 
-tzoffset = "-07:00" #timezone offset - assumimg its PDT for now
+tzoffset = "-08:00" #timezone offset - assumimg its PST for now
 today = date.today()
 query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-time to check for freebusy - default is 60 days from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
 query_max = (today + timedelta(days = 60)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
