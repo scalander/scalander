@@ -66,7 +66,7 @@ def make_query(query_min, query_max):
     else:
         raise Exception ("invalid query_max format")
 
-    assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00-07:00") < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00-07:00"), "query interval ends before it starts"
+    assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00" +tzoffest) < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00" +tzoffest), "query interval ends before it starts"
 
     query_body = {
         # "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
