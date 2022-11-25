@@ -6,6 +6,7 @@ from datetime import *
 import datetime
 import api_app.api as api
 import environ
+import html
 
 
 #TODO internationalize
@@ -36,7 +37,7 @@ def inviteEmail(id): #takes meeting id string
     message = Mail( #describing the email to send
         from_email=ENDPOINT,
         to_email=[api.get_user(u).email for u in meeting.subscribed_users], 
-        subject=f'{meeting.name} Time Confirmation',
+        subject=html.unescape(f'{meeting.name} Time Confirmation'), # these (https://www.w3resource.com/xml/prohibited-character-literals.php) characters were being escaped, and since the subject line isn't html, it should be okay just to unescape
         html_content=f'<p><h1>{meeting.name} has been scheduled for <strong>{meetingtime.start}</strong> and will last for <strong>{meeting.length}</strong>.<br><br><a href="https://scalander.com/{id}">Click Here to See Meeting Details</a></h1></p>')
     if not DONTDOIT:
         sg = SendGridAPIClient(env("SENDGRID_KEY")) #getting key from env and using it to initialize a sendgrid
@@ -48,7 +49,7 @@ def availabilityEmail(id, uid): #takes meeting id string, user id string
     message = Mail( #describing the email to send
         from_email=ENDPOINT,
         to_emails=[user.email], # email(s) being plural is a misnomer, email is singular
-        subject=f'Finding time for {meeting.name}')
+        subject=html.unescape(f'Finding time for {meeting.name}')) # these (https://www.w3resource.com/xml/prohibited-character-literals.php) characters were being escaped, and since the subject line isn't html, it should be okay just to unescape
 
     message.template_id = AVAILABILITY_EMAIL_TEMPLATE
 
