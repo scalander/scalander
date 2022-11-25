@@ -6,11 +6,10 @@ from datetime import datetime
 
 class SchedulingTestCase(TestCase):
 
-
-    def test_if_chickn(self):
+    def test_test(self):
         print(self)
         raise Exception("AAA")
 
-    # def test_check_multiple_users(self):
+#     # def test_check_multiple_users(self):
 
 

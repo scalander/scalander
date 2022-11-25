@@ -220,7 +220,7 @@ def create_times(schedule_during:[Block], meeting_length,
     # return all meaningful blocks
     return proposals
                                 
-def schedule(ranges:[Block], meeting_length: int, tickets: int,
+def schedule(ranges:List[Block], meeting_length: int, tickets: int,
              time_increment=5, max_chunks:int=None) -> List[Proposal]:
     """Performs scheduling `meeting_length` blocks for `tickets` between `ranges` 
 
