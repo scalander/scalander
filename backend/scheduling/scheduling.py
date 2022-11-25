@@ -155,7 +155,7 @@ def sweep(commitments):
 
     return list(zip(availabilities, blocks))
 
-def create_times(schedule_during:[Block], meeting_length,
+def create_times(schedule_during:List[Block], meeting_length,
                  tickets, time_increment=5) -> List[Proposal]:
     """creates suitable times and calculates user availability
 
