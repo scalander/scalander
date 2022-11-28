@@ -92,4 +92,17 @@ class SchedulingTestCase(TestCase):
         # is fine
         self.assertTrue(block_in_blocks(later_block, [later_block]))
 
-        ## part 3 
+        ## part 3: block slightly off, in each direction
+        day_delta = datetime.timedelta(days=1)
+        
+        # slightly larger
+        slightly_larger_1 = Block(start=later_dates[0]-day_delta, end=later_dates[1])
+        slightly_larger_2 = Block(start=later_dates[0], end=later_dates[1]+day_delta)
+        self.assertTrue(block_in_blocks(later_block, [slightly_larger_1]))
+        self.assertTrue(block_in_blocks(later_block, [slightly_larger_2]))
+        self.assertTrue(block_in_blocks(later_block, [slightly_larger_1,
+                                                      slightly_larger_2]))
+        self.assertFalse(block_in_blocks(slightly_larger_1, [later_block]))
+        self.assertFalse(block_in_blocks(slightly_larger_2, [later_block]))
+
+    

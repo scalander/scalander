@@ -41,7 +41,7 @@ class Proposal:
     total_weight: int
 
 def block_in_blocks(block:Block, blocks:List[Block]):
-    """utility function to check if a block is in blocks
+    """utility function to test if `block` is temporally contained within `blocks`
 
     Arguments:
         block: Block - block to check if its in...
