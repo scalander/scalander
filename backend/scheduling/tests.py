@@ -61,20 +61,35 @@ class SchedulingTestCase(TestCase):
  
     def test_block_in_blocks(self):
 
+        ## part 1: generate non-intersecting dates
+        # we will generate date ranges that don't intersect
+        # which
+        
         earlier_dates = []
         for _ in range(2):
             # append first range of dates
             earlier_dates.append(self.faker.date_between("-7d",
-                                                         "-1d"))
-        earlier_dates = sorted(self.earlier_dates)
+                                                         "-3d"))
+        earlier_dates = sorted(earlier_dates)
         earlier_block = Block(start=earlier_dates[0], end=earlier_dates[1])
             
         later_dates = []
         for _ in range(2):
             # append first range of dates
-            later_dates.append(self.faker.date_between("+1d",
+            later_dates.append(self.faker.date_between("+3d",
                                                        "+7d"))
-        later_dates = sorted(self.later_dates)
+        later_dates = sorted(later_dates)
         later_block = Block(start=later_dates[0], end=later_dates[1])
 
+        # as the dates don't intersect, we should expect that
+        # the block is not in the earlier blocks
+        self.assertFalse(block_in_blocks(later_block, [earlier_block]))
 
+        ## part 2: generate exactly intersecting dates
+        # white-box test to test the edge case that there
+        # is one block that's exactly the size of the target block
+        # this should return True because an exact commitment
+        # is fine
+        self.assertTrue(block_in_blocks(later_block, [later_block]))
+
+        ## part 3 
