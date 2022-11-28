@@ -15,7 +15,7 @@ init:
 	$(MAKE) migrate
 
 start:
-	docker compose up -d
+	docker compose up -d --build
 
 restart:
 	docker compose up -d --build
