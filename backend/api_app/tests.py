@@ -24,3 +24,16 @@ class UserTestCase(TestCase):
         self.assertEqual(fetched_user.emails, "johndoe@email.com")
         self.assertEqual(r_com_ids, commitment_ids)
         self.assertEqual(r_sub_ids, sub_ids)
+    
+    def test_meeting_create(self):
+        now = datetime.datetime.now()
+        meeting = api.Meeting("Some Meeting", now, now, now, 30, [], [])
+        meeting_id = api.create_meeting(meeting)
+        fetched_meeting = api.get_meeting(meeting_id)
+        self.assertEqual(fetched_meeting.name, "Some Meeting")
+        self.assertEqual(fetched_meeting.start, now)
+        self.assertEqual(fetched_meeting.end, now)
+        self.assertEqual(fetched_meeting.lock_in_date, now)
+        self.assertEqual(len(fetched_meeting.proposals), 0)
+        self.assertEqual(len(fetched_meeting.subscriptions), 0)
+        self.assertEqual(fetched_meeting.length, 30)
