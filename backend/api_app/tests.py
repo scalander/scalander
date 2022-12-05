@@ -72,3 +72,14 @@ class UserTestCase(TestCase):
         self.assertEqual(fetched_attendance.meeting, meeting_id)
         self.assertEqual(fetched_attendance.is_critical, True)
         self.assertEqual(fetched_attendance.weight, 190)
+
+    def test_commitment_create(self):
+        user = api.User("Teddy", "the@the.com", [])
+        user_id = api.create_user(user)
+        now = datetime.datetime.now()
+        commitment = api.Commitment(now, now, False)
+        commitment_id = api.create_commitment(commitment)
+        fetched_commitment = api.get_commitment(commitment_id)
+        self.assertEqual(fetched_commitment.start, now)
+        self.assertEqual(fetched_commitment.end, now)
+        self.assertEqual(fetched_commitment.is_absolute, False)
