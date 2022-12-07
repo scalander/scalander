@@ -134,7 +134,13 @@ def sweep(commitments):
         # this is given that we had somebody online during this
         # block (i.e. its possible the block ended but the next
         # one didn't start yet)
-        if len(online) > 0:
+
+        # we also need to put in one more check, in that
+        # if the current operation doesn't move our
+        # epoch, we skip creation (i.e. if two things
+        # start at the same time, we don't want to
+        # start)
+        if len(online) > 0 and epoch != c[2]:
             blocks.append(new_block)
             availabilities.append(online.copy())
 
