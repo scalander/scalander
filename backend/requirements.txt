@@ -14,3 +14,4 @@ gunicorn
 pytz
 mysqlclient
 django-cachalot
+faker

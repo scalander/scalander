@@ -41,7 +41,7 @@ class Proposal:
     total_weight: int
 
 def block_in_blocks(block:Block, blocks:List[Block]):
-    """utility function to check if a block is in blocks
+    """utility function to test if `block` is temporally contained within `blocks`
 
     Arguments:
         block: Block - block to check if its in...
@@ -155,7 +155,7 @@ def sweep(commitments):
 
     return list(zip(availabilities, blocks))
 
-def create_times(schedule_during:[Block], meeting_length,
+def create_times(schedule_during:List[Block], meeting_length,
                  tickets, time_increment=5) -> List[Proposal]:
     """creates suitable times and calculates user availability
 
@@ -220,7 +220,7 @@ def create_times(schedule_during:[Block], meeting_length,
     # return all meaningful blocks
     return proposals
                                 
-def schedule(ranges:[Block], meeting_length: int, tickets: int,
+def schedule(ranges:List[Block], meeting_length: int, tickets: int,
              time_increment=5, max_chunks:int=None) -> List[Proposal]:
     """Performs scheduling `meeting_length` blocks for `tickets` between `ranges` 
 
