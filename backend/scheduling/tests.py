@@ -105,4 +105,56 @@ class SchedulingTestCase(TestCase):
         self.assertFalse(block_in_blocks(slightly_larger_1, [later_block]))
         self.assertFalse(block_in_blocks(slightly_larger_2, [later_block]))
 
+    def test_sweep(self):
+        # we are going to have four chunks
+        # three overlaps slightly, one far away:
+        #    (8.5)------1-----(10.5)
+        # (8)---2---(9)    ---2---
+        #                   ---3---
+        #                   ---4---
+        # We should end up with 2start<->1start, 1start<->2end, 2end<->2start
+        #                       2start<->1end, 1end<->2end, 3/4start<->3/4end
+
+        # create the ranges as illustrated above, from left to right
+        # start order
+        ranges = [
+            (2, [datetime.datetime(2022, 1, 1, 8, 0),
+                 datetime.datetime(2022, 1, 1, 9, 0)]),
+            (1, [datetime.datetime(2022, 1, 1, 8, 30),
+                 datetime.datetime(2022, 1, 1, 10, 30)]),
+            (2, [datetime.datetime(2022, 1, 1, 10, 0),
+                 datetime.datetime(2022, 1, 1, 11, 0)]),
+            (3, [datetime.datetime(2022, 1, 1, 12, 0),
+                 datetime.datetime(2022, 1, 1, 13, 0)]),
+            (4, [datetime.datetime(2022, 1, 1, 12, 0),
+                 datetime.datetime(2022, 1, 1, 13, 0)]),
+        ]
+
+        # shuffle the list
+        self.faker.random.shuffle(ranges)
+
+        # sweep it!
+        result = sweep(ranges)
+
+        # Recall that:
+        # we should end up with 2start<->1start, 1start<->2end, 2end<->2start
+        #                       2start<->1end, 1end<->2end, 3/4start<->3/4end
+
+        # we shall implement this result
+        target = [
+            # 2 start <-> 1 start --- 2
+            ([2], Block(datetime.datetime(2022, 1, 1, 8, 0),
+                        datetime.datetime(2022, 1, 1, 8, 30))),
+            # 1 start <-> 2 end --- 2,1
+            ([2,1], Block(datetime.datetime(2022, 1, 1, 8, 30),
+                          datetime.datetime(2022, 1, 1, 9, 0))),
+            # 2 end <-> 2 start --- 1
+            ([1], Block(datetime.datetime(2022, 1, 1, 9, 0),
+                        datetime.datetime(2022, 1, 1, 10, 0)))
+            # 2 start <-> 1 end --- 1,2
+            ([1,2], Block(datetime.datetime(2022, 1, 1, 10, 0),
+                          datetime.datetime(2022, 1, 1, 10, 30)))
+        ]
+        
+
     
