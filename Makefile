@@ -10,7 +10,6 @@ init:
 		echo;\
 		exit 1;\
 	fi
-	touch backend/db.sqlite3
 	docker compose up -d --build
 	$(MAKE) migrate
 
@@ -21,8 +20,9 @@ restart:
 	docker compose up -d --build
 
 migrate:
+	ls -lah backend
 	docker compose exec backend python manage.py makemigrations
-	docker compose exec backend python manage.py migrate
+	docker compose exec backend python manage.py migrate --run-syncdb
 
 backendshell:
 	docker compose exec backend /bin/bash

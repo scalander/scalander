@@ -7,6 +7,9 @@ name: Scalander Continuous Integration
 on:
   pull_request:
     types: [ready_for_review]
+  push:
+    brances:
+      - "main"
 
 jobs: 
 
@@ -16,8 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Docker
-        uses: docker/setup-buildx-action@v2
       - name: Import key
         run: echo "${{ secrets.CI_PGP_KEY }}" | gpg --import
       - name: Install git-secret
@@ -28,6 +29,9 @@ jobs:
       - name: Decode secrets
         run: git secret reveal
       - name: Initialize development flow
-        run: make init
+        run: |
+          # disastrous idea that's a stopgap solution
+          chmod -R 777 *
+          make init
       - name: Run tests
         run: make test
