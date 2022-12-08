@@ -58,7 +58,9 @@ class SchedulingTestCase(TestCase):
         # dates, deadlines, ranges, etc. for us
         self.faker = Faker()
         self.faker.seed_instance(71)
- 
+        # to enable max range error reporting
+        self.maxDiff = None
+
     def test_block_in_blocks(self):
 
         ## part 1: generate non-intersecting dates
@@ -119,10 +121,10 @@ class SchedulingTestCase(TestCase):
         # create the ranges as illustrated above, from left to right
         # start order
         ranges = [
-            (2, [datetime.datetime(2022, 1, 1, 8, 0),
-                 datetime.datetime(2022, 1, 1, 9, 0)]),
             (1, [datetime.datetime(2022, 1, 1, 8, 30),
                  datetime.datetime(2022, 1, 1, 10, 30)]),
+            (2, [datetime.datetime(2022, 1, 1, 8, 0),
+                 datetime.datetime(2022, 1, 1, 9, 0)]),
             (2, [datetime.datetime(2022, 1, 1, 10, 0),
                  datetime.datetime(2022, 1, 1, 11, 0)]),
             (3, [datetime.datetime(2022, 1, 1, 12, 0),
@@ -148,7 +150,7 @@ class SchedulingTestCase(TestCase):
             ([2], Block(datetime.datetime(2022, 1, 1, 8, 0),
                         datetime.datetime(2022, 1, 1, 8, 30))),
             # 1 start <-> 2 end --- 2,1
-            ([2,1], Block(datetime.datetime(2022, 1, 1, 8, 30),
+            ([1,2], Block(datetime.datetime(2022, 1, 1, 8, 30),
                           datetime.datetime(2022, 1, 1, 9, 0))),
             # 2 end <-> 2 start --- 1
             ([1], Block(datetime.datetime(2022, 1, 1, 9, 0),
@@ -167,9 +169,5 @@ class SchedulingTestCase(TestCase):
                         datetime.datetime(2022, 1, 1, 13, 30)))
         ]
 
-        self.maxDiff = None
-
         self.assertSequenceEqual(target, result)
         
-
-    

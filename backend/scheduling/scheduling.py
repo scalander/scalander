@@ -103,7 +103,6 @@ def sweep(commitments):
     # sort commitments by their start date
     flattened = sorted(flattened, key=lambda x:x[2])
 
-
     # generated scratch blocks (should contain Block objects)
     blocks = []
     # generated availabilities (should contain tuples of IDs)
@@ -142,7 +141,10 @@ def sweep(commitments):
         # start)
         if len(online) > 0 and epoch != c[2]:
             blocks.append(new_block)
-            availabilities.append(online.copy())
+            # we sort the IDs to make sure that they
+            # are in some semblance of order for
+            # consistancy
+            availabilities.append(sorted(online.copy()))
 
         # if we have a START event
         if c[0] == "START":
@@ -169,7 +171,7 @@ def create_times(schedule_during:List[Block], meeting_length,
     Arguments:
         ranges: [Block] - ranges of times in which to create smaller chunks of 
         meeting_length: int - number of **minutes** which the meeting should last
-        tickets: int - the UserMeetingSubscription ticket IDs for the participating users
+        tickets: List[int] - the UserMeetingSubscription ticket IDs for the participating users
         [time_increment]: int - number of **minutes** that should be between the starts
                                 of two blocks of output (how close should proposals be?)
 
