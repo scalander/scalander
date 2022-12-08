@@ -58,7 +58,9 @@ class SchedulingTestCase(TestCase):
         # dates, deadlines, ranges, etc. for us
         self.faker = Faker()
         self.faker.seed_instance(71)
- 
+        # to enable max range error reporting
+        self.maxDiff = None
+
     def test_block_in_blocks(self):
 
         ## part 1: generate non-intersecting dates
@@ -105,4 +107,67 @@ class SchedulingTestCase(TestCase):
         self.assertFalse(block_in_blocks(slightly_larger_1, [later_block]))
         self.assertFalse(block_in_blocks(slightly_larger_2, [later_block]))
 
-    
+    def test_sweep(self):
+        # we are going to have four chunks
+        # three overlaps slightly, one far away:
+        #    (8.5)------1-----(10.5)
+        # (8)---2---(9)   (10)---2---(11)
+        #                                  (12) ---3--- (13)
+        #                                  (12) ---4--------- (13.5)
+        # We should end up with 2start<->1start, 1start<->2end, 2end<->2start
+        #                       2start<->1end, 1end<->2end, 3/4start<->3end
+        #                       3end<->4end
+
+        # create the ranges as illustrated above, from left to right
+        # start order
+        ranges = [
+            (1, [datetime.datetime(2022, 1, 1, 8, 30),
+                 datetime.datetime(2022, 1, 1, 10, 30)]),
+            (2, [datetime.datetime(2022, 1, 1, 8, 0),
+                 datetime.datetime(2022, 1, 1, 9, 0)]),
+            (2, [datetime.datetime(2022, 1, 1, 10, 0),
+                 datetime.datetime(2022, 1, 1, 11, 0)]),
+            (3, [datetime.datetime(2022, 1, 1, 12, 0),
+                 datetime.datetime(2022, 1, 1, 13, 0)]),
+            (4, [datetime.datetime(2022, 1, 1, 12, 0),
+                 datetime.datetime(2022, 1, 1, 13, 30)]),
+        ]
+
+        # shuffle the list
+        self.faker.random.shuffle(ranges)
+
+        # sweep it!
+        result = sweep(ranges)
+
+        # Recall that:
+        # we should end up with 2start<->1start, 1start<->2end, 2end<->2start
+        #                       2start<->1end, 1end<->2end, 3/4start<->3/4end
+        #                       3end<->4end
+
+        # we shall implement this result
+        target = [
+            # 2 start <-> 1 start --- 2
+            ([2], Block(datetime.datetime(2022, 1, 1, 8, 0),
+                        datetime.datetime(2022, 1, 1, 8, 30))),
+            # 1 start <-> 2 end --- 2,1
+            ([1,2], Block(datetime.datetime(2022, 1, 1, 8, 30),
+                          datetime.datetime(2022, 1, 1, 9, 0))),
+            # 2 end <-> 2 start --- 1
+            ([1], Block(datetime.datetime(2022, 1, 1, 9, 0),
+                        datetime.datetime(2022, 1, 1, 10, 0))),
+            # 2 start <-> 1 end --- 1,2
+            ([1,2], Block(datetime.datetime(2022, 1, 1, 10, 0),
+                          datetime.datetime(2022, 1, 1, 10, 30))),
+            # 1 end <-> 2 end --- 1,2
+            ([2], Block(datetime.datetime(2022, 1, 1, 10, 30),
+                        datetime.datetime(2022, 1, 1, 11, 0))),
+            # 3/4start <-> 3end
+            ([3,4], Block(datetime.datetime(2022, 1, 1, 12, 0),
+                          datetime.datetime(2022, 1, 1, 13, 0))),
+            # 3end <-> 4end
+            ([4], Block(datetime.datetime(2022, 1, 1, 13, 0),
+                        datetime.datetime(2022, 1, 1, 13, 30)))
+        ]
+
+        self.assertSequenceEqual(target, result)
+        

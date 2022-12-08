@@ -20,3 +20,6 @@ client_secret.json
 #.*
 \#*#
 backend/server.log
+.gitsecret/keys/random_seed
+!*.secret
+.coverage

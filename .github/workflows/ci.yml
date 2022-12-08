@@ -1,0 +1,33 @@
+# This workflow creates a clean test of the system
+# and ensures the test suite doesn't fail on any
+# pull request
+
+name: Scalander Continuous Integration 
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs: 
+
+  # trigger the test suite
+  test_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v2
+      - name: Import key
+        run: echo "${{ secrets.CI_PGP_KEY }}" | gpg --import
+      - name: Install git-secret
+        run: |
+          sudo sh -c "echo 'deb https://gitsecret.jfrog.io/artifactory/git-secret-deb git-secret main' >> /etc/apt/sources.list"
+          wget -qO - 'https://gitsecret.jfrog.io/artifactory/api/gpg/key/public' | sudo apt-key add -
+          sudo apt-get update && sudo apt-get install -y git-secret
+      - name: Decode secrets
+        run: git secret reveal
+      - name: Initialize development flow
+        run: make init
+      - name: Run tests
+        run: make test
