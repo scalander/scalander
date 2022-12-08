@@ -1,4 +1,4 @@
-.PHONY: init start restart backendshell frontendshell migrate test
+.PHONY: init start restart backendshell frontendshell migrate test coverage
 
 init:
 	@if [  ! -f backend/.env ]; then\
@@ -33,3 +33,7 @@ frontendshell:
 test:
 	docker compose exec backend python manage.py test
 
+coverage:
+	docker compose exec backend coverage run --source='.' manage.py test
+	docker compose exec backend coverage html
+	open backend/htmlcov/index.html
