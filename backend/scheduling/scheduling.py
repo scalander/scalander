@@ -41,7 +41,7 @@ class Proposal:
     total_weight: int
 
 def block_in_blocks(block:Block, blocks:List[Block]):
-    """utility function to check if a block is in blocks
+    """utility function to test if `block` is temporally contained within `blocks`
 
     Arguments:
         block: Block - block to check if its in...
@@ -103,7 +103,6 @@ def sweep(commitments):
     # sort commitments by their start date
     flattened = sorted(flattened, key=lambda x:x[2])
 
-
     # generated scratch blocks (should contain Block objects)
     blocks = []
     # generated availabilities (should contain tuples of IDs)
@@ -134,9 +133,18 @@ def sweep(commitments):
         # this is given that we had somebody online during this
         # block (i.e. its possible the block ended but the next
         # one didn't start yet)
-        if len(online) > 0:
+
+        # we also need to put in one more check, in that
+        # if the current operation doesn't move our
+        # epoch, we skip creation (i.e. if two things
+        # start at the same time, we don't want to
+        # start)
+        if len(online) > 0 and epoch != c[2]:
             blocks.append(new_block)
-            availabilities.append(online.copy())
+            # we sort the IDs to make sure that they
+            # are in some semblance of order for
+            # consistancy
+            availabilities.append(sorted(online.copy()))
 
         # if we have a START event
         if c[0] == "START":
@@ -155,7 +163,7 @@ def sweep(commitments):
 
     return list(zip(availabilities, blocks))
 
-def create_times(schedule_during:[Block], meeting_length,
+def create_times(schedule_during:List[Block], meeting_length,
                  tickets, time_increment=5) -> List[Proposal]:
     """creates suitable times and calculates user availability
 
@@ -163,7 +171,7 @@ def create_times(schedule_during:[Block], meeting_length,
     Arguments:
         ranges: [Block] - ranges of times in which to create smaller chunks of 
         meeting_length: int - number of **minutes** which the meeting should last
-        tickets: int - the UserMeetingSubscription ticket IDs for the participating users
+        tickets: List[int] - the UserMeetingSubscription ticket IDs for the participating users
         [time_increment]: int - number of **minutes** that should be between the starts
                                 of two blocks of output (how close should proposals be?)
 
@@ -220,7 +228,7 @@ def create_times(schedule_during:[Block], meeting_length,
     # return all meaningful blocks
     return proposals
                                 
-def schedule(ranges:[Block], meeting_length: int, tickets: int,
+def schedule(ranges:List[Block], meeting_length: int, tickets: int,
              time_increment=5, max_chunks:int=None) -> List[Proposal]:
     """Performs scheduling `meeting_length` blocks for `tickets` between `ranges` 
 
