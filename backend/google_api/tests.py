@@ -9,18 +9,9 @@ from google_api import get_freebusy
 #import expected value
 from google_api import mock_output
 
-# import faker
-from faker import Faker
-
-#import json
-import json
-
 # import mock http calls
 from googleapiclient.discovery import build
 from googleapiclient.http import HttpMock
-
-#try out pprint
-import pprint
 
 #tests all of the google calendar api things
 class GcalTestCase(TestCase):
