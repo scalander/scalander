@@ -35,7 +35,7 @@ def format_all(cals): #takes in a list of the user's calendars from send_request
 
 
 def make_query(query_min, query_max):
-    if type(query_min) == datetime.date:
+    if type(query_min) == datetime.date or type(query_min) == datetime.datetime:
         q_min = query_min.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
     elif len(query_min) == 25:
         q_min = query_min
@@ -46,7 +46,7 @@ def make_query(query_min, query_max):
     else:
         raise Exception ("invalid query_min format")
 
-    if type(query_max) == datetime.date:
+    if type(query_max) == datetime.date or type(query_min) == datetime.datetime:
         q_max = query_max.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
     elif len(query_max) == 25:
         q_max = query_max

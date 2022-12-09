@@ -6,13 +6,18 @@ import datetime
 # import code to test
 from google_api import get_freebusy
 
+#import expected value
+from google_api import mock_output
+
 # import faker
 from faker import Faker
+
+#import json
+import json
 
 # import mock http calls
 from googleapiclient.discovery import build
 from googleapiclient.http import HttpMock
-from google.oauth2.credentials import Credentials
 
 #try out pprint
 import pprint
@@ -31,14 +36,14 @@ class GcalTestCase(TestCase):
         self.tzoffset = "-08:00" #TODO: when timezones work, fix these tests
 
         #mock api calls:
-        calhttp = HttpMock("google_api/mock_calendar_response.py")
-        freebusyhttp = HttpMock("mock_freebusy_response.py")
-        service = build("calendar", http=calhttp , credentials=Credentials())
+        calhttp = HttpMock("google_api/mock_calendar_response.json")
+        freebusyhttp = HttpMock("google_api/mock_freebusy_response.json")
+        service = build("calendar", "v3", http=calhttp)
         self.calendar_response = service.calendarList().list().execute()
+        service.close
+        service = build("calendar", "v3", http=freebusyhttp)
         self.freebusy_response = service.freebusy().query().execute()
         service.close
-        self.request = 0 #TODO: make request
-        self.send_request = 0
 
     def tearDown(self):
         del self.cases
@@ -47,28 +52,27 @@ class GcalTestCase(TestCase):
         for case in self.cases:
             body = get_freebusy.make_query(case["start"], case["end"])
             if type(case["start"]) == datetime.date or type(case["start"]) == datetime.datetime:
-                self.assertTrue(body["timeMin"] == case["start"].strftime()+ "T00:00:00" +self.tzoffset, "query min does not match input")
+                self.assertTrue(body["timeMin"] == case["start"].strftime("%Y-%m-%d")+ "T00:00:00" +self.tzoffset, "query min does not match input")
             elif type(case["start"]) == str:
                 self.assertTrue(body["timeMin"] == case["start"] + "T00:00:00" +self.tzoffset)
 
             if type(case["end"]) == datetime.date or type(case["end"]) == datetime.datetime:
-                self.assertTrue(body["timeMax"] == case["end"].strftime() + "T00:00:00" +self.tzoffset, "query max does not match input")
+                self.assertTrue(body["timeMax"] == case["end"].strftime("%Y-%m-%d") + "T00:00:00" +self.tzoffset, "query max does not match input")
             elif type(case["end"]) == str:
                 self.assertTrue(body["timeMax"] == case["end"] + "T00:00:00" +self.tzoffset)
     
     def test_format_all(self):
-        cals = get_freebusy.format_all(self.response)
-
-        self.assertTrue(type(cals) == list)
-        self.assertTrue(cals != []) #TODO: use this to check if its the expected output once i have one
+        cals = get_freebusy.format_all(self.calendar_response)
+        self.assertEqual(cals,[{'id': 'n1bis749a5nh1oiid6cjkf2d407lgojq@import.calendar.google.com'}, {'id': 'jonwu@nuevaschool.org'}, {'id': '85h7n2emq6p062lcvq13qbt41to18hk9@import.calendar.google.com'}], "format_all() response incorrect")
 
     def test_link_names(self):
-        names = get_freebusy.link_names(self.response)
-
-        #TODO: assert resopnse matches
+        self.names = get_freebusy.link_names(self.calendar_response)
+        self.assertEqual(self.names, {'n1bis749a5nh1oiid6cjkf2d407lgojq@import.calendar.google.com': 'Jonathan Wu Calendar (Canvas)', 'jonwu@nuevaschool.org': 'main', '85h7n2emq6p062lcvq13qbt41to18hk9@import.calendar.google.com': 'Nueva Calendar'}, "link_names() response incorrect")
 
     def test_send_commitments(self):
-        self.send_request
+        names = get_freebusy.link_names(self.calendar_response)
+        result = get_freebusy.send_commitments(self.freebusy_response,names)
+        self.assertEqual(result,mock_output.data)
             
 
 
