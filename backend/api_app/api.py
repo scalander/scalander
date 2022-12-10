@@ -80,10 +80,6 @@ def get_user_by_subscription(id):
     attendence = models.UserMeetingSubscription.objects.get(id=id)
     return get_user(attendence.user.id)
 
-def get_user_by_commitment(id):
-    attendence = models.MeetingProposalAttendance.objects.get(id=id)
-    return get_user(attendence.user.id)
-
 def get_uid_by_subscription(id):
     attendence = models.UserMeetingSubscription.objects.get(id=id)
     return attendence.user.id
@@ -92,7 +88,7 @@ def get_uid_by_subscription(id):
 def update_user(id, obj):
     user = models.User.objects.get(id=id)
     user.name = obj.name
-    user.emails = obj.emails
+    user.email = obj.email
     user.save()
 
 # D

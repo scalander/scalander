@@ -6,29 +6,20 @@
 # query_max is a datetime date object in format %Y-%m%d or a datetime.date object (needs to have year, month, and day) - this is the last day to query for freebusy information (default is 7 days from today)
 # auth_code is a string gotten from the google api when the user consents - required (will spit out an assertion error)
 # 
-# example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.a0Aa4xrXOxt9h5nJCON0Fb3w0ACK3-t0FWfXzwFwF3RzASc-PXn2GN4UkJcuZOzcvJfvrqzOwcOKJzwxJ55mjlHAvYdQZLc6LXJpsCs-KmJXuljw8-XwcCZ3YRM-Jz6jQmBqXs80Wudghg7VHXSzqJhSS5b7KkaCgYKATASARASFQEjDvL9FFkGmCmFA7dRV_bEjGUrcg0163")
+# example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.[b64 encoded credential]")
 #############
 import datetime
 from datetime import timedelta, date
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-
-# NOTE: this first comment block is depreciated code - is now being done in the frontend
-# flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-#     'client_secret.json',
-#     scopes = ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/calendar.events"])
-# flow.redirect_uri = "https://localhost:8080/"
-# auth_uri = flow.authorization_url()
-# auth_request = redirect(flow.redirect_uri)
-# auth_response = auth_request.build_absolute_uri()
-# flow.fetch_token(authorization_response = auth_response)
+f = open("mock_api_response.txt", "w")
 
 tzoffset = "-08:00" #timezone offset - assumimg its PST for now
 today = date.today()
 query_min = today.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset  #eariliest date-time to check for freebusy - default is 60 days from today (as specified by RFC3339 https://www.rfc-editor.org/rfc/rfc3339#section-5.6)
 query_max = (today + timedelta(days = 60)).strftime("%Y-%m-%d") + "T00:00:00" +tzoffset #latest date-time to check - default is midnight today, see query_max
 
-# handling the calendar.list return datahttp://localhost:8080/schedule/i
+# handling the calendar.list return data http://localhost:8080/schedule/i
 def format_all(cals): #takes in a list of the user's calendars from send_request()
     #takes in a set of the user's calendars from the google api and formats and returns them to be used in a freebusy query - use send_query()
     formatted_ids = [] #for storing the calendar IDs in the format that query() takes
@@ -44,7 +35,7 @@ def format_all(cals): #takes in a list of the user's calendars from send_request
 
 
 def make_query(query_min, query_max):
-    if type(query_min) == datetime.date:
+    if type(query_min) == datetime.date or type(query_min) == datetime.datetime:
         q_min = query_min.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
     elif len(query_min) == 25:
         q_min = query_min
@@ -55,7 +46,7 @@ def make_query(query_min, query_max):
     else:
         raise Exception ("invalid query_min format")
 
-    if type(query_max) == datetime.date:
+    if type(query_max) == datetime.date or type(query_min) == datetime.datetime:
         q_max = query_max.strftime("%Y-%m-%d") + "T00:00:00" +tzoffset
     elif len(query_max) == 25:
         q_max = query_max
@@ -66,7 +57,7 @@ def make_query(query_min, query_max):
     else:
         raise Exception ("invalid query_max format")
 
-    assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00" +tzoffest) < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00" +tzoffest), "query interval ends before it starts"
+    assert datetime.datetime.strptime(q_min, "%Y-%m-%dT00:00:00" +tzoffset) < datetime.datetime.strptime(q_max, "%Y-%m-%dT00:00:00" +tzoffset), "query interval ends before it starts"
 
     query_body = {
         # "calendarExpansionMax": 50, # Maximal number of calendars for which FreeBusy information is to be provided. Optional. Maximum value is 50.
@@ -141,13 +132,10 @@ def get_freebusy(query_min = query_min, query_max = query_max, auth_code = ""):
     #does all the things - 
     #takes datetime.date object or string "Y-m-d" for query min and max - takes from midnight to midnight on both dates (defualt is today and 1 week from today)
     #requires auth code from google api
-    #example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.a0Aa4xrXOxt9h5nJCON0Fb3w0ACK3-t0FWfXzwFwF3RzASc-PXn2GN4UkJcuZOzcvJfvrqzOwcOKJzwxJ55mjlHAvYdQZLc6LXJpsCs-KmJXuljw8-XwcCZ3YRM-Jz6jQmBqXs80Wudghg7VHXSzqJhSS5b7KkaCgYKATASARASFQEjDvL9FFkGmCmFA7dRV_bEjGUrcg0163")
+    #example usage: get_freebusy("2022-10-09", "2022-10-10", "ya29.[b64 encoded credential]")
     assert auth_code != "", "missing auth code"
     # ids = format_all(cals)
     body = make_query(query_min, query_max)
     request = send_request(body, auth_code)
-    query = request[0] #sets query equal to api response
-    commitments = send_commitments(query, request[1])
+    commitments = send_commitments(request[0], request[1])
     return (commitments)
-
-#testing:
