@@ -21,6 +21,7 @@
         <p class="callout-text">{strings.HOMEPAGE_DESCRIPTION}</p>
         <br />
         <a href="./create"><Button primary>{strings.HOMEPAGE_BUTTON}</Button></a>
+        <a href="/faq" class="link">FAQ</a>
         <a href="/privacy" class="link">Privacy</a>
         <a href="/terms" class="link">Terms</a>
     </div>
