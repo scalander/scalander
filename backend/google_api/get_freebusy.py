@@ -12,7 +12,6 @@ import datetime
 from datetime import timedelta, date
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-f = open("mock_api_response.txt", "w")
 
 tzoffset = "-08:00" #timezone offset - assumimg its PST for now
 today = date.today()
