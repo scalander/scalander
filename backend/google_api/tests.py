@@ -43,14 +43,14 @@ class GcalTestCase(TestCase):
         for case in self.cases:
             body = get_freebusy.make_query(case["start"], case["end"])
             if type(case["start"]) == datetime.date or type(case["start"]) == datetime.datetime:
-                self.assertTrue(body["timeMin"] == case["start"].strftime("%Y-%m-%d")+ "T00:00:00" +self.tzoffset, "query min does not match input")
+                self.assertEqual(body["timeMin"], case["start"].strftime("%Y-%m-%d")+ "T00:00:00" +self.tzoffset, "query min does not match input")
             elif type(case["start"]) == str:
-                self.assertTrue(body["timeMin"] == case["start"] + "T00:00:00" +self.tzoffset)
+                self.assertEqual(body["timeMin"], case["start"] + "T00:00:00" +self.tzoffset)
 
             if type(case["end"]) == datetime.date or type(case["end"]) == datetime.datetime:
-                self.assertTrue(body["timeMax"] == case["end"].strftime("%Y-%m-%d") + "T00:00:00" +self.tzoffset, "query max does not match input")
+                self.assertEqual(body["timeMax"], case["end"].strftime("%Y-%m-%d") + "T00:00:00" +self.tzoffset, "query max does not match input")
             elif type(case["end"]) == str:
-                self.assertTrue(body["timeMax"] == case["end"] + "T00:00:00" +self.tzoffset)
+                self.assertEqual(body["timeMax"], case["end"] + "T00:00:00" +self.tzoffset)
     
     def test_format_all(self):
         cals = get_freebusy.format_all(self.calendar_response)
