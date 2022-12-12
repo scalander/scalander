@@ -19,7 +19,7 @@
     <p>{strings.FAQ_FOUR_ANSWER}</p><br>
     <!--ADD MORE IF NEEDED-->
 
-    <br><br><br>
+    <!-- <br><br><br> -->
     <h2>{strings.FAQ_CONTACT_HEADER}</h2>
     <p>{strings.FAQ_CONTACT_INFO} <a href="https://github.com/scalander/scalander/tree/main">GitHub</a>.</p>
 </div>
