@@ -241,7 +241,7 @@ def update_attendance(id, obj):
     subscription.save()
 
 def delete_attendance(id):
-    delete_subscription(id)
+    models.UserMeetingSubscription.objects.get(id=id).delete()
 
 ##########################
 # /api/many-commitments ##
