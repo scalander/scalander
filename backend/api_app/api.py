@@ -80,10 +80,6 @@ def get_user_by_subscription(id):
     attendence = models.UserMeetingSubscription.objects.get(id=id)
     return get_user(attendence.user.id)
 
-def get_user_by_commitment(id):
-    attendence = models.MeetingProposalAttendance.objects.get(id=id)
-    return get_user(attendence.user.id)
-
 def get_uid_by_subscription(id):
     attendence = models.UserMeetingSubscription.objects.get(id=id)
     return attendence.user.id
@@ -245,7 +241,7 @@ def update_attendance(id, obj):
     subscription.save()
 
 def delete_attendance(id):
-    delete_subscription(id)
+    models.UserMeetingSubscription.objects.get(id=id).delete()
 
 ##########################
 # /api/many-commitments ##

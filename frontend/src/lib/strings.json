@@ -41,5 +41,16 @@
     "RESULT_AVAILABLE": "Available",
     "RESULT_UNAVAILABLE": "Unavailable",
     "RESULT_ALTERNATE": "Alternate Schedules",
-    "RESULT_ORDERING": "ordered by optimality"
+    "RESULT_ORDERING": "ordered by optimality",
+    "FAQ_TITLE": "Frequently Asked Questions",
+    "FAQ_ONE": "What data do you store?",
+    "FAQ_ONE_ANSWER": "We only store the times when you are available, and we don't store any data relating to what you are doing when you are unavailable.",
+    "FAQ_TWO": "How do you keep my account and meeting data safe?",
+    "FAQ_TWO_ANSWER": "All your data is stored at Google data centers using industry-standard security practices.",
+    "FAQ_THREE": "How does this weight thing work?",
+    "FAQ_THREE_ANSWER": "For each potential meeting time, the cumulative sum of all the weights determines which times we prioritize over others. For example, if there are two people with a weight of 2 and one person with a weight of 5, a time that only has the higher weighted attendee would be prioritized over a time with both lower weighted attendees.",
+    "FAQ_FOUR": "Shouldn't it be scalendar instead of scalander?",
+    "FAQ_FOUR_ANSWER": "No.",
+    "FAQ_CONTACT_HEADER": "Have more questions?",
+    "FAQ_CONTACT_INFO": "Email us at support@scalander.com or post your issue on our"
 }
